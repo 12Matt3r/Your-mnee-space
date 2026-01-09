@@ -5,15 +5,19 @@ import { useAuth } from '../../hooks/useAuth'
 import { useContent } from '../../hooks/useContent'
 import { 
   CogIcon,
-  HeartIcon,
-  EyeIcon,
   UserPlusIcon,
   GiftIcon,
   CalendarIcon,
   MapPinIcon,
-  LinkIcon
+  LinkIcon,
+  Squares2X2Icon,
+  ViewColumnsIcon
 } from '@heroicons/react/24/outline'
-import { formatDate, formatRelativeTime } from '../../lib/utils'
+import { formatDate } from '../../lib/utils'
+import { BioModule } from '../../components/profile/modules/BioModule'
+import { PortfolioModule } from '../../components/profile/modules/PortfolioModule'
+import { TippingModule } from '../../components/profile/modules/TippingModule'
+import toast from 'react-hot-toast'
 
 export const ProfilePage = () => {
   const { username } = useParams()
@@ -21,7 +25,12 @@ export const ProfilePage = () => {
   const { content, loading, fetchContent } = useContent()
   const [profileData, setProfileData] = useState<any>(null)
   const [isOwnProfile, setIsOwnProfile] = useState(false)
-  const [activeTab, setActiveTab] = useState<'content' | 'collections' | 'collaborations'>('content')
+
+  // New Modular State
+  const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid')
+  const [modules, setModules] = useState<string[]>(['bio', 'tipping', 'portfolio'])
+
+  // Simulated Stats
   const [stats, setStats] = useState({
     totalContent: 0,
     totalViews: 0,
@@ -31,7 +40,6 @@ export const ProfilePage = () => {
   })
 
   useEffect(() => {
-    // Determine if this is the current user's profile
     const isOwn = !username || username === currentUserProfile?.username
     setIsOwnProfile(isOwn)
 
@@ -39,7 +47,6 @@ export const ProfilePage = () => {
       setProfileData(currentUserProfile)
       fetchContent({ userId: currentUserProfile.id })
     } else {
-      // Fetch other user's profile (simulated)
       setProfileData({
         username: username || 'unknown',
         display_name: 'Creative Artist',
@@ -54,7 +61,6 @@ export const ProfilePage = () => {
       })
     }
 
-    // Simulate stats
     setStats({
       totalContent: 42,
       totalViews: 15420,
@@ -63,6 +69,14 @@ export const ProfilePage = () => {
       following: 567
     })
   }, [username, currentUserProfile, fetchContent])
+
+  const handleTip = (amount: number) => {
+    if (amount === 0) {
+      toast('Custom tip amount coming soon!', { icon: '💸' })
+    } else {
+      toast.success(`Sent $${amount} tip to ${profileData.display_name}!`)
+    }
+  }
 
   if (!profileData) {
     return (
@@ -75,7 +89,7 @@ export const ProfilePage = () => {
   return (
     <div className="space-y-8">
       {/* Profile Header */}
-      <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl overflow-hidden">
+      <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl overflow-hidden group/header">
         {/* Background Cover */}
         <div className="h-48 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 relative">
           {profileData.background_url && (
@@ -86,6 +100,12 @@ export const ProfilePage = () => {
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+          {isOwnProfile && (
+            <button className="absolute top-4 right-4 bg-black/50 p-2 rounded-lg text-white opacity-0 group-hover/header:opacity-100 transition-all">
+              Change Cover
+            </button>
+          )}
         </div>
 
         {/* Profile Info */}
@@ -93,9 +113,9 @@ export const ProfilePage = () => {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between">
             <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-6">
               {/* Avatar */}
-              <div className="relative -mt-20 md:-mt-16">
+              <div className="relative -mt-20 md:-mt-16 group/avatar">
                 <div className="w-32 h-32 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 p-1">
-                  <div className="w-full h-full rounded-full bg-black flex items-center justify-center">
+                  <div className="w-full h-full rounded-full bg-black flex items-center justify-center overflow-hidden">
                     {profileData.avatar_url ? (
                       <img 
                         src={profileData.avatar_url} 
@@ -109,6 +129,11 @@ export const ProfilePage = () => {
                     )}
                   </div>
                 </div>
+                {isOwnProfile && (
+                  <button className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover/avatar:opacity-100 transition-all text-white text-xs">
+                    Edit
+                  </button>
+                )}
               </div>
 
               {/* Basic Info */}
@@ -118,10 +143,6 @@ export const ProfilePage = () => {
                 </h1>
                 <p className="text-purple-300 mb-2">@{profileData.username}</p>
                 
-                {profileData.bio && (
-                  <p className="text-gray-300 max-w-2xl mb-4">{profileData.bio}</p>
-                )}
-
                 <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
                   {profileData.location && (
                     <span className="flex items-center">
@@ -151,10 +172,19 @@ export const ProfilePage = () => {
             {/* Action Buttons */}
             <div className="flex items-center space-x-3 mt-6 md:mt-0">
               {isOwnProfile ? (
-                <button className="flex items-center space-x-2 px-6 py-3 bg-purple-500/20 border border-purple-400/50 rounded-xl text-purple-300 font-medium hover:bg-purple-500/30 transition-all">
-                  <CogIcon className="h-5 w-5" />
-                  <span>Edit Profile</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setLayoutMode(layoutMode === 'grid' ? 'list' : 'grid')}
+                    className="p-3 bg-black/30 border border-purple-500/30 rounded-xl text-purple-300 hover:bg-purple-500/20"
+                    title="Toggle Layout"
+                  >
+                    {layoutMode === 'grid' ? <ViewColumnsIcon className="h-5 w-5" /> : <Squares2X2Icon className="h-5 w-5" />}
+                  </button>
+                  <button className="flex items-center space-x-2 px-6 py-3 bg-purple-500/20 border border-purple-400/50 rounded-xl text-purple-300 font-medium hover:bg-purple-500/30 transition-all">
+                    <CogIcon className="h-5 w-5" />
+                    <span>Customize</span>
+                  </button>
+                </div>
               ) : (
                 <>
                   <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-medium hover:from-pink-600 hover:to-purple-600 transition-all neon-glow">
@@ -198,101 +228,37 @@ export const ProfilePage = () => {
         </div>
       )}
 
-      {/* Content Tabs */}
-      <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl overflow-hidden">
-        {/* Tab Headers */}
-        <div className="flex border-b border-purple-500/20">
-          {[
-            { id: 'content', name: 'Content', count: stats.totalContent },
-            { id: 'collections', name: 'Collections', count: 8 },
-            { id: 'collaborations', name: 'Collaborations', count: 12 }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 px-6 py-4 text-center font-medium transition-all ${
-                activeTab === tab.id
-                  ? 'text-purple-300 border-b-2 border-purple-400 bg-purple-500/10'
-                  : 'text-gray-400 hover:text-purple-300'
-              }`}
-            >
-              {tab.name} <span className="ml-1">({tab.count})</span>
-            </button>
-          ))}
-        </div>
+      {/* Modular Content Area */}
+      <div className={`grid gap-6 ${layoutMode === 'grid' ? 'grid-cols-1 md:grid-cols-12' : 'grid-cols-1'}`}>
 
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === 'content' && (
-            <div>
-              {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="loading-spinner w-8 h-8" />
-                </div>
-              ) : content.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {content.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-black/30 border border-purple-500/30 rounded-xl overflow-hidden hover:border-purple-400/50 transition-all group"
-                    >
-                      <div className="aspect-video bg-gradient-to-br from-purple-600/20 to-pink-600/20 relative">
-                        {item.file_url && (
-                          <img 
-                            src={item.file_url} 
-                            alt={item.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <h3 className="text-white font-medium text-sm truncate">{item.title}</h3>
-                          <div className="flex items-center justify-between text-xs text-gray-300 mt-1">
-                            <span className="flex items-center">
-                              <EyeIcon className="h-3 w-3 mr-1" />
-                              {item.view_count}
-                            </span>
-                            <span className="flex items-center">
-                              <HeartIcon className="h-3 w-3 mr-1" />
-                              {item.like_count}
-                            </span>
-                            <span>{formatRelativeTime(item.created_at)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <h3 className="text-xl font-semibold text-white mb-2">
-                    {isOwnProfile ? 'No content yet' : 'No public content'}
-                  </h3>
-                  <p className="text-gray-400">
-                    {isOwnProfile 
-                      ? 'Start creating and sharing your work!'
-                      : 'This user hasn\'t shared any public content yet.'
-                    }
-                  </p>
-                </div>
-              )}
-            </div>
+        {/* Left Column (Bio & Tipping) */}
+        <div className={`space-y-6 ${layoutMode === 'grid' ? 'md:col-span-4' : ''}`}>
+          {modules.includes('bio') && (
+            <BioModule
+              content={profileData.bio}
+              editable={isOwnProfile}
+              onEdit={() => toast('Edit Bio Coming Soon', { icon: '📝' })}
+            />
           )}
 
-          {activeTab === 'collections' && (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold text-white mb-2">Collections</h3>
-              <p className="text-gray-400">Content collections feature coming soon!</p>
-            </div>
-          )}
-
-          {activeTab === 'collaborations' && (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-semibold text-white mb-2">Collaborations</h3>
-              <p className="text-gray-400">Collaboration history feature coming soon!</p>
-            </div>
+          {modules.includes('tipping') && (
+            <TippingModule
+              creatorName={profileData.display_name || profileData.username}
+              onTip={handleTip}
+            />
           )}
         </div>
+
+        {/* Right Column (Portfolio/Content) */}
+        <div className={`${layoutMode === 'grid' ? 'md:col-span-8' : ''}`}>
+          {modules.includes('portfolio') && (
+            <PortfolioModule
+              items={content}
+              limit={layoutMode === 'grid' ? 6 : 12}
+            />
+          )}
+        </div>
+
       </div>
     </div>
   )
