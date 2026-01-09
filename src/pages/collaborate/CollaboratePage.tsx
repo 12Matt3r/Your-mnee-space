@@ -11,9 +11,13 @@ import {
   UserIcon,
   HashtagIcon,
   SpeakerXMarkIcon,
-  NoSymbolIcon
+  NoSymbolIcon,
+  PencilSquareIcon,
+  MusicalNoteIcon
 } from '@heroicons/react/24/outline'
 import { formatRelativeTime } from '../../lib/utils'
+import { SharedCanvas } from '../../components/collaboration/SharedCanvas'
+import { JamSession } from '../../components/collaboration/JamSession'
 import toast from 'react-hot-toast'
 
 export const CollaboratePage = () => {
@@ -48,6 +52,7 @@ export const CollaboratePage = () => {
   const [isDragging, setIsDragging] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [activeTab, setActiveTab] = useState<'chat' | 'canvas' | 'jam'>('chat')
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -283,8 +288,39 @@ export const CollaboratePage = () => {
                   </div>
                 </div>
                 
-                {/* Voice Chat Button */}
+                {/* Tools & Voice Chat */}
                 <div className="flex items-center space-x-2">
+                  {/* Tool Tabs */}
+                  <div className="flex bg-black/40 rounded-lg p-1 mr-4 border border-purple-500/20">
+                    <button
+                      onClick={() => setActiveTab('chat')}
+                      className={`p-2 rounded-md transition-all ${
+                        activeTab === 'chat' ? 'bg-purple-500/30 text-white' : 'text-gray-400 hover:text-white'
+                      }`}
+                      title="Chat"
+                    >
+                      <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('canvas')}
+                      className={`p-2 rounded-md transition-all ${
+                        activeTab === 'canvas' ? 'bg-purple-500/30 text-white' : 'text-gray-400 hover:text-white'
+                      }`}
+                      title="Shared Canvas"
+                    >
+                      <PencilSquareIcon className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('jam')}
+                      className={`p-2 rounded-md transition-all ${
+                        activeTab === 'jam' ? 'bg-purple-500/30 text-white' : 'text-gray-400 hover:text-white'
+                      }`}
+                      title="Jam Session"
+                    >
+                      <MusicalNoteIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+
                   {currentVoiceSession ? (
                     <span className="text-sm text-green-400 flex items-center space-x-1">
                       <SpeakerWaveIcon className="h-4 w-4" />
@@ -303,115 +339,131 @@ export const CollaboratePage = () => {
               </div>
             </div>
 
-            {/* Messages Area */}
-            <div 
-              className={`flex-1 overflow-y-auto p-4 space-y-4 transition-all ${
-                isDragging ? 'bg-purple-500/10 border-2 border-dashed border-purple-400' : ''
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              {currentRoomMessages.length > 0 ? (
-                currentRoomMessages.map((message) => (
-                  <div key={message.id} className="flex space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                      {message.user_profile?.avatar_url ? (
-                        <img 
-                          src={message.user_profile.avatar_url} 
-                          alt={message.user_profile.username}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        message.user_profile?.username?.charAt(0).toUpperCase() || 'U'
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-semibold text-white">
-                          {message.user_profile?.display_name || message.user_profile?.username || 'Unknown User'}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {formatRelativeTime(message.created_at)}
-                        </span>
-                      </div>
-                      <div className="bg-black/30 rounded-lg p-3">
-                        {message.message_type === 'text' ? (
-                          <p className="text-gray-200">{message.content}</p>
-                        ) : message.message_type === 'image' && message.file_url ? (
-                          <div>
+            {/* Main Content Area */}
+            {activeTab === 'chat' && (
+              <>
+                <div
+                  className={`flex-1 overflow-y-auto p-4 space-y-4 transition-all ${
+                    isDragging ? 'bg-purple-500/10 border-2 border-dashed border-purple-400' : ''
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  {currentRoomMessages.length > 0 ? (
+                    currentRoomMessages.map((message) => (
+                      <div key={message.id} className="flex space-x-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                          {message.user_profile?.avatar_url ? (
                             <img 
-                              src={message.file_url} 
-                              alt={message.file_name}
-                              className="max-w-xs rounded-lg mb-2"
+                              src={message.user_profile.avatar_url}
+                              alt={message.user_profile.username}
+                              className="w-full h-full rounded-full object-cover"
                             />
-                            <p className="text-gray-200">{message.content}</p>
+                          ) : (
+                            message.user_profile?.username?.charAt(0).toUpperCase() || 'U'
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-semibold text-white">
+                              {message.user_profile?.display_name || message.user_profile?.username || 'Unknown User'}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {formatRelativeTime(message.created_at)}
+                            </span>
                           </div>
-                        ) : message.file_url ? (
-                          <div className="flex items-center space-x-2">
-                            <PaperClipIcon className="h-4 w-4 text-purple-400" />
-                            <a 
-                              href={message.file_url} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="text-purple-300 hover:text-purple-200 underline"
-                            >
-                              {message.file_name}
-                            </a>
+                          <div className="bg-black/30 rounded-lg p-3">
+                            {message.message_type === 'text' ? (
+                              <p className="text-gray-200">{message.content}</p>
+                            ) : message.message_type === 'image' && message.file_url ? (
+                              <div>
+                                <img
+                                  src={message.file_url}
+                                  alt={message.file_name}
+                                  className="max-w-xs rounded-lg mb-2"
+                                />
+                                <p className="text-gray-200">{message.content}</p>
+                              </div>
+                            ) : message.file_url ? (
+                              <div className="flex items-center space-x-2">
+                                <PaperClipIcon className="h-4 w-4 text-purple-400" />
+                                <a
+                                  href={message.file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-purple-300 hover:text-purple-200 underline"
+                                >
+                                  {message.file_name}
+                                </a>
+                              </div>
+                            ) : (
+                              <p className="text-gray-200">{message.content}</p>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-gray-200">{message.content}</p>
-                        )}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-white mb-2">No messages yet</h3>
+                      <p className="text-gray-400">Be the first to start the conversation!</p>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <ChatBubbleLeftRightIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">No messages yet</h3>
-                  <p className="text-gray-400">Be the first to start the conversation!</p>
+                  )}
+                  <div ref={messagesEndRef} />
                 </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
 
-            {/* Message Input */}
-            <div className="p-4 border-t border-purple-500/20 bg-black/20 backdrop-blur-sm">
-              <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-2 text-gray-400 hover:text-purple-400 transition-colors"
-                >
-                  <PaperClipIcon className="h-5 w-5" />
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleFileUpload(file)
-                  }}
-                  className="hidden"
-                  accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx"
-                />
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder={`Message #${currentRoomData?.name}`}
-                  className="flex-1 px-4 py-2 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20"
-                />
-                <button
-                  type="submit"
-                  disabled={!newMessage.trim()}
-                  className="p-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
-                >
-                  <PaperAirplaneIcon className="h-5 w-5" />
-                </button>
-              </form>
-            </div>
+                {/* Message Input */}
+                <div className="p-4 border-t border-purple-500/20 bg-black/20 backdrop-blur-sm">
+                  <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2 text-gray-400 hover:text-purple-400 transition-colors"
+                    >
+                      <PaperClipIcon className="h-5 w-5" />
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleFileUpload(file)
+                      }}
+                      className="hidden"
+                      accept="image/*,video/*,audio/*,.pdf,.txt,.doc,.docx"
+                    />
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder={`Message #${currentRoomData?.name}`}
+                      className="flex-1 px-4 py-2 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newMessage.trim()}
+                      className="p-2 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                    >
+                      <PaperAirplaneIcon className="h-5 w-5" />
+                    </button>
+                  </form>
+                </div>
+              </>
+            )}
+
+            {activeTab === 'canvas' && (
+              <div className="flex-1 p-4">
+                <SharedCanvas sessionId={currentRoom} />
+              </div>
+            )}
+
+            {activeTab === 'jam' && (
+              <div className="flex-1 p-4">
+                <JamSession sessionId={currentRoom} />
+              </div>
+            )}
           </>
         ) : (
           // No room selected
