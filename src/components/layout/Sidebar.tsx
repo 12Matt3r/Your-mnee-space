@@ -17,7 +17,8 @@ import {
   CubeIcon,
   ChatBubbleLeftRightIcon,
   RssIcon,
-  CpuChipIcon
+  CpuChipIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline'
 import { cn } from '../../lib/utils'
 
@@ -27,6 +28,7 @@ const publicNavigation = [
   { name: 'Social Feed', href: '/social', icon: RssIcon },
   { name: 'Discover', href: '/discover', icon: MagnifyingGlassIcon },
   { name: 'Artist Discovery', href: '/discover-artists', icon: SparklesIcon },
+  { name: 'Creative Labs', href: '/learning', icon: AcademicCapIcon },
   { name: 'Virtual Rooms', href: '/rooms', icon: BuildingLibraryIcon },
   { name: 'Marketplace', href: '/marketplace', icon: ShoppingBagIcon },
   { name: 'Agent Marketplace', href: '/agents', icon: CpuChipIcon },

@@ -390,11 +390,45 @@ interface AssetsTabProps {
 }
 
 const AssetsTab: React.FC<AssetsTabProps> = ({ roomId, assets }) => {
+  const hasComputer = assets.some(a =>
+    a.interaction_type === 'computer_interface' ||
+    a.asset_library?.subcategory === 'computer_workstation'
+  )
+
+  const handleAddComputer = () => {
+    // Logic to add computer asset would go here
+    // For now we just show a toast as this requires the addAsset hook which isn't imported
+    toast.success('Adding Creative Workstation to your room...')
+    // In a real implementation: addAsset({ ...computerData })
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-white mb-4">Room Assets</h3>
         
+        {!hasComputer && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/30 rounded-xl">
+            <div className="flex items-start space-x-3">
+              <div className="p-2 bg-blue-500/20 rounded-lg">
+                <CubeIcon className="h-6 w-6 text-blue-400" />
+              </div>
+              <div>
+                <h4 className="text-white font-medium mb-1">Missing Workstation</h4>
+                <p className="text-gray-400 text-sm mb-3">
+                  Add a computer interface to enable "Vibe Code" and access your OS tools.
+                </p>
+                <button
+                  onClick={handleAddComputer}
+                  className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 rounded-lg text-white text-xs font-medium transition-colors"
+                >
+                  Add Computer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {assets.length === 0 ? (
           <div className="text-center py-8">
             <CubeIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />

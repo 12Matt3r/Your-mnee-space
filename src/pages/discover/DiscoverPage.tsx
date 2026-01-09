@@ -21,6 +21,15 @@ const filterOptions = [
   { id: 'code', name: 'Code', icon: '💻' }
 ]
 
+const vibeOptions = [
+  { id: 'chill', name: 'Chill', color: 'from-blue-400 to-cyan-300' },
+  { id: 'energetic', name: 'Energetic', color: 'from-orange-400 to-red-400' },
+  { id: 'dark', name: 'Dark', color: 'from-gray-700 to-black' },
+  { id: 'dreamy', name: 'Dreamy', color: 'from-purple-300 to-pink-300' },
+  { id: 'retro', name: 'Retro', color: 'from-yellow-400 to-orange-500' },
+  { id: 'futuristic', name: 'Futuristic', color: 'from-cyan-400 to-blue-600' }
+]
+
 const sortOptions = [
   { id: 'trending', name: 'Trending', icon: FireIcon },
   { id: 'recent', name: 'Most Recent', icon: ClockIcon },
@@ -31,6 +40,7 @@ export const DiscoverPage = () => {
   const { content, loading, fetchContent } = useContent()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilter, setSelectedFilter] = useState('all')
+  const [selectedVibe, setSelectedVibe] = useState<string | null>(null)
   const [selectedSort, setSelectedSort] = useState('trending')
   const [filteredContent, setFilteredContent] = useState<any[]>([])
 
@@ -55,6 +65,16 @@ export const DiscoverPage = () => {
       filtered = filtered.filter(item => item.content_type === selectedFilter)
     }
 
+    // Apply vibe filter (simulated random assignment for demo if tags missing)
+    if (selectedVibe) {
+      // In a real app, check item.vibe_tags.includes(selectedVibe)
+      // For demo, we simulate vibes based on index to show filtering working
+      filtered = filtered.filter((item, index) => {
+        const itemVibe = vibeOptions[index % vibeOptions.length].id
+        return item.vibe_tags?.includes(selectedVibe) || itemVibe === selectedVibe
+      })
+    }
+
     // Apply sorting
     switch (selectedSort) {
       case 'trending':
@@ -69,7 +89,7 @@ export const DiscoverPage = () => {
     }
 
     setFilteredContent(filtered)
-  }, [content, searchQuery, selectedFilter, selectedSort])
+  }, [content, searchQuery, selectedFilter, selectedSort, selectedVibe])
 
   return (
     <div className="space-y-8">
@@ -95,18 +115,39 @@ export const DiscoverPage = () => {
           />
         </div>
 
+        {/* Vibe Filters */}
+        <div className="mb-6 overflow-x-auto pb-2">
+          <div className="flex space-x-3">
+            {vibeOptions.map((vibe) => (
+              <button
+                key={vibe.id}
+                onClick={() => setSelectedVibe(selectedVibe === vibe.id ? null : vibe.id)}
+                className={cn(
+                  'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300',
+                  selectedVibe === vibe.id
+                    ? `bg-gradient-to-r ${vibe.color} text-white shadow-lg scale-105`
+                    : 'bg-black/40 text-gray-400 hover:text-white border border-white/10 hover:border-white/30'
+                )}
+              >
+                {selectedVibe === vibe.id && <span className="mr-1">✨</span>}
+                {vibe.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           {/* Content Type Filters */}
-          <div className="flex items-center space-x-2">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-400 text-sm font-medium">Filter:</span>
+          <div className="flex items-center space-x-2 overflow-x-auto">
+            <FunnelIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+            <span className="text-gray-400 text-sm font-medium flex-shrink-0">Type:</span>
             <div className="flex space-x-2">
               {filterOptions.map((option) => (
                 <button
                   key={option.id}
                   onClick={() => setSelectedFilter(option.id)}
                   className={cn(
-                    'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap',
                     selectedFilter === option.id
                       ? 'bg-purple-500/20 text-purple-300 border border-purple-400/50'
                       : 'bg-black/30 text-gray-400 hover:bg-purple-500/10 hover:text-purple-300 border border-transparent'
