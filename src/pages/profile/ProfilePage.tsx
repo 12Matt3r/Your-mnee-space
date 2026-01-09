@@ -17,6 +17,7 @@ import { formatDate } from '../../lib/utils'
 import { BioModule } from '../../components/profile/modules/BioModule'
 import { PortfolioModule } from '../../components/profile/modules/PortfolioModule'
 import { TippingModule } from '../../components/profile/modules/TippingModule'
+import { MentorshipModule } from '../../components/profile/modules/MentorshipModule'
 import toast from 'react-hot-toast'
 
 export const ProfilePage = () => {
@@ -28,7 +29,7 @@ export const ProfilePage = () => {
 
   // New Modular State
   const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid')
-  const [modules, setModules] = useState<string[]>(['bio', 'tipping', 'portfolio'])
+  const [modules, setModules] = useState<string[]>(['bio', 'tipping', 'mentorship', 'portfolio'])
 
   // Simulated Stats
   const [stats, setStats] = useState({
@@ -245,6 +246,12 @@ export const ProfilePage = () => {
             <TippingModule
               creatorName={profileData.display_name || profileData.username}
               onTip={handleTip}
+            />
+          )}
+
+          {modules.includes('mentorship') && (
+            <MentorshipModule
+              creatorName={profileData.display_name || profileData.username}
             />
           )}
         </div>

@@ -27,6 +27,7 @@ import { SettingsPage } from './pages/settings/SettingsPage';
 import SocialFeedPage from './pages/social/SocialFeedPage';
 import MessagesPage from './pages/messages/MessagesPage';
 import { AgentsPage } from './pages/agents/AgentsPage';
+import { LearningPage } from './pages/learning/LearningPage';
 import './App.css';
 
 function App() {
@@ -88,6 +89,12 @@ function App() {
                 <Route path="/rooms/:id" element={
                   <Layout>
                     <VirtualRoomViewPage />
+                  </Layout>
+                } />
+
+                <Route path="/learning" element={
+                  <Layout>
+                    <LearningPage />
                   </Layout>
                 } />
 
