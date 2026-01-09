@@ -159,7 +159,7 @@ export const ProfilePage = () => {
                 <>
                   <button className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl text-white font-medium hover:from-pink-600 hover:to-purple-600 transition-all neon-glow">
                     <UserPlusIcon className="h-5 w-5" />
-                    <span>Follow</span>
+                    <span>Support</span>
                   </button>
                   <button className="flex items-center space-x-2 px-6 py-3 bg-black/30 border border-purple-500/30 rounded-xl text-purple-300 font-medium hover:bg-purple-500/20 transition-all">
                     <GiftIcon className="h-5 w-5" />
@@ -172,29 +172,31 @@ export const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
-          <div className="text-2xl font-bold text-cyan-400">{stats.totalContent}</div>
-          <div className="text-gray-400 text-sm">Content</div>
+      {/* Stats - Anti-Analytics Pattern (Private Only) */}
+      {isOwnProfile && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
+            <div className="text-2xl font-bold text-cyan-400">{stats.totalContent}</div>
+            <div className="text-gray-400 text-sm">Content</div>
+          </div>
+          <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
+            <div className="text-2xl font-bold text-purple-400">{stats.totalViews.toLocaleString()}</div>
+            <div className="text-gray-400 text-sm">Total Reach</div>
+          </div>
+          <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
+            <div className="text-2xl font-bold text-pink-400">{stats.totalLikes.toLocaleString()}</div>
+            <div className="text-gray-400 text-sm">Appreciations</div>
+          </div>
+          <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
+            <div className="text-2xl font-bold text-blue-400">{stats.followers.toLocaleString()}</div>
+            <div className="text-gray-400 text-sm">Supporters</div>
+          </div>
+          <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
+            <div className="text-2xl font-bold text-orange-400">{stats.following.toLocaleString()}</div>
+            <div className="text-gray-400 text-sm">Supporting</div>
+          </div>
         </div>
-        <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
-          <div className="text-2xl font-bold text-purple-400">{stats.totalViews.toLocaleString()}</div>
-          <div className="text-gray-400 text-sm">Views</div>
-        </div>
-        <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
-          <div className="text-2xl font-bold text-pink-400">{stats.totalLikes.toLocaleString()}</div>
-          <div className="text-gray-400 text-sm">Likes</div>
-        </div>
-        <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
-          <div className="text-2xl font-bold text-blue-400">{stats.followers.toLocaleString()}</div>
-          <div className="text-gray-400 text-sm">Followers</div>
-        </div>
-        <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
-          <div className="text-2xl font-bold text-orange-400">{stats.following.toLocaleString()}</div>
-          <div className="text-gray-400 text-sm">Following</div>
-        </div>
-      </div>
+      )}
 
       {/* Content Tabs */}
       <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl overflow-hidden">

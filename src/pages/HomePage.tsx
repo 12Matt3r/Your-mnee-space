@@ -201,15 +201,15 @@ export const HomePage = () => {
           </div>
         </div>
 
-        {/* Real User Stats */}
+        {/* Your Creative Journey */}
         <div className="grid grid-cols-3 gap-6 mt-8">
           <div className="text-center">
             <div className="text-3xl font-bold text-cyan-400">{stats.totalViews?.toLocaleString() || 0}</div>
-            <div className="text-gray-400 text-sm">Total Views</div>
+            <div className="text-gray-400 text-sm">Total Reach</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-pink-400">{stats.totalLikes?.toLocaleString() || 0}</div>
-            <div className="text-gray-400 text-sm">Total Likes</div>
+            <div className="text-gray-400 text-sm">Room Visits</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-purple-400">{stats.totalCollaborations || 0}</div>
@@ -223,7 +223,7 @@ export const HomePage = () => {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-white flex items-center">
             <HomeIcon className="h-6 w-6 text-blue-400 mr-2" />
-            Your Virtual Room
+            Your Bedroom
           </h2>
           <button 
             onClick={() => navigate('/studio', { state: { tab: 'epk' } })}
