@@ -10,6 +10,7 @@ import {
 import { Menu, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
+import { ThemeSelector } from '../theme/ThemeSelector'
 
 export const Header = () => {
   const { user, profile, signOut } = useAuth()
@@ -44,6 +45,8 @@ export const Header = () => {
               <PlusIcon className="h-5 w-5" />
               <span>Create</span>
             </Link>
+
+            <ThemeSelector />
 
             {/* Notifications */}
             <button className="relative p-2 text-gray-400 hover:text-purple-300 transition-colors">
