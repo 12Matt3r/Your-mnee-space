@@ -1,9 +1,19 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { PencilIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { supabase } from '../../lib/supabase'
 
 interface SharedCanvasProps {
   sessionId: string
   isActive?: boolean
+}
+
+interface DrawEvent {
+  prevX: number
+  prevY: number
+  currX: number
+  currY: number
+  color: string
+  width: number
 }
 
 export const SharedCanvas: React.FC<SharedCanvasProps> = ({ sessionId, isActive = true }) => {
@@ -12,6 +22,7 @@ export const SharedCanvas: React.FC<SharedCanvasProps> = ({ sessionId, isActive 
   const [color, setColor] = useState('#8B5CF6') // Purple
   const [brushSize, setBrushSize] = useState(2)
   const [context, setContext] = useState<CanvasRenderingContext2D | null>(null)
+  const prevPos = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -34,6 +45,16 @@ export const SharedCanvas: React.FC<SharedCanvasProps> = ({ sessionId, isActive 
 
     setContext(ctx)
 
+    // Setup Supabase Realtime
+    const channel = supabase.channel(`canvas:${sessionId}`)
+      .on('broadcast', { event: 'draw' }, ({ payload }) => {
+        drawRemote(payload)
+      })
+      .on('broadcast', { event: 'clear' }, () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      })
+      .subscribe()
+
     // Handle resize
     const handleResize = () => {
       // Save content
@@ -52,8 +73,12 @@ export const SharedCanvas: React.FC<SharedCanvasProps> = ({ sessionId, isActive 
     }
 
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      supabase.removeChannel(channel)
+    }
+  }, [sessionId])
 
   useEffect(() => {
     if (context) {
@@ -62,12 +87,30 @@ export const SharedCanvas: React.FC<SharedCanvasProps> = ({ sessionId, isActive 
     }
   }, [color, brushSize, context])
 
+  const drawRemote = (event: DrawEvent) => {
+    if (!context || !canvasRef.current) return
+
+    const prevStyle = context.strokeStyle
+    const prevWidth = context.lineWidth
+
+    context.strokeStyle = event.color
+    context.lineWidth = event.width
+
+    context.beginPath()
+    context.moveTo(event.prevX, event.prevY)
+    context.lineTo(event.currX, event.currY)
+    context.stroke()
+    context.closePath()
+
+    context.strokeStyle = prevStyle
+    context.lineWidth = prevWidth
+  }
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!context || !isActive) return
 
     const { offsetX, offsetY } = e.nativeEvent
-    context.beginPath()
-    context.moveTo(offsetX, offsetY)
+    prevPos.current = { x: offsetX, y: offsetY }
     setIsDrawing(true)
   }
 
@@ -75,20 +118,46 @@ export const SharedCanvas: React.FC<SharedCanvasProps> = ({ sessionId, isActive 
     if (!isDrawing || !context || !isActive) return
 
     const { offsetX, offsetY } = e.nativeEvent
+
+    // Draw locally
+    context.beginPath()
+    context.moveTo(prevPos.current.x, prevPos.current.y)
     context.lineTo(offsetX, offsetY)
     context.stroke()
+    context.closePath()
+
+    // Broadcast
+    const event: DrawEvent = {
+      prevX: prevPos.current.x,
+      prevY: prevPos.current.y,
+      currX: offsetX,
+      currY: offsetY,
+      color: color,
+      width: brushSize
+    }
+
+    supabase.channel(`canvas:${sessionId}`).send({
+      type: 'broadcast',
+      event: 'draw',
+      payload: event
+    })
+
+    prevPos.current = { x: offsetX, y: offsetY }
   }
 
   const stopDrawing = () => {
-    if (context) {
-      context.closePath()
-    }
     setIsDrawing(false)
   }
 
   const clearCanvas = () => {
     if (context && canvasRef.current) {
       context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+
+      supabase.channel(`canvas:${sessionId}`).send({
+        type: 'broadcast',
+        event: 'clear',
+        payload: {}
+      })
     }
   }
 

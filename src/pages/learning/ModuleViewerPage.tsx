@@ -5,8 +5,10 @@ import {
   PlayIcon,
   CheckCircleIcon,
   ChatBubbleBottomCenterTextIcon,
-  SparklesIcon
+  SparklesIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline'
+import toast from 'react-hot-toast'
 
 const mockLesson = {
   id: 1,
@@ -126,6 +128,16 @@ export const ModuleViewerPage = () => {
                 <li>Audio-Visual Sync</li>
                 <li>User Interaction Loops</li>
               </ul>
+
+              <div className="mt-8 pt-8 border-t border-purple-500/20">
+                <button
+                  onClick={() => toast('XP Awarded! +100 XP', { icon: '🏆', style: { background: '#333', color: '#fff' } })}
+                  className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl text-white font-bold text-lg hover:from-yellow-600 hover:to-orange-600 transition-all flex items-center justify-center space-x-2"
+                >
+                  <TrophyIcon className="h-6 w-6" />
+                  <span>Complete Lesson & Claim XP</span>
+                </button>
+              </div>
             </div>
           </div>
 

@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { PlayIcon, PauseIcon, BackwardIcon, ForwardIcon, MusicalNoteIcon } from '@heroicons/react/24/solid'
+import { supabase } from '../../lib/supabase'
 
 interface JamSessionProps {
   sessionId: string
@@ -7,19 +8,53 @@ interface JamSessionProps {
 
 export const JamSession: React.FC<JamSessionProps> = ({ sessionId }) => {
   const [isPlaying, setIsPlaying] = useState(false)
-  const [activeTrack, setActiveTrack] = useState(0)
 
-  // Simulated tracks
-  const tracks = [
+  // Tracks state managed locally and synced via Realtime
+  const [tracks, setTracks] = useState([
     { id: 1, name: 'Drum Loop A', active: true, color: 'bg-blue-500' },
     { id: 2, name: 'Bassline Synth', active: true, color: 'bg-purple-500' },
     { id: 3, name: 'Lead Melody', active: false, color: 'bg-pink-500' },
     { id: 4, name: 'Pad Textures', active: false, color: 'bg-teal-500' }
-  ]
+  ])
+
+  useEffect(() => {
+    const channel = supabase.channel(`jam:${sessionId}`)
+      .on('broadcast', { event: 'toggle_track' }, ({ payload }) => {
+        setTracks(current =>
+          current.map((t, i) => i === payload.index ? { ...t, active: !t.active } : t)
+        )
+      })
+      .on('broadcast', { event: 'play_pause' }, ({ payload }) => {
+        setIsPlaying(payload.isPlaying)
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [sessionId])
 
   const toggleTrack = (index: number) => {
-    // In a real app, this would toggle the audio channel
-    console.log('Toggling track:', index)
+    const newTracks = [...tracks]
+    newTracks[index].active = !newTracks[index].active
+    setTracks(newTracks)
+
+    supabase.channel(`jam:${sessionId}`).send({
+      type: 'broadcast',
+      event: 'toggle_track',
+      payload: { index }
+    })
+  }
+
+  const togglePlay = () => {
+    const newState = !isPlaying
+    setIsPlaying(newState)
+
+    supabase.channel(`jam:${sessionId}`).send({
+      type: 'broadcast',
+      event: 'play_pause',
+      payload: { isPlaying: newState }
+    })
   }
 
   return (
@@ -92,7 +127,7 @@ export const JamSession: React.FC<JamSessionProps> = ({ sessionId }) => {
           <BackwardIcon className="h-6 w-6" />
         </button>
         <button
-          onClick={() => setIsPlaying(!isPlaying)}
+          onClick={togglePlay}
           className={`p-4 rounded-full text-white shadow-lg shadow-purple-500/20 transition-all ${
             isPlaying ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700'
           }`}
