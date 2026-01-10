@@ -100,6 +100,16 @@ export const socialApi = {
     return data?.data || data;
   },
 
+  async getPostBookmarks(postId: string) {
+    const { data, error } = await supabase
+      .from('bookmarks')
+      .select('*')
+      .eq('post_id', postId);
+
+    if (error) throw error;
+    return data;
+  },
+
   async checkIfUserBookmarkedPost(postId: string, userId: string) {
     const { data, error } = await supabase
       .from('bookmarks')
