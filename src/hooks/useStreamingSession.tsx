@@ -1,3 +1,6 @@
+// YourSpace Creative Labs - Streaming Session Hook
+import { useState, useMemo } from 'react';
+import { useStreaming } from './useStreaming';
 // YourSpace Creative Labs - Streaming Session Hook (Placeholder)
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
@@ -32,11 +35,21 @@ const ICE_SERVERS = {
 
 export const useStreamingSession = (roomId: string) => {
   const { user } = useAuth();
+  const {
+    currentStream,
+    participants: realParticipants,
+    createStream,
+    joinStream,
+    leaveStream,
+    endStream,
+    fetchActiveStreams,
+    isLoading
+  } = useStreaming();
+
   const [session, setSession] = useState<StreamingSession | null>(null);
   const [participants, setParticipants] = useState<StreamParticipant[]>([]);
   const [isHost, setIsHost] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
@@ -57,6 +70,56 @@ export const useStreamingSession = (roomId: string) => {
       hostConnection.current = null;
     }
 
+  // Derived state
+  const isStreaming = !!currentStream && currentStream.status === 'live';
+
+  const isHost = useMemo(() => {
+    return currentStream?.created_by === user?.id;
+  }, [currentStream, user]);
+
+  const session: StreamingSession | null = useMemo(() => {
+    if (!currentStream) return null;
+    return {
+      id: currentStream.id,
+      roomId: currentStream.room_id,
+      title: currentStream.title,
+      isActive: currentStream.status === 'live',
+      startTime: currentStream.scheduled_start || currentStream.created_at,
+      started_at: currentStream.started_at || currentStream.created_at,
+      participants: realParticipants.map(p => p.user_id),
+      profiles: currentStream.host
+    };
+  }, [currentStream, realParticipants]);
+
+  const participants: StreamParticipant[] = useMemo(() => {
+    return realParticipants.map(p => ({
+      id: p.id,
+      userId: p.user_id,
+      username: p.profiles?.username || 'Unknown',
+      isHost: p.role === 'host',
+      isStreaming: p.is_camera_on || p.is_screen_sharing,
+      joinedAt: p.joined_at
+    }));
+  }, [realParticipants]);
+
+  const handleStartStreaming = async (title: string, description: string) => {
+    try {
+      setStreamError(null);
+      await createStream({
+        roomId,
+        title,
+        description,
+        streamType: 'social', // Default
+      });
+    } catch (err: any) {
+      setStreamError(err.message);
+    }
+  };
+
+  const handleStopStreaming = async () => {
+    if (currentStream) {
+      await endStream(currentStream.id);
+    }
     // Unsubscribe from channel
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
@@ -224,10 +287,33 @@ export const useStreamingSession = (roomId: string) => {
     cleanup();
   };
 
-  const joinSession = async () => {
+  const handleJoinSession = async () => {
     console.log('Joining session:', roomId);
     cleanup();
     setIsConnecting(true);
+    setStreamError(null);
+    try {
+      const streams = await fetchActiveStreams(roomId);
+      const activeStream = streams.find(s => s.status === 'live');
+
+      if (activeStream) {
+        await joinStream(activeStream.id, 'viewer');
+      } else {
+        console.log('No active stream found in room:', roomId);
+        setStreamError('No active stream found');
+      }
+    } catch (err: any) {
+      console.error('Failed to join session:', err);
+      setStreamError('Failed to join session');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const handleLeaveSession = async () => {
+    if (currentStream) {
+      await leaveStream(currentStream.id);
+    }
     setIsHost(false);
 
     // Reset remote stream
@@ -366,12 +452,12 @@ export const useStreamingSession = (roomId: string) => {
     session,
     participants,
     isHost,
-    isConnecting,
+    isConnecting: isConnecting || isLoading,
     isStreaming,
-    startStreaming,
-    stopStreaming,
-    joinSession,
-    leaveSession,
+    startStreaming: handleStartStreaming,
+    stopStreaming: handleStopStreaming,
+    joinSession: handleJoinSession,
+    leaveSession: handleLeaveSession,
     streamError,
     remoteStream,
   };
