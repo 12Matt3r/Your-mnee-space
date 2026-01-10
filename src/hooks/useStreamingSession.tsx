@@ -1,7 +1,11 @@
 // YourSpace Creative Labs - Streaming Session Hook
 import { useState, useEffect, useMemo } from 'react';
 import { useStreaming } from './useStreaming';
-import { useAuth } from '../contexts/AuthContext';
+// YourSpace Creative Labs - Streaming Session Hook (Placeholder)
+import { useState, useEffect } from 'react';
+import { useStreaming } from './useStreaming';
+import { supabase } from '../lib/supabase';
+import { useAuth } from './useAuth';
 
 export interface StreamingSession {
   id: string;
@@ -75,6 +79,44 @@ export const useStreamingSession = (roomId: string) => {
 
   const isStreaming = !!currentStream && currentStream.status === 'live';
 
+  const { createStream, endStream } = useStreaming();
+
+  const startStreaming = async (title: string, description: string) => {
+    console.log('Starting stream:', { roomId, title, description });
+    try {
+      setIsConnecting(true);
+      const stream = await createStream({
+        roomId,
+        title,
+        description,
+        streamType: 'teaching', // Default type, could be passed as arg
+      });
+
+      // Map StreamSession to StreamingSession
+      const newSession: StreamingSession = {
+        id: stream.id,
+        roomId: stream.room_id,
+        title: stream.title,
+        isActive: stream.status === 'live',
+        startTime: stream.started_at || new Date().toISOString(),
+        started_at: stream.started_at || new Date().toISOString(),
+        participants: [],
+        profiles: stream.host ? {
+          display_name: stream.host.display_name || stream.host.username,
+          username: stream.host.username,
+          avatar_url: stream.host.avatar_url
+        } : undefined
+      };
+
+      setSession(newSession);
+      setIsStreaming(true);
+      setIsHost(true);
+    } catch (error: any) {
+      console.error('Error starting stream:', error);
+      setStreamError(error.message || 'Failed to start stream');
+      setIsStreaming(false);
+    } finally {
+      setIsConnecting(false);
   useEffect(() => {
     // Initial fetch of active streams for the room
     fetchActiveStreams(roomId).catch(console.error);
@@ -101,6 +143,19 @@ export const useStreamingSession = (roomId: string) => {
 
   const stopStreaming = async () => {
     console.log('Stopping stream:', roomId);
+
+    if (session?.id) {
+      try {
+        await endStream(session.id);
+      } catch (error) {
+        console.error('Error stopping stream:', error);
+      }
+    }
+
+    setIsStreaming(false);
+    setIsHost(false);
+    setSession(null);
+    setParticipants([]);
     if (!currentStream) return;
 
     setIsConnecting(true);
