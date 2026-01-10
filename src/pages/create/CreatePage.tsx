@@ -29,12 +29,22 @@ export const CreatePage = () => {
     title: '',
     description: '',
     tags: '',
+    vibe: '',
     isPublic: true
   })
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [dragActive, setDragActive] = useState(false)
 
   const currentType = contentTypes.find(type => type.id === selectedType)
+
+  const vibeOptions = [
+    { id: 'chill', name: 'Chill', color: 'from-blue-400 to-cyan-300' },
+    { id: 'energetic', name: 'Energetic', color: 'from-orange-400 to-red-400' },
+    { id: 'dark', name: 'Dark', color: 'from-gray-700 to-black' },
+    { id: 'dreamy', name: 'Dreamy', color: 'from-purple-300 to-pink-300' },
+    { id: 'retro', name: 'Retro', color: 'from-yellow-400 to-orange-500' },
+    { id: 'futuristic', name: 'Futuristic', color: 'from-cyan-400 to-blue-600' }
+  ]
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: currentType?.accept || {},
@@ -61,14 +71,14 @@ export const CreatePage = () => {
       file: selectedFile,
       title: formData.title,
       description: formData.description,
-      tags,
+      tags: [...tags, formData.vibe].filter(Boolean),
       isPublic: formData.isPublic,
       contentType: selectedType
     })
 
     if (result) {
       // Reset form
-      setFormData({ title: '', description: '', tags: '', isPublic: true })
+      setFormData({ title: '', description: '', tags: '', vibe: '', isPublic: true })
       setSelectedFile(null)
       setSelectedType('')
     }
@@ -217,6 +227,30 @@ export const CreatePage = () => {
                   className="w-full px-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all resize-none"
                   placeholder="Describe your creation, inspiration, or process..."
                 />
+              </div>
+
+              {/* Vibe Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Select Vibe
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  {vibeOptions.map((vibe) => (
+                    <button
+                      key={vibe.id}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, vibe: vibe.id }))}
+                      className={cn(
+                        'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                        formData.vibe === vibe.id
+                          ? `bg-gradient-to-r ${vibe.color} text-white shadow-lg scale-105`
+                          : 'bg-black/30 text-gray-400 border border-purple-500/20 hover:border-purple-500/50'
+                      )}
+                    >
+                      {vibe.name}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Tags */}

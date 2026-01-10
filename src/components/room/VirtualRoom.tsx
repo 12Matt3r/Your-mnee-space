@@ -3,6 +3,7 @@
 
 import React from 'react'
 import { cn } from '../../lib/utils'
+import { useTheme, NEON_COLORS } from '../../lib/theme'
 
 interface VirtualRoomProps {
   roomId?: string
@@ -23,6 +24,9 @@ export const VirtualRoom: React.FC<VirtualRoomProps> = ({
   enableControls = true,
   readOnly = false
 }) => {
+  const { currentTheme } = useTheme()
+  const accentColor = NEON_COLORS.primary[currentTheme]
+
   React.useEffect(() => {
     // Track room visit if roomId is provided
     if (roomId && onInteraction) {
@@ -37,10 +41,14 @@ export const VirtualRoom: React.FC<VirtualRoomProps> = ({
   return (
     <div 
       className={cn(
-        'relative bg-gradient-to-br from-purple-900/20 via-pink-900/20 to-purple-900/20 backdrop-blur-sm rounded-xl overflow-hidden border border-purple-500/20 flex items-center justify-center',
+        'relative bg-gradient-to-br from-black via-gray-900 to-black backdrop-blur-sm rounded-xl overflow-hidden border border-white/10 flex items-center justify-center transition-all duration-500',
         className
       )}
-      style={{ height }}
+      style={{
+        height,
+        boxShadow: `0 0 40px ${accentColor}20`,
+        borderColor: `${accentColor}40`
+      }}
     >
       {/* Placeholder 3D Room Visualization */}
       <div className="relative w-full h-full flex items-center justify-center">
@@ -83,13 +91,18 @@ export const VirtualRoom: React.FC<VirtualRoomProps> = ({
         
         {/* Mock 3D perspective grid */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-t from-purple-500/10 to-transparent" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to top, ${accentColor}10, transparent)`
+            }}
+          />
           <div 
             className="absolute inset-0" 
             style={{
               backgroundImage: `
-                linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px),
-                linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px)
+                linear-gradient(90deg, ${accentColor}20 1px, transparent 1px),
+                linear-gradient(${accentColor}20 1px, transparent 1px)
               `,
               backgroundSize: '50px 50px',
               transform: 'perspective(500px) rotateX(60deg)',
