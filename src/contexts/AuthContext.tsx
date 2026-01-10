@@ -1,14 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase, Profile } from '../lib/supabase';
 import { socialApi } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   profile: Profile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<any>;
   signOut: () => Promise<void>;
 }
 
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -24,10 +26,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function loadUser() {
       setLoading(true);
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
         
-        if (user) {
+        if (session?.user) {
           const userProfile = await socialApi.getCurrentUserProfile();
           setProfile(userProfile);
         }
@@ -43,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         // NEVER use any async operations in callback
+        setSession(session);
         setUser(session?.user || null);
         if (!session?.user) {
           setProfile(null);
@@ -70,22 +74,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Auth methods
   async function signIn(email: string, password: string) {
-    const result = await socialApi.signIn(email, password);
-    return result;
+    // The socialApi.signIn returns the session data but we rely on the onAuthStateChange listener
+    // to update our local state to keep it single source of truth
+    await socialApi.signIn(email, password);
   }
 
   async function signUp(email: string, password: string, fullName?: string) {
-    const result = await socialApi.signUp(email, password, fullName);
-    return result;
+    await socialApi.signUp(email, password, fullName);
   }
 
   async function signOut() {
     await socialApi.signOut();
     setProfile(null);
+    setSession(null);
+    setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
