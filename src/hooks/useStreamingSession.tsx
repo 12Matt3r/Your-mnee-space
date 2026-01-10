@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useStreaming } from './useStreaming';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface StreamingSession {
   id: string;
@@ -55,7 +56,7 @@ export const useStreamingSession = (roomId: string) => {
       started_at: currentStream.started_at || currentStream.created_at,
       participants: streamParticipants.map(p => p.user_id),
       profiles: currentStream.host,
-    };
+    });
   }, [currentStream, streamParticipants]);
 
   // Map streamParticipants to StreamParticipant interface
@@ -180,7 +181,7 @@ export const useStreamingSession = (roomId: string) => {
         const activeStream = streams.find(s => s.status === 'live');
 
         if (activeStream) {
-            await joinStream(activeStream.id);
+            await joinStream(activeStream.id, 'viewer');
         } else {
             setStreamError('No active stream found in this room');
         }

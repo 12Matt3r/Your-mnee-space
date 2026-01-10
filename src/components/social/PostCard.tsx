@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Heart, MessageCircle, Repeat, Share, Bookmark, MoreHorizontal, Eye, MapPin } from 'lucide-react';
 import { Post, SocialUser } from '@/types/social';
 import { useSocial } from '@/hooks/useSocial';
-import { formatRelativeTime } from '@/utils/helpers';
+import { formatRelativeTime } from '@/lib/utils';
 import { toast } from 'react-hot-toast';
 
 interface PostCardProps {
@@ -263,7 +263,10 @@ export const PostCard: React.FC<PostCardProps> = ({
         
         {/* More Options */}
         <div className="flex-shrink-0">
-          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+          <button
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            aria-label="More options"
+          >
             <MoreHorizontal className="w-5 h-5" />
           </button>
         </div>
@@ -276,6 +279,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           <button
             onClick={() => onReply?.(post)}
             className="flex items-center gap-2 px-3 py-2 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
+            aria-label={`Reply to ${post.user?.display_name || 'user'}. ${post.reply_count} replies`}
           >
             <MessageCircle className="w-5 h-5" />
             {post.reply_count > 0 && (
@@ -291,6 +295,8 @@ export const PostCard: React.FC<PostCardProps> = ({
                 ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-gray-700'
                 : 'text-gray-500 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700'
             }`}
+            aria-label={isReposted ? "Undo repost" : "Repost"}
+            aria-pressed={isReposted}
           >
             <Repeat className="w-5 h-5" />
             {repostCount > 0 && (
@@ -306,6 +312,8 @@ export const PostCard: React.FC<PostCardProps> = ({
                 ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-gray-700'
                 : 'text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-gray-700'
             }`}
+            aria-label={isLiked ? "Unlike" : "Like"}
+            aria-pressed={isLiked}
           >
             <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
             {likeCount > 0 && (
@@ -314,8 +322,12 @@ export const PostCard: React.FC<PostCardProps> = ({
           </button>
           
           {/* Views */}
-          <div className="flex items-center gap-2 px-3 py-2 text-gray-500">
-            <Eye className="w-5 h-5" />
+          <div
+            className="flex items-center gap-2 px-3 py-2 text-gray-500"
+            role="status"
+            aria-label={`${formatCount(post.view_count)} views`}
+          >
+            <Eye className="w-5 h-5" aria-hidden="true" />
             <span className="text-sm font-medium">{formatCount(post.view_count)}</span>
           </div>
           
@@ -329,6 +341,8 @@ export const PostCard: React.FC<PostCardProps> = ({
                   : 'text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-gray-700'
               }`}
               title={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+              aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}
+              aria-pressed={isBookmarked}
             >
               <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
             </button>
@@ -337,6 +351,7 @@ export const PostCard: React.FC<PostCardProps> = ({
               onClick={handleShare}
               className="p-2 rounded-lg text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors"
               title="Share"
+              aria-label="Share post"
             >
               <Share className="w-5 h-5" />
             </button>
