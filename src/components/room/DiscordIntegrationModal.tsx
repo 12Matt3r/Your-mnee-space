@@ -9,6 +9,8 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
 import { cn } from '../../lib/utils'
+import { supabase } from '../../lib/supabase'
+import { toast } from 'react-hot-toast'
 
 interface DiscordIntegrationModalProps {
   isOpen: boolean
@@ -21,13 +23,29 @@ export const DiscordIntegrationModal = ({ isOpen, onClose }: DiscordIntegrationM
 
   if (!isOpen) return null
 
-  const handleLinkAccount = () => {
+  const handleLinkAccount = async () => {
     setIsConnecting(true)
-    // TODO: Implement OAuth2 flow in next step
-    setTimeout(() => {
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'discord',
+        options: {
+          redirectTo: `${window.location.origin}/auth/discord/callback`,
+          scopes: 'identify email guilds'
+        }
+      })
+
+      if (error) {
+        throw error
+      }
+
+      // Note: The actual redirect happens here, so the code below might not run immediately
+      // unless there's an error or the user cancels in a popup (if that was used, but we're doing redirect)
+    } catch (error: any) {
+      console.error('Error linking Discord account:', error)
+      toast.error(error.message || 'Failed to initiate Discord connection')
       setIsConnecting(false)
-      setIsLinked(true)
-    }, 2000)
+    }
   }
 
   const DiscordIcon = () => (
