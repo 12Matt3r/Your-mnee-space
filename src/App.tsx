@@ -28,6 +28,7 @@ import SocialFeedPage from './pages/social/SocialFeedPage';
 import MessagesPage from './pages/messages/MessagesPage';
 import { AgentsPage } from './pages/agents/AgentsPage';
 import { LearningPage } from './pages/learning/LearningPage';
+import { ModuleViewerPage } from './pages/learning/ModuleViewerPage';
 import './App.css';
 
 function App() {
@@ -95,6 +96,12 @@ function App() {
                 <Route path="/learning" element={
                   <Layout>
                     <LearningPage />
+                  </Layout>
+                } />
+
+                <Route path="/learning/modules/:id" element={
+                  <Layout>
+                    <ModuleViewerPage />
                   </Layout>
                 } />
 
