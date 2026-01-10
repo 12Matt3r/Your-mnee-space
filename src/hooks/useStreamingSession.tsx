@@ -23,6 +23,13 @@ export interface StreamParticipant {
   joinedAt: string;
 }
 
+const ICE_SERVERS = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+  ],
+};
+
 export const useStreamingSession = (roomId: string) => {
   const { user } = useAuth();
   const [session, setSession] = useState<StreamingSession | null>(null);
@@ -31,26 +38,291 @@ export const useStreamingSession = (roomId: string) => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
 
-  const startStreaming = async (title: string, description: string) => {
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const peerConnections = useRef<Map<string, RTCPeerConnection>>(new Map());
+  const hostConnection = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const viewerIdRef = useRef<string>(crypto.randomUUID());
+
+  // Cleanup function
+  const cleanup = useCallback(() => {
+    // Close all peer connections
+    peerConnections.current.forEach((pc) => pc.close());
+    peerConnections.current.clear();
+
+    if (hostConnection.current) {
+      hostConnection.current.close();
+      hostConnection.current = null;
+    }
+
+    // Unsubscribe from channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    setIsStreaming(false);
+    setIsConnecting(false);
+    setRemoteStream(null);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [cleanup]);
+
+  const startStreaming = async (title: string, description: string, stream: MediaStream) => {
     console.log('Starting stream:', { roomId, title, description });
+
+    // Reset state
+    cleanup();
+
+    setIsHost(true);
     setIsStreaming(true);
-    // TODO: Implement actual streaming logic
+    localStreamRef.current = stream;
+
+    // Create a mock session object for UI
+    setSession({
+      id: crypto.randomUUID(),
+      roomId,
+      title,
+      isActive: true,
+      startTime: new Date().toISOString(),
+      started_at: new Date().toISOString(),
+      participants: [],
+      profiles: { display_name: 'Host' } // Placeholder
+    });
+
+    try {
+      // Initialize Supabase channel
+      const channel = supabase.channel(`streaming:${roomId}`);
+      channelRef.current = channel;
+
+      channel
+        .on('broadcast', { event: 'join-request' }, async (payload) => {
+          console.log('Received join request:', payload);
+          const { viewerId } = payload.payload;
+
+          if (!viewerId) return;
+
+          // Add participant to state
+          setParticipants((prev) => {
+            if (prev.find((p) => p.id === viewerId)) return prev;
+            return [
+              ...prev,
+              {
+                id: viewerId,
+                userId: viewerId,
+                username: `Viewer ${viewerId.slice(0, 4)}`,
+                isHost: false,
+                isStreaming: false,
+                joinedAt: new Date().toISOString(),
+              },
+            ];
+          });
+
+          // Create PeerConnection for this viewer
+          const pc = new RTCPeerConnection(ICE_SERVERS);
+          peerConnections.current.set(viewerId, pc);
+
+          // Add local tracks to PC
+          if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach((track) => {
+              pc.addTrack(track, localStreamRef.current!);
+            });
+          }
+
+          // Handle ICE candidates
+          pc.onicecandidate = (event) => {
+            if (event.candidate) {
+              channel.send({
+                type: 'broadcast',
+                event: 'ice-candidate',
+                payload: {
+                  candidate: event.candidate,
+                  target: viewerId,
+                },
+              });
+            }
+          };
+
+          // Create Offer
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+
+          // Send Offer
+          channel.send({
+            type: 'broadcast',
+            event: 'offer',
+            payload: {
+              sdp: offer,
+              target: viewerId,
+              hostId: 'host', // Simple host ID
+            },
+          });
+        })
+        .on('broadcast', { event: 'answer' }, async (payload) => {
+          console.log('Received answer:', payload);
+          const { sdp, viewerId } = payload.payload;
+          const pc = peerConnections.current.get(viewerId);
+          if (pc) {
+            await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+          }
+        })
+        .on('broadcast', { event: 'ice-candidate' }, async (payload) => {
+          const { candidate, target } = payload.payload;
+          // Host checks if the candidate is from a viewer (we might need a senderId in payload)
+          // For simplicity, we assume if we are host, we only handle candidates meant for us if we were a viewer?
+          // No, host receives candidates from viewer.
+          // We need to know WHICH viewer sent it.
+          // Let's update the payload to include senderId.
+          // For now, let's assume we handle it if we find the PC?
+          // But wait, the viewer sends candidate to host.
+          // If we are host, we need to know who sent it.
+          // Let's assume the payload includes `senderId`.
+          if (payload.payload.senderId) {
+             const pc = peerConnections.current.get(payload.payload.senderId);
+             if (pc) {
+               await pc.addIceCandidate(new RTCIceCandidate(candidate));
+             }
+          }
+        })
+        .on('broadcast', { event: 'leave' }, (payload) => {
+           const { viewerId } = payload.payload;
+           const pc = peerConnections.current.get(viewerId);
+           if (pc) {
+             pc.close();
+             peerConnections.current.delete(viewerId);
+             setParticipants(prev => prev.filter(p => p.id !== viewerId));
+           }
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Host subscribed to signaling channel');
+          }
+        });
+
+    } catch (error) {
+      console.error('Error starting stream:', error);
+      setStreamError(error instanceof Error ? error.message : 'Unknown error');
+      setIsStreaming(false);
+    }
   };
 
   const stopStreaming = async () => {
     console.log('Stopping stream:', roomId);
-    setIsStreaming(false);
-    // TODO: Implement actual stop streaming logic
+    if (channelRef.current) {
+        channelRef.current.send({
+            type: 'broadcast',
+            event: 'stream-end',
+            payload: {}
+        });
+    }
+    cleanup();
   };
 
   const joinSession = async () => {
     console.log('Joining session:', roomId);
+    cleanup();
     setIsConnecting(true);
-    // TODO: Implement actual join session logic
-    setTimeout(() => {
+    setIsHost(false);
+
+    // Reset remote stream
+    setRemoteStream(null);
+
+    try {
+      const channel = supabase.channel(`streaming:${roomId}`);
+      channelRef.current = channel;
+
+      const viewerId = viewerIdRef.current;
+
+      channel
+        .on('broadcast', { event: 'offer' }, async (payload) => {
+          const { sdp, target } = payload.payload;
+          if (target !== viewerId) return;
+
+          console.log('Received offer');
+
+          const pc = new RTCPeerConnection(ICE_SERVERS);
+          hostConnection.current = pc;
+
+          pc.onicecandidate = (event) => {
+            if (event.candidate) {
+              channel.send({
+                type: 'broadcast',
+                event: 'ice-candidate',
+                payload: {
+                  candidate: event.candidate,
+                  target: 'host', // Target the host
+                  senderId: viewerId
+                },
+              });
+            }
+          };
+
+          pc.ontrack = (event) => {
+            console.log('Received remote track');
+            setRemoteStream(event.streams[0]);
+            setIsConnecting(false);
+            setIsStreaming(true);
+             // Mock session
+            setSession({
+                id: 'session-id',
+                roomId,
+                title: 'Live Stream',
+                isActive: true,
+                startTime: new Date().toISOString(),
+                started_at: new Date().toISOString(),
+                participants: [],
+                profiles: { display_name: 'Host' }
+            });
+          };
+
+          await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+
+          channel.send({
+            type: 'broadcast',
+            event: 'answer',
+            payload: {
+              sdp: answer,
+              viewerId: viewerId,
+            },
+          });
+        })
+        .on('broadcast', { event: 'ice-candidate' }, async (payload) => {
+           const { candidate, target } = payload.payload;
+           if (target === viewerId && hostConnection.current) {
+             await hostConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+           }
+        })
+        .on('broadcast', { event: 'stream-end' }, () => {
+            console.log('Stream ended by host');
+            cleanup();
+            setSession(null);
+            alert('The stream has ended.');
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            console.log('Viewer subscribed, sending join request');
+            // Request to join
+            channel.send({
+              type: 'broadcast',
+              event: 'join-request',
+              payload: { viewerId },
+            });
+          }
+        });
+
+    } catch (error) {
+      console.error('Error joining session:', error);
       setIsConnecting(false);
-    }, 1000);
+      setStreamError(error instanceof Error ? error.message : 'Unknown error');
+    }
   };
 
   const leaveSession = async () => {
@@ -101,5 +373,6 @@ export const useStreamingSession = (roomId: string) => {
     joinSession,
     leaveSession,
     streamError,
+    remoteStream,
   };
 };
