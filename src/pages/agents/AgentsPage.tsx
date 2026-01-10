@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ECONOMY_LAYERS, FAVORITISM_TIERS, MNEE_CONFIG, generatePaymentLink } from '../../lib/mnee';
-import { Bot, Zap, Star, Clock, DollarSign, Users, Briefcase, Search, Plus, X } from 'lucide-react';
+import { Bot, Zap, Star, Clock, DollarSign, Users, Briefcase, Search, Plus, X, Wallet } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 interface Agent {
@@ -42,12 +43,14 @@ const AI_SERVICES = [
 
 export function AgentsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [myJobs, setMyJobs] = useState<AgentJob[]>([]);
   const [selectedTab, setSelectedTab] = useState<'marketplace' | 'post-job' | 'my-jobs' | 'economy'>('marketplace');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [walletBalance, setWalletBalance] = useState('100');
   
   // Job posting form state
   const [jobTitle, setJobTitle] = useState('');
@@ -64,6 +67,12 @@ export function AgentsPage() {
   useEffect(() => {
     loadAgents();
     if (user) loadMyJobs();
+
+    // Load balance
+    const storedBalance = localStorage.getItem('mnee_balance');
+    if (storedBalance) {
+      setWalletBalance(storedBalance);
+    }
   }, [user]);
 
   const loadAgents = async () => {
@@ -143,10 +152,26 @@ export function AgentsPage() {
   const confirmHire = () => {
     if (!selectedAgent) return;
     const totalCost = selectedAgent.hourly_rate * parseFloat(hireHours);
-    const paymentUrl = generatePaymentLink(MNEE_CONFIG.address, totalCost.toString());
-    window.open(paymentUrl, '_blank');
+
+    // Check balance
+    const currentBalance = parseFloat(localStorage.getItem('mnee_balance') || '100');
+
+    if (currentBalance < totalCost) {
+        toast.error(`Insufficient MNEE balance. You need ${(totalCost - currentBalance).toFixed(2)} more MNEE.`);
+        navigate('/wallet');
+        return;
+    }
+
+    // Deduct balance
+    const newBalance = currentBalance - totalCost;
+    localStorage.setItem('mnee_balance', newBalance.toString());
+    setWalletBalance(newBalance.toString());
+
+    // const paymentUrl = generatePaymentLink(MNEE_CONFIG.address, totalCost.toString());
+    // window.open(paymentUrl, '_blank');
+
     setShowHireModal(false);
-    toast.success(`Hiring ${selectedAgent.name} - complete payment to confirm`);
+    toast.success(`Hired ${selectedAgent.name} successfully! Balance: ${newBalance.toFixed(2)} MNEE`);
   };
 
   const filteredAgents = agents.filter(agent => {
@@ -160,16 +185,27 @@ export function AgentsPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Agent Marketplace
-          </h1>
-          <p className="text-gray-400 mt-2">
-            Hire AI agents with MNEE tokens. Agents earn, grow, and can even hire other AI or humans.
-          </p>
-          <p className="text-sm text-purple-400 mt-1">
-            MNEE Contract: {MNEE_CONFIG.address}
-          </p>
+        <div className="flex justify-between items-start mb-8">
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Agent Marketplace
+              </h1>
+              <p className="text-gray-400 mt-2">
+                Hire AI agents with MNEE tokens. Agents earn, grow, and can even hire other AI or humans.
+              </p>
+              <p className="text-sm text-purple-400 mt-1">
+                MNEE Contract: {MNEE_CONFIG.address}
+              </p>
+            </div>
+             <button
+                onClick={() => navigate('/wallet')}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors border border-gray-700"
+              >
+                <Wallet className="w-4 h-4 text-green-400" />
+                <span className="text-green-400 font-mono">
+                   {parseFloat(walletBalance).toFixed(2)} MNEE
+                </span>
+              </button>
         </div>
 
         {/* Tabs */}
@@ -583,7 +619,7 @@ export function AgentsPage() {
               onClick={confirmHire}
               className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-bold hover:from-purple-500 hover:to-pink-500 transition-all"
             >
-              Proceed to Payment
+              Confirm Payment
             </button>
           </div>
         </div>

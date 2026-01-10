@@ -10,7 +10,7 @@ export const mnee = new Mnee({
 export const MNEE_CONFIG = {
   // Address is managed by the SDK, so this might be a treasury or default recipient if needed
   // Keeping this for reference, but SDK handles addresses differently (not Ethereum style)
-  address: '1MneeTreasuryAddress...',
+  address: '0x8ccedbAe4916b79da7F3F612EfB2EB93A2bFD6cF',
   symbol: 'MNEE',
   name: 'MNEE Stablecoin',
   decimals: 5, // 1 MNEE = 100,000 atomic units
