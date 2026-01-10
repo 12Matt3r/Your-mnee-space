@@ -19,6 +19,7 @@ export interface Profile {
   id: string;
   username: string | null;
   display_name: string | null;
+  full_name: string | null; // Added to match usage in codebase
   bio: string | null;
   avatar_url: string | null;
   background_image_url: string | null;
@@ -110,4 +111,19 @@ export interface SubscriptionTier {
   description: string | null;
   benefits: string[];
   subscriber_count: number;
+}
+
+export interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url?: string;
+  created_at: string;
+  updated_at: string;
+  profiles?: {
+    id: string;
+    username: string | null;
+    full_name: string | null;
+    avatar_url: string | null;
+  };
 }

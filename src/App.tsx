@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/theme/ThemeProvider';
 import { GlobalMusicProvider } from './components/music/GlobalMusicProvider';
+import { Web3Provider } from './components/web3/Web3Provider';
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
@@ -36,10 +37,11 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <ThemeProvider>
-          <GlobalMusicProvider>
-            <div className="App">
-              <Routes>
+        <Web3Provider>
+          <ThemeProvider>
+            <GlobalMusicProvider>
+              <div className="App">
+                <Routes>
                 {/* Auth routes without layout */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
@@ -185,12 +187,13 @@ function App() {
                   </ProtectedRoute>
                 } />
 
-                {/* Fallback route */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
-          </GlobalMusicProvider>
-        </ThemeProvider>
+                  {/* Fallback route */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
+            </GlobalMusicProvider>
+          </ThemeProvider>
+        </Web3Provider>
       </AuthProvider>
     </Router>
   );
