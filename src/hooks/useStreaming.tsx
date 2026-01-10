@@ -385,7 +385,7 @@ export const useStreaming = () => {
         localStream.getTracks().forEach(track => track.stop());
       }
 
-      // @ts-ignore - TypeScript doesn't have proper types for getDisplayMedia
+      // @ts-expect-error - TypeScript doesn't have proper types for getDisplayMedia
       const stream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio

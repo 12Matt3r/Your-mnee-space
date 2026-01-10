@@ -336,29 +336,20 @@ const Generic3DAsset: React.FC<{
   onPointerOut: (e: ThreeEvent<PointerEvent>) => void
   onClick: (e: ThreeEvent<MouseEvent>) => void
 }> = ({ asset, position, rotation, scale, hovered, clicked, ...handlers }) => {
-  // Try to load GLTF model, fallback to basic geometry
-  let gltf
-  try {
-    if (asset.asset_library?.file_url && 
-        (asset.asset_library.file_url.includes('.gltf') || 
-         asset.asset_library.file_url.includes('.glb'))) {
-      gltf = useGLTF(asset.asset_library.file_url)
-    }
-  } catch (error) {
-    console.warn('Failed to load GLTF model:', asset.asset_library?.file_url)
-  }
+  // Only attempt to load if it's a GLTF/GLB file
+  const isGLTF = asset.asset_library?.file_url &&
+    (asset.asset_library.file_url.includes('.gltf') ||
+     asset.asset_library.file_url.includes('.glb'));
 
-  if (gltf && gltf.scene) {
+  // Use a separate component for the GLTF model to respect hook rules
+  if (isGLTF) {
     return (
-      <primitive
-        // ref={ref}
-        object={gltf.scene.clone()}
+      <GLTFAsset
+        url={asset.asset_library!.file_url}
         position={position}
         rotation={rotation}
         scale={scale}
-        castShadow
-        receiveShadow
-        {...handlers}
+        handlers={handlers}
       />
     )
   }
@@ -409,5 +400,26 @@ const Generic3DAsset: React.FC<{
       {getGeometry()}
       {getMaterial()}
     </mesh>
+  )
+}
+
+const GLTFAsset: React.FC<{
+  url: string
+  position: [number, number, number]
+  rotation: [number, number, number]
+  scale: [number, number, number]
+  handlers: any
+}> = ({ url, position, rotation, scale, handlers }) => {
+  const gltf = useGLTF(url)
+  return (
+    <primitive
+      object={gltf.scene.clone()}
+      position={position}
+      rotation={rotation}
+      scale={scale}
+      castShadow
+      receiveShadow
+      {...handlers}
+    />
   )
 }
