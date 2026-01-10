@@ -48,7 +48,6 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
     joinSession,
     leaveSession,
     streamError,
-    remoteStream,
   } = useStreamingSession(roomId);
 
   // Local state
@@ -389,15 +388,10 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
       setTitle(`${profile?.display_name || 'User'}'s Stream`);
     }
 
-    if (localStreamRef.current) {
-      await startStreaming(
-        title || `${profile?.display_name || 'User'}'s Stream`,
-        description,
-        localStreamRef.current
-      );
-    } else {
-      console.error('No local stream available');
-    }
+    await startStreaming(
+      title || `${profile?.display_name || 'User'}'s Stream`,
+      description
+    );
   };
 
   // Handle stop stream button click
@@ -832,7 +826,6 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
           // Chat panel
           <StreamChat
             sessionId={session?.id || ''}
-            roomId={roomId}
             onClose={() => setShowChat(false)}
           />
         ) : null}
@@ -964,13 +957,6 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
     </div>
   );
 
-  // Update remote video when stream changes
-  useEffect(() => {
-    if (remoteVideoRef.current && remoteStream) {
-      remoteVideoRef.current.srcObject = remoteStream;
-    }
-  }, [remoteStream]);
-
   // Viewer screen
   const renderViewerScreen = () => (
     <div className="flex h-full">
@@ -1005,7 +991,6 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
         {showChat && (
           <StreamChat
             sessionId={session?.id || ''}
-            roomId={roomId}
             onClose={() => setShowChat(false)}
           />
         )}

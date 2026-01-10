@@ -6,17 +6,6 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database types for YourSpace MNEE Platform
-export interface Post {
-  id: string;
-  user_id: string;
-  content: string;
-  image_url: string | null;
-  video_url: string | null;
-  created_at: string;
-  updated_at: string;
-  reply_to_id?: string | null;
-}
-
 export interface Profile {
   id: string;
   username: string | null;
