@@ -308,33 +308,20 @@ const Timeline = () => {
           const isLiked = likedPostIds.has(post.id);
           const isBookmarked = bookmarkedPostIds.has(post.id);
           
-          // Get like and bookmark counts
+          // Get like count
           let likesCount = 0;
-          let bookmarksCount = 0;
           try {
-            const [likes, bookmarks] = await Promise.all([
-              socialApi.getPostLikeCount(post.id),
-              socialApi.getPostBookmarkCount(post.id)
-            ]);
-            likesCount = likes;
-            bookmarksCount = bookmarks;
+            const likes = await socialApi.getPostLikes(post.id);
+            likesCount = likes.length;
           } catch (error) {
-            console.error('Error getting interaction counts:', error);
+            console.error('Error getting likes count:', error);
           }
           
-          // Get reply count
-          let repliesCount = 0;
-          try {
-            repliesCount = await socialApi.getPostReplyCount(post.id);
-          } catch (error) {
-            console.error('Error getting reply count:', error);
-          }
-
           return {
             ...post,
             likes_count: likesCount,
-            replies_count: repliesCount,
-            bookmarks_count: bookmarksCount,
+            replies_count: 0, // TODO: implement replies
+            bookmarks_count: 0, // TODO: implement bookmark count
             is_liked: isLiked,
             is_bookmarked: isBookmarked
           };
