@@ -1,7 +1,7 @@
-// YourSpace Creative Labs - Streaming Session Hook
-import { useState, useEffect, useRef, useCallback } from 'react';
+// YourSpace Creative Labs - Streaming Session Hook (Placeholder)
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { RealtimeChannel } from '@supabase/supabase-js';
+import { useAuth } from './useAuth';
 
 export interface StreamingSession {
   id: string;
@@ -31,6 +31,7 @@ const ICE_SERVERS = {
 };
 
 export const useStreamingSession = (roomId: string) => {
+  const { user } = useAuth();
   const [session, setSession] = useState<StreamingSession | null>(null);
   const [participants, setParticipants] = useState<StreamParticipant[]>([]);
   const [isHost, setIsHost] = useState(false);
@@ -326,14 +327,39 @@ export const useStreamingSession = (roomId: string) => {
 
   const leaveSession = async () => {
     console.log('Leaving session:', roomId);
-    if (channelRef.current && !isHost) {
-        channelRef.current.send({
-            type: 'broadcast',
-            event: 'leave',
-            payload: { viewerId: viewerIdRef.current }
-        });
+
+    // Attempt to close the visit record if user is authenticated
+    if (user && roomId) {
+      try {
+        // Find the most recent open visit for this room and user
+        const { data: visits, error: fetchError } = await supabase
+          .from('room_visits')
+          .select('id, created_at')
+          .eq('room_id', roomId)
+          .eq('visitor_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (!fetchError && visits && visits.length > 0) {
+          const visit = visits[0];
+          const duration = Math.floor((Date.now() - new Date(visit.created_at).getTime()) / 1000);
+
+          // Update the visit with duration
+          await supabase
+            .from('room_visits')
+            .update({ visit_duration: duration })
+            .eq('id', visit.id);
+
+          console.log('Updated visit duration:', duration);
+        }
+      } catch (error) {
+        console.error('Error leaving session:', error);
+      }
     }
-    cleanup();
+
+    setSession(null);
+    setParticipants([]);
+    setIsStreaming(false);
   };
 
   return {

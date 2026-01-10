@@ -832,6 +832,7 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
           // Chat panel
           <StreamChat
             sessionId={session?.id || ''}
+            roomId={roomId}
             onClose={() => setShowChat(false)}
           />
         ) : null}
@@ -1004,6 +1005,7 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
         {showChat && (
           <StreamChat
             sessionId={session?.id || ''}
+            roomId={roomId}
             onClose={() => setShowChat(false)}
           />
         )}

@@ -228,6 +228,16 @@ export function useSocial() {
 
       if (error) throw error;
 
+      // Get post count
+      let postCount = 0;
+      if (data) {
+        const { count } = await supabase
+          .from('posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', data.id);
+        postCount = count || 0;
+      }
+
       return data ? {
         id: data.id,
         username: data.username,
@@ -237,7 +247,7 @@ export function useSocial() {
         banner_image: data.background_image_url,
         followers: data.follower_count || 0,
         following: data.following_count || 0,
-        posts: 0, // TODO: Count posts
+        posts: postCount,
         is_verified: data.is_verified || false,
         location: data.bio, // Placeholder
         website: '', // Placeholder
