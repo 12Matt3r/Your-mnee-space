@@ -1,11 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+const supabaseUrl = 'https://zbmigpfyzdmwtcsqniys.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpibWlncGZ5emRtd3Rjc3FuaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzA2OTgsImV4cCI6MjA4MzUwNjY5OH0.quUOZNtInJtz4ySRA7jl9jZzymo-IcS4USQ-mLqXnEo';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -14,13 +10,17 @@ export interface Profile {
   id: string;
   username: string | null;
   display_name: string | null;
+  full_name: string | null;
   bio: string | null;
   avatar_url: string | null;
   background_image_url: string | null;
   background_video_url: string | null;
+  website: string | null;
+  location: string | null;
   theme: string | null;
   custom_css: string | null;
   creator_type: string | null;
+  subscription_tier: string | null;
   is_verified: boolean | null;
   is_premium: boolean | null;
   profile_views: number | null;
@@ -30,6 +30,32 @@ export interface Profile {
   reputation_score: number | null;
   wallet_address: string | null;
   mnee_balance: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  media_urls?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Content {
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string | null;
+  file_url: string;
+  thumbnail_url: string | null;
+  content_type: string;
+  tags: string[];
+  vibe_tags?: string[];
+  is_public: boolean;
+  like_count: number;
+  view_count: number;
   created_at: string;
   updated_at: string;
 }
