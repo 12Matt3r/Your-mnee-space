@@ -313,10 +313,18 @@ const Timeline = () => {
             console.error('Error getting likes count:', error);
           }
           
+          // Get reply count
+          let repliesCount = 0;
+          try {
+            repliesCount = await socialApi.getPostReplyCount(post.id);
+          } catch (error) {
+            console.error('Error getting reply count:', error);
+          }
+
           return {
             ...post,
             likes_count: likesCount,
-            replies_count: 0, // TODO: implement replies
+            replies_count: repliesCount,
             bookmarks_count: 0, // TODO: implement bookmark count
             is_liked: isLiked,
             is_bookmarked: isBookmarked
