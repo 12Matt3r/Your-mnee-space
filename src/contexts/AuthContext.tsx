@@ -74,19 +74,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Auth methods
   async function signIn(email: string, password: string) {
-    const result = await socialApi.signIn(email, password);
-    return result;
+    // The socialApi.signIn returns the session data but we rely on the onAuthStateChange listener
+    // to update our local state to keep it single source of truth
+    await socialApi.signIn(email, password);
   }
 
   async function signUp(email: string, password: string, fullName?: string) {
-    const result = await socialApi.signUp(email, password, fullName);
-    return result;
+    await socialApi.signUp(email, password, fullName);
   }
 
   async function signOut() {
     await socialApi.signOut();
     setProfile(null);
     setSession(null);
+    setUser(null);
   }
 
   return (
