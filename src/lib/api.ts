@@ -40,16 +40,6 @@ export const socialApi = {
     return data;
   },
 
-  async getPostReplyCount(postId: string) {
-    const { count, error } = await supabase
-      .from('posts')
-      .select('*', { count: 'exact', head: true })
-      .eq('reply_to_id', postId);
-
-    if (error) throw error;
-    return count || 0;
-  },
-
   // Likes
   async likePost(postId: string) {
     const { data, error } = await supabase.functions.invoke('like-post', {
@@ -108,16 +98,6 @@ export const socialApi = {
     
     if (error) throw error;
     return data?.data || data;
-  },
-
-  async getPostBookmarks(postId: string) {
-    const { data, error } = await supabase
-      .from('bookmarks')
-      .select('*')
-      .eq('post_id', postId);
-
-    if (error) throw error;
-    return data;
   },
 
   async checkIfUserBookmarkedPost(postId: string, userId: string) {

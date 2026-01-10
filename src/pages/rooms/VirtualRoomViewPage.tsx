@@ -4,7 +4,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useVirtualRooms, VirtualRoom } from '../../hooks/useVirtualRooms'
-import { useRoomLike } from '../../hooks/useRoomLike'
 import { VirtualRoom as VirtualRoomComponent } from '../../components/room/VirtualRoom.full'
 import ArtistRoom3D from '../../components/room/ArtistRoom3D'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
@@ -21,14 +20,13 @@ import {
 import toast from 'react-hot-toast'
 
 export const VirtualRoomViewPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
-  const roomId = id
+  const { roomId } = useParams<{ roomId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { getRoom, loading } = useVirtualRooms()
-  const { liked, toggleLike, loading: likeLoading } = useRoomLike(roomId || '')
   const [room, setRoom] = useState<VirtualRoom | null>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [liked, setLiked] = useState(false)
   const [view3D, setView3D] = useState(false)
 
   useEffect(() => {
@@ -73,7 +71,13 @@ export const VirtualRoomViewPage: React.FC = () => {
   }
 
   const handleLike = async () => {
-    await toggleLike()
+    if (!user) {
+      toast.error('Please sign in to like rooms')
+      return
+    }
+    // TODO: Implement like functionality
+    setLiked(!liked)
+    toast.success(liked ? 'Removed from favorites' : 'Added to favorites')
   }
 
   const handleShare = async () => {
@@ -149,10 +153,9 @@ export const VirtualRoomViewPage: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={handleLike}
-                disabled={likeLoading}
                 className={`p-2 rounded-lg transition-colors ${
                   liked ? 'bg-pink-500/20 text-pink-300' : 'hover:bg-purple-500/20 text-gray-300 hover:text-white'
-                } ${likeLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                }`}
               >
                 <HeartIcon className={`h-5 w-5 ${liked ? 'fill-current' : ''}`} />
               </button>
