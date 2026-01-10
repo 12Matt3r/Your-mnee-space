@@ -163,7 +163,7 @@ export const PortfolioGalleryWidget: React.FC<PortfolioGalleryWidgetProps> = ({ 
     </div>
   )
 
-  const renderCarouselLayout = () => {
+  const CarouselLayout = () => {
     const [currentIndex, setCurrentIndex] = useState(0)
     
     if (portfolioItems.length === 0) return null
@@ -277,7 +277,7 @@ export const PortfolioGalleryWidget: React.FC<PortfolioGalleryWidgetProps> = ({ 
           <>
             {layout === 'grid' && renderGridLayout()}
             {layout === 'masonry' && renderMasonryLayout()}
-            {layout === 'carousel' && renderCarouselLayout()}
+            {layout === 'carousel' && <CarouselLayout />}
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
