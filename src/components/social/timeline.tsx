@@ -287,22 +287,26 @@ const Timeline = () => {
     try {
       const postsData = await socialApi.getPosts();
       
+      // Batch fetch user interactions if logged in
+      let likedPostIds = new Set<string>();
+      let bookmarkedPostIds = new Set<string>();
+
+      if (user && postsData.length > 0) {
+        try {
+          const postIds = postsData.map(p => p.id);
+          const interactions = await socialApi.getUserInteractionsForPosts(postIds, user.id);
+          likedPostIds = interactions.likedPostIds;
+          bookmarkedPostIds = interactions.bookmarkedPostIds;
+        } catch (error) {
+          console.error('Error fetching user interactions:', error);
+        }
+      }
+
       // Transform posts to include interaction counts and states
       const postsWithInteractions: PostWithInteractions[] = await Promise.all(
         postsData.map(async (post) => {
-          let isLiked = false;
-          let isBookmarked = false;
-          
-          if (user) {
-            try {
-              [isLiked, isBookmarked] = await Promise.all([
-                socialApi.checkIfUserLikedPost(post.id, user.id),
-                socialApi.checkIfUserBookmarkedPost(post.id, user.id)
-              ]);
-            } catch (error) {
-              console.error('Error checking interaction state:', error);
-            }
-          }
+          const isLiked = likedPostIds.has(post.id);
+          const isBookmarked = bookmarkedPostIds.has(post.id);
           
           // Get like count
           let likesCount = 0;
