@@ -1,5 +1,7 @@
-// YourSpace Creative Labs - Streaming Session Hook (Placeholder)
-import { useState, useEffect } from 'react';
+// YourSpace Creative Labs - Streaming Session Hook
+import { useState, useMemo } from 'react';
+import { useStreaming } from './useStreaming';
+import { useAuth } from './useAuth';
 
 export interface StreamingSession {
   id: string;
@@ -22,52 +24,111 @@ export interface StreamParticipant {
 }
 
 export const useStreamingSession = (roomId: string) => {
-  const [session, setSession] = useState<StreamingSession | null>(null);
-  const [participants, setParticipants] = useState<StreamParticipant[]>([]);
-  const [isHost, setIsHost] = useState(false);
+  const { user } = useAuth();
+  const {
+    currentStream,
+    participants: realParticipants,
+    createStream,
+    joinStream,
+    leaveStream,
+    endStream,
+    fetchActiveStreams,
+    isLoading
+  } = useStreaming();
+
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
 
-  const startStreaming = async (title: string, description: string) => {
-    console.log('Starting stream:', { roomId, title, description });
-    setIsStreaming(true);
-    // TODO: Implement actual streaming logic
+  // Derived state
+  const isStreaming = !!currentStream && currentStream.status === 'live';
+
+  const isHost = useMemo(() => {
+    return currentStream?.created_by === user?.id;
+  }, [currentStream, user]);
+
+  const session: StreamingSession | null = useMemo(() => {
+    if (!currentStream) return null;
+    return {
+      id: currentStream.id,
+      roomId: currentStream.room_id,
+      title: currentStream.title,
+      isActive: currentStream.status === 'live',
+      startTime: currentStream.scheduled_start || currentStream.created_at,
+      started_at: currentStream.started_at || currentStream.created_at,
+      participants: realParticipants.map(p => p.user_id),
+      profiles: currentStream.host
+    };
+  }, [currentStream, realParticipants]);
+
+  const participants: StreamParticipant[] = useMemo(() => {
+    return realParticipants.map(p => ({
+      id: p.id,
+      userId: p.user_id,
+      username: p.profiles?.username || 'Unknown',
+      isHost: p.role === 'host',
+      isStreaming: p.is_camera_on || p.is_screen_sharing,
+      joinedAt: p.joined_at
+    }));
+  }, [realParticipants]);
+
+  const handleStartStreaming = async (title: string, description: string) => {
+    try {
+      setStreamError(null);
+      await createStream({
+        roomId,
+        title,
+        description,
+        streamType: 'social', // Default
+      });
+    } catch (err: any) {
+      setStreamError(err.message);
+    }
   };
 
-  const stopStreaming = async () => {
-    console.log('Stopping stream:', roomId);
-    setIsStreaming(false);
-    // TODO: Implement actual stop streaming logic
+  const handleStopStreaming = async () => {
+    if (currentStream) {
+      await endStream(currentStream.id);
+    }
   };
 
-  const joinSession = async () => {
+  const handleJoinSession = async () => {
     console.log('Joining session:', roomId);
     setIsConnecting(true);
-    // TODO: Implement actual join session logic
-    setTimeout(() => {
+    setStreamError(null);
+    try {
+      const streams = await fetchActiveStreams(roomId);
+      const activeStream = streams.find(s => s.status === 'live');
+
+      if (activeStream) {
+        await joinStream(activeStream.id, 'viewer');
+      } else {
+        console.log('No active stream found in room:', roomId);
+        setStreamError('No active stream found');
+      }
+    } catch (err: any) {
+      console.error('Failed to join session:', err);
+      setStreamError('Failed to join session');
+    } finally {
       setIsConnecting(false);
-    }, 1000);
+    }
   };
 
-  const leaveSession = async () => {
-    console.log('Leaving session:', roomId);
-    setSession(null);
-    setParticipants([]);
-    setIsStreaming(false);
-    // TODO: Implement actual leave session logic
+  const handleLeaveSession = async () => {
+    if (currentStream) {
+      await leaveStream(currentStream.id);
+    }
   };
 
   return {
     session,
     participants,
     isHost,
-    isConnecting,
+    isConnecting: isConnecting || isLoading,
     isStreaming,
-    startStreaming,
-    stopStreaming,
-    joinSession,
-    leaveSession,
+    startStreaming: handleStartStreaming,
+    stopStreaming: handleStopStreaming,
+    joinSession: handleJoinSession,
+    leaveSession: handleLeaveSession,
     streamError,
   };
 };
