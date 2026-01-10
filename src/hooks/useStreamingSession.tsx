@@ -1,6 +1,6 @@
 // YourSpace Creative Labs - Streaming Session Hook
 import { useState, useEffect, useMemo } from 'react';
-import { useStreaming, StreamSession as UseStreamingSession, StreamParticipant as UseStreamingParticipant } from './useStreaming';
+import { useStreaming } from './useStreaming';
 import { useAuth } from '../contexts/AuthContext';
 
 export interface StreamingSession {
