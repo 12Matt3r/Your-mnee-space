@@ -28,6 +28,8 @@ import SocialFeedPage from './pages/social/SocialFeedPage';
 import MessagesPage from './pages/messages/MessagesPage';
 import { AgentsPage } from './pages/agents/AgentsPage';
 import { LearningPage } from './pages/learning/LearningPage';
+import { ModuleViewerPage } from './pages/learning/ModuleViewerPage';
+import { WalletPage } from './pages/wallet/WalletPage';
 import './App.css';
 
 function App() {
@@ -73,6 +75,12 @@ function App() {
                     <MarketplacePage />
                   </Layout>
                 } />
+
+                <Route path="/wallet" element={
+                  <Layout>
+                    <WalletPage />
+                  </Layout>
+                } />
                 
                 <Route path="/agents" element={
                   <Layout>
@@ -95,6 +103,12 @@ function App() {
                 <Route path="/learning" element={
                   <Layout>
                     <LearningPage />
+                  </Layout>
+                } />
+
+                <Route path="/learning/modules/:id" element={
+                  <Layout>
+                    <ModuleViewerPage />
                   </Layout>
                 } />
 

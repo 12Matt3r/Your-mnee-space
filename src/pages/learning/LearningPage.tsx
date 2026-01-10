@@ -111,9 +111,10 @@ export const LearningPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {learningPaths.map((path) => (
-            <div
+            <Link
               key={path.id}
-              className="group relative bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1"
+              to={`/learning/modules/${path.id}`}
+              className="group relative bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 hover:-translate-y-1 block"
             >
               <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${path.color} flex items-center justify-center mb-4 shadow-lg group-hover:shadow-purple-500/25`}>
                 <path.icon className="h-6 w-6 text-white" />
@@ -132,7 +133,7 @@ export const LearningPage = () => {
                   {path.students.toLocaleString()} Students
                 </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

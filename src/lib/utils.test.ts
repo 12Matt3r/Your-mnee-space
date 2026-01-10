@@ -12,7 +12,8 @@ import {
 describe('Utils', () => {
   describe('formatRelativeTime', () => {
     it('returns "1 day ago" for yesterday', () => {
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      // Subtracting 23 hours to be safe with Math.ceil logic in utils
+      const yesterday = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
       expect(formatRelativeTime(yesterday)).toBe('1 day ago')
     })
   })

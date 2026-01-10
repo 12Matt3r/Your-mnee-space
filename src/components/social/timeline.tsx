@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, ImageIcon, Smile, Calendar, MapPin } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 import { Post } from '../../lib/supabase';
@@ -77,16 +77,19 @@ const ComposerBox = () => {
           {/* Composer Actions */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-4">
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Image">
                 <ImageIcon className="w-5 h-5 text-blue-500" />
               </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Poll">
+                <BarChart2 className="w-5 h-5 text-blue-500" />
+              </button>
+              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Emoji">
                 <Smile className="w-5 h-5 text-blue-500" />
               </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Schedule">
                 <Calendar className="w-5 h-5 text-blue-500" />
               </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Location">
                 <MapPin className="w-5 h-5 text-blue-500" />
               </button>
             </div>
@@ -126,6 +129,26 @@ const ComposerBox = () => {
         </div>
       </div>
     </form>
+  );
+};
+
+const PostContent = ({ text }: { text: string }) => {
+  // Simple regex to find hashtags
+  const parts = text.split(/(\#[a-zA-Z0-9_]+)/g);
+
+  return (
+    <p className="text-gray-900 dark:text-white text-base leading-relaxed">
+      {parts.map((part, index) => {
+        if (part.startsWith('#')) {
+          return (
+            <span key={index} className="text-blue-500 hover:underline cursor-pointer">
+              {part}
+            </span>
+          );
+        }
+        return part;
+      })}
+    </p>
   );
 };
 
@@ -217,9 +240,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
           
           {/* Post Content */}
           <div className="mt-2">
-            <p className="text-gray-900 dark:text-white text-base leading-relaxed">
-              {post.content}
-            </p>
+            <PostContent text={post.content} />
           </div>
           
           {/* Post Actions */}
@@ -280,6 +301,7 @@ const Timeline = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [feedType, setFeedType] = useState<'chronological' | 'trending'>('chronological');
 
   const loadPosts = async () => {
     setLoading(true);
@@ -328,6 +350,13 @@ const Timeline = () => {
         })
       );
       
+      // Sort based on feed type if needed
+      if (feedType === 'trending') {
+        postsWithInteractions.sort((a, b) => b.likes_count - a.likes_count);
+      } else {
+        // Already chronological from API
+      }
+
       setPosts(postsWithInteractions);
     } catch (err) {
       console.error('Error loading posts:', err);
@@ -347,7 +376,7 @@ const Timeline = () => {
     
     window.addEventListener('refreshTimeline', handleRefresh);
     return () => window.removeEventListener('refreshTimeline', handleRefresh);
-  }, [user]);
+  }, [user, feedType]);
 
   if (error) {
     return (
@@ -380,11 +409,25 @@ const Timeline = () => {
         
         {/* Timeline Tabs */}
         <div className="flex border-b border-gray-200 dark:border-gray-800">
-          <button className="flex-1 px-4 py-3 text-center font-medium text-gray-900 dark:text-white border-b-2 border-blue-500">
+          <button
+            onClick={() => setFeedType('chronological')}
+            className={`flex-1 px-4 py-3 text-center font-medium transition-colors ${
+              feedType === 'chronological'
+                ? 'text-gray-900 dark:text-white border-b-2 border-blue-500'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
             For you
           </button>
-          <button className="flex-1 px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-            Following
+          <button
+            onClick={() => setFeedType('trending')}
+            className={`flex-1 px-4 py-3 text-center font-medium transition-colors ${
+              feedType === 'trending'
+                ? 'text-gray-900 dark:text-white border-b-2 border-blue-500'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Trending
           </button>
         </div>
       </div>
