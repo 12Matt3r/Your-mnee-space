@@ -174,13 +174,20 @@ export const HomePage = () => {
     <div className="space-y-8">
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div>
+            <div className="inline-flex items-center space-x-2 bg-purple-500/10 rounded-full px-3 py-1 mb-3 border border-purple-500/20">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-xs font-medium text-purple-300">Interactive Creative Labs v1.0</span>
+            </div>
             <h1 className="text-4xl font-bold gradient-text mb-2">
               {getGreeting()}, {profile?.display_name || profile?.username}!
             </h1>
             <p className="text-gray-400 text-lg">
-              Welcome to your creative universe. Ready to make something amazing?
+              Your creative universe awaits. Build, collaborate, and grow.
             </p>
           </div>
           <div className="flex space-x-4">
@@ -202,17 +209,17 @@ export const HomePage = () => {
         </div>
 
         {/* Your Creative Journey */}
-        <div className="grid grid-cols-3 gap-6 mt-8">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-cyan-400">{stats.totalViews?.toLocaleString() || 0}</div>
+        <div className="grid grid-cols-3 gap-6 mt-8 pt-8 border-t border-purple-500/10">
+          <div className="text-center group cursor-default">
+            <div className="text-3xl font-bold text-cyan-400 group-hover:scale-110 transition-transform">{stats.totalViews?.toLocaleString() || 0}</div>
             <div className="text-gray-400 text-sm">Total Reach</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-pink-400">{stats.totalLikes?.toLocaleString() || 0}</div>
+          <div className="text-center group cursor-default">
+            <div className="text-3xl font-bold text-pink-400 group-hover:scale-110 transition-transform">{stats.totalLikes?.toLocaleString() || 0}</div>
             <div className="text-gray-400 text-sm">Room Visits</div>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-purple-400">{stats.totalCollaborations || 0}</div>
+          <div className="text-center group cursor-default">
+            <div className="text-3xl font-bold text-purple-400 group-hover:scale-110 transition-transform">{stats.totalCollaborations || 0}</div>
             <div className="text-gray-400 text-sm">Collaborations</div>
           </div>
         </div>
@@ -225,12 +232,22 @@ export const HomePage = () => {
             <HomeIcon className="h-6 w-6 text-blue-400 mr-2" />
             Your Bedroom
           </h2>
-          <button 
-            onClick={() => navigate('/studio', { state: { tab: 'epk' } })}
-            className="text-purple-400 hover:text-purple-300 font-medium"
-          >
-            Manage EPK
-          </button>
+          <div className="flex space-x-4">
+            {/* Jump Back In Button */}
+            <button
+              onClick={() => navigate('/rooms/manage')}
+              className="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              <span>Jump back in</span>
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            </button>
+            <button
+              onClick={() => navigate('/studio', { state: { tab: 'epk' } })}
+              className="text-purple-400 hover:text-purple-300 font-medium"
+            >
+              Manage EPK
+            </button>
+          </div>
         </div>
 
         <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6">
