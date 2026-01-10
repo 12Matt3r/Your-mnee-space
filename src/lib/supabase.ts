@@ -1,22 +1,15 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://zbmigpfyzdmwtcsqniys.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpibWlncGZ5emRtd3Rjc3FuaXlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MzA2OTgsImV4cCI6MjA4MzUwNjY5OH0.quUOZNtInJtz4ySRA7jl9jZzymo-IcS4USQ-mLqXnEo';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Database types for YourSpace MNEE Platform
-export interface Post {
-  id: string;
-  user_id: string;
-  content: string;
-  image_url: string | null;
-  video_url: string | null;
-  created_at: string;
-  updated_at: string;
-  reply_to_id?: string | null;
-}
-
 export interface Profile {
   id: string;
   username: string | null;

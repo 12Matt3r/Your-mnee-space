@@ -177,6 +177,7 @@ export const useDiscord = () => {
         return mockInvite
       }
 
+      toast.success(`Voice channel "${channelName}" created!`)
       return mockInvite
     } catch (error) {
       console.error('Error creating voice channel:', error)
@@ -198,27 +199,6 @@ export const useDiscord = () => {
     unlinkDiscordAccount,
     createVoiceChannel,
     initiateDiscordAuth,
-    fetchDiscordProfile
-  }
-}nvite
-      }
-
-      toast.success(`Voice channel "${channelName}" created!`)
-      return mockInvite
-    } catch (error) {
-      console.error('Error creating voice channel:', error)
-      toast.error('Failed to create voice channel')
-      return null
-    }
-  }
-
-  return {
-    discordProfile,
-    isConnected,
-    loading,
-    linkDiscordAccount,
-    unlinkDiscordAccount,
-    createVoiceChannel,
     refreshProfile: fetchDiscordProfile
   }
 }

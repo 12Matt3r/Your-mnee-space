@@ -1,5 +1,5 @@
 // YourSpace Creative Labs - Discord Profile Component
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDiscord } from '../../hooks/useDiscord'
 import {
   UserIcon,
@@ -33,36 +33,6 @@ const DiscordStatus = ({ isConnected, verified }: { isConnected: boolean; verifi
   </div>
 )
 
-const GuildBadge = ({ guild, getGuildIconUrl }: { guild: any; getGuildIconUrl: (guild: any, size?: number) => string | null }) => {
-  const iconUrl = getGuildIconUrl(guild, 32)
-  
-  return (
-    <div className="group relative">
-      <div className="w-8 h-8 rounded-lg overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-        {iconUrl ? (
-          <img 
-            src={iconUrl} 
-            alt={guild.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="text-white text-xs font-bold">
-            {guild.name.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
-      
-      {/* Tooltip */}
-      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <div className="bg-black/90 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-          {guild.name}
-          {guild.owner && ' (Owner)'}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export const DiscordProfile: React.FC<DiscordProfileProps> = ({
   className = '',
   showGuilds = false,
@@ -70,23 +40,20 @@ export const DiscordProfile: React.FC<DiscordProfileProps> = ({
 }) => {
   const { 
     discordProfile, 
-    discordGuilds, 
     loading, 
     isConnected, 
-    fetchDiscordGuilds, 
-    disconnectDiscord,
-    getDiscordAvatarUrl 
+    unlinkDiscordAccount,
   } = useDiscord()
-
-  // Fetch guilds when component mounts and user is connected
-  useEffect(() => {
-    if (isConnected && showGuilds && discordGuilds.length === 0) {
-      fetchDiscordGuilds()
-    }
-  }, [isConnected, showGuilds, discordGuilds.length, fetchDiscordGuilds])
 
   if (!isConnected || !discordProfile) {
     return null
+  }
+
+  // Local helper for avatar URL since it's not in the hook anymore
+  const getDiscordAvatarUrl = () => {
+      if (!discordProfile.avatar && !discordProfile.discord_id) return null;
+      if (discordProfile.avatar?.startsWith('http')) return discordProfile.avatar;
+      return `https://cdn.discordapp.com/avatars/${discordProfile.discord_id}/${discordProfile.avatar}.png`;
   }
 
   const avatarUrl = getDiscordAvatarUrl()
@@ -169,7 +136,7 @@ export const DiscordProfile: React.FC<DiscordProfileProps> = ({
         </div>
         
         <button
-          onClick={disconnectDiscord}
+          onClick={unlinkDiscordAccount}
           disabled={loading}
           className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
           title="Disconnect Discord"
@@ -188,41 +155,8 @@ export const DiscordProfile: React.FC<DiscordProfileProps> = ({
       )}
       
       {showGuilds && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-white">Discord Servers</h4>
-            <button
-              onClick={fetchDiscordGuilds}
-              disabled={loading}
-              className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
-            >
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
-          </div>
-          
-          {discordGuilds.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {discordGuilds.slice(0, 8).map((guild) => (
-                <GuildBadge 
-                  key={guild.id} 
-                  guild={guild} 
-                  getGuildIconUrl={(guild, size) => 
-                    guild.icon 
-                      ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=${size}` 
-                      : null
-                  } 
-                />
-              ))}
-              
-              {discordGuilds.length > 8 && (
-                <div className="w-8 h-8 rounded-lg bg-gray-600 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">+{discordGuilds.length - 8}</span>
-                </div>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400">No Discord servers found</p>
-          )}
+        <div className="mt-4">
+           <p className="text-sm text-gray-400">Discord servers not available in demo mode.</p>
         </div>
       )}
     </div>

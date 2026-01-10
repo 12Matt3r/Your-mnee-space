@@ -1,29 +1,30 @@
-# YourSpace
+# YourSpace Creative Labs
 
-A modern real estate platform connecting renters with verified spaces through an intuitive, Tinder-style matching experience.
+A next-generation creative platform connecting artists, mentors, and learners through interactive virtual spaces and real-time collaboration.
 
 **Live Demo:** [https://7d74cho3vka6.space.minimax.io](https://7d74cho3vka6.space.minimax.io)
 
 ## Features
 
-- Swipe-based property discovery
-- Advanced filtering (price, location, amenities)
-- User authentication via Supabase
-- Favorites and application tracking
-- Responsive design for all devices
+- **Interactive Virtual Rooms**: 2D/3D customizable spaces for "vibe coding" and creative expression.
+- **Live Streaming & Collaboration**: Real-time social streaming, screen sharing, and collaborative sessions.
+- **Creative Learning Hub**: Interactive modules and mentorship programs.
+- **Discovery Engine**: Vibe-based filtering (Chill, Energetic, Dark, Retro) to find content that matches your mood.
+- **Economy Layer**: Integrated payments and tipping via MNEE/Stripe.
 
 ## Tech Stack
 
 - **Frontend:** React + TypeScript + Vite
 - **Styling:** Tailwind CSS
-- **Backend:** Supabase (Auth, Database, Storage)
+- **Backend:** Supabase (Auth, Database, Storage, Edge Functions)
+- **Realtime:** Supabase Realtime, WebRTC
 - **Deployment:** Matrix Space
 
 ## Quick Start
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Set up environment
 cp .env.example .env
@@ -33,12 +34,18 @@ cp .env.example .env
 npm run dev
 ```
 
-## Environment Variables
+## Architecture
 
-```
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
-```
+- **`src/hooks`**: Custom hooks for business logic (e.g., `useStreaming`, `useStreamingSession`).
+- **`src/components`**: Reusable UI components.
+- **`src/pages`**: Application routes.
+- **`src/contexts`**: Global state providers (`AuthContext`, `ThemeContext`).
+
+## Streaming Implementation
+
+The streaming architecture is built on two layers:
+1. **`useStreaming`**: The low-level provider managing WebRTC connections, media tracks, and Supabase signaling.
+2. **`useStreamingSession`**: A session-level hook that manages the lifecycle of a stream within a specific room, including host/participant roles and UI state.
 
 ## License
 
