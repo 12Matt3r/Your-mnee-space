@@ -79,6 +79,16 @@ export const socialApi = {
     return data;
   },
 
+  async getPostLikeCount(postId: string) {
+    const { count, error } = await supabase
+      .from('likes')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    if (error) throw error;
+    return count || 0;
+  },
+
   async checkIfUserLikedPost(postId: string, userId: string) {
     const { data, error } = await supabase
       .from('likes')
@@ -120,6 +130,16 @@ export const socialApi = {
     return data;
   },
 
+  async getPostBookmarkCount(postId: string) {
+    const { count, error } = await supabase
+      .from('bookmarks')
+      .select('*', { count: 'exact', head: true })
+      .eq('post_id', postId);
+
+    if (error) throw error;
+    return count || 0;
+  },
+
   async checkIfUserBookmarkedPost(postId: string, userId: string) {
     const { data, error } = await supabase
       .from('bookmarks')
@@ -130,6 +150,21 @@ export const socialApi = {
 
     if (error) throw error;
     return !!data;
+  },
+
+  async getUserInteractionsForPosts(postIds: string[], userId: string) {
+    const [likedData, bookmarkedData] = await Promise.all([
+      supabase.from('likes').select('post_id').eq('user_id', userId).in('post_id', postIds),
+      supabase.from('bookmarks').select('post_id').eq('user_id', userId).in('post_id', postIds)
+    ]);
+
+    if (likedData.error) throw likedData.error;
+    if (bookmarkedData.error) throw bookmarkedData.error;
+
+    const likedPostIds = new Set(likedData.data.map(item => item.post_id));
+    const bookmarkedPostIds = new Set(bookmarkedData.data.map(item => item.post_id));
+
+    return { likedPostIds, bookmarkedPostIds };
   },
 
   // Hashtags

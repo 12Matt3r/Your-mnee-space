@@ -287,33 +287,37 @@ const Timeline = () => {
     try {
       const postsData = await socialApi.getPosts();
       
+      // Batch fetch user interactions if logged in
+      let likedPostIds = new Set<string>();
+      let bookmarkedPostIds = new Set<string>();
+
+      if (user && postsData.length > 0) {
+        try {
+          const postIds = postsData.map(p => p.id);
+          const interactions = await socialApi.getUserInteractionsForPosts(postIds, user.id);
+          likedPostIds = interactions.likedPostIds;
+          bookmarkedPostIds = interactions.bookmarkedPostIds;
+        } catch (error) {
+          console.error('Error fetching user interactions:', error);
+        }
+      }
+
       // Transform posts to include interaction counts and states
       const postsWithInteractions: PostWithInteractions[] = await Promise.all(
         postsData.map(async (post) => {
-          let isLiked = false;
-          let isBookmarked = false;
-          
-          if (user) {
-            try {
-              [isLiked, isBookmarked] = await Promise.all([
-                socialApi.checkIfUserLikedPost(post.id, user.id),
-                socialApi.checkIfUserBookmarkedPost(post.id, user.id)
-              ]);
-            } catch (error) {
-              console.error('Error checking interaction state:', error);
-            }
-          }
+          const isLiked = likedPostIds.has(post.id);
+          const isBookmarked = bookmarkedPostIds.has(post.id);
           
           // Get like and bookmark counts
           let likesCount = 0;
           let bookmarksCount = 0;
           try {
             const [likes, bookmarks] = await Promise.all([
-              socialApi.getPostLikes(post.id),
-              socialApi.getPostBookmarks(post.id)
+              socialApi.getPostLikeCount(post.id),
+              socialApi.getPostBookmarkCount(post.id)
             ]);
-            likesCount = likes.length;
-            bookmarksCount = bookmarks.length;
+            likesCount = likes;
+            bookmarksCount = bookmarks;
           } catch (error) {
             console.error('Error getting interaction counts:', error);
           }
@@ -329,10 +333,8 @@ const Timeline = () => {
           return {
             ...post,
             likes_count: likesCount,
-            replies_count: 0, // TODO: implement replies
-            bookmarks_count: bookmarksCount,
             replies_count: repliesCount,
-            bookmarks_count: 0, // TODO: implement bookmark count
+            bookmarks_count: bookmarksCount,
             is_liked: isLiked,
             is_bookmarked: isBookmarked
           };
