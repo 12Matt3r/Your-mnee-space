@@ -34,6 +34,8 @@ import { WalletPage } from './pages/wallet/WalletPage';
 import { SubscriptionPage } from './pages/monetization/SubscriptionPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
 import { LivePage } from './pages/live/LivePage';
+import { GovernancePage } from './pages/governance/GovernancePage';
+import { CreateAgentPage } from './pages/agents/CreateAgentPage';
 import './App.css';
 
 function App() {
@@ -99,10 +101,22 @@ function App() {
                     <LivePage />
                   </Layout>
                 } />
+
+                <Route path="/governance" element={
+                  <Layout>
+                    <GovernancePage />
+                  </Layout>
+                } />
                 
                 <Route path="/agents" element={
                   <Layout>
                     <AgentsPage />
+                  </Layout>
+                } />
+
+                <Route path="/agents/create" element={
+                  <Layout>
+                    <CreateAgentPage />
                   </Layout>
                 } />
                 
