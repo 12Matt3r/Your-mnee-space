@@ -2,43 +2,12 @@ import React, { useState } from 'react';
 import { useAccount, useBalance } from 'wagmi';
 import { MNEE_CONTRACT_ADDRESS } from '../../lib/wagmi';
 import { formatUnits } from 'viem';
-import { Vote, Lock, TrendingUp, Users, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Vote, Lock, TrendingUp, Users, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-
-const PROPOSALS = [
-  {
-    id: 1,
-    title: 'YGP-12: Increase Creator Revenue Share',
-    description: 'Proposal to increase the creator revenue share from 90% to 92.5% by reducing platform fees.',
-    status: 'Active',
-    votes_for: 154200,
-    votes_against: 42000,
-    end_date: '2026-02-01',
-    tags: ['Treasury', 'Economics']
-  },
-  {
-    id: 2,
-    title: 'YGP-13: Add Solana Integration',
-    description: 'Integrate Solana wallets to support cross-chain agent payments.',
-    status: 'Active',
-    votes_for: 89000,
-    votes_against: 92000,
-    end_date: '2026-02-05',
-    tags: ['Technical', 'Integration']
-  },
-  {
-    id: 3,
-    title: 'YGP-11: Fund "Neon City" Asset Pack',
-    description: 'Allocate 50,000 MNEE from treasury to commission a high-quality asset pack for all users.',
-    status: 'Passed',
-    votes_for: 450000,
-    votes_against: 12000,
-    end_date: '2026-01-10',
-    tags: ['Content', 'Grant']
-  }
-];
+import { useGovernance } from '../../hooks/useGovernance';
 
 export const GovernancePage = () => {
+  const { proposals, loading: proposalsLoading } = useGovernance();
   const { address } = useAccount();
   const { data: balance } = useBalance({
     address,
@@ -166,13 +135,22 @@ export const GovernancePage = () => {
                 </button>
             </div>
 
-            {PROPOSALS.map((proposal) => {
-                const totalVotes = proposal.votes_for + proposal.votes_against;
-                const percentFor = (proposal.votes_for / totalVotes) * 100;
+            {proposalsLoading ? (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+                </div>
+            ) : proposals.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                    No proposals found.
+                </div>
+            ) : (
+                proposals.map((proposal) => {
+                    const totalVotes = proposal.votes_for + proposal.votes_against;
+                    const percentFor = totalVotes > 0 ? (proposal.votes_for / totalVotes) * 100 : 0;
 
-                return (
-                    <div key={proposal.id} className="bg-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-all">
-                        <div className="flex justify-between items-start mb-4">
+                    return (
+                        <div key={proposal.id} className="bg-gray-900/30 border border-gray-800 rounded-xl p-6 hover:border-gray-700 transition-all">
+                            <div className="flex justify-between items-start mb-4">
                             <div>
                                 <div className="flex gap-2 mb-2">
                                     {proposal.tags.map(tag => (
@@ -222,12 +200,13 @@ export const GovernancePage = () => {
                         )}
                         {proposal.status === 'Passed' && (
                              <div className="pt-2 text-sm text-green-400 font-medium flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4" /> Passed on {proposal.end_date}
+                                <CheckCircle className="w-4 h-4" /> Passed on {new Date(proposal.end_date).toLocaleDateString()}
                              </div>
                         )}
                     </div>
-                );
-            })}
+                    );
+                })
+            )}
           </div>
         </div>
       </div>
