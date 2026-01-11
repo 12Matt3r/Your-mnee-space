@@ -11,6 +11,7 @@ import { Menu, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { ThemeSelector } from '../theme/ThemeSelector'
+import { ConnectWallet } from '../web3/ConnectWallet'
 
 export const Header = () => {
   const { user, profile, signOut } = useAuth()
@@ -45,6 +46,8 @@ export const Header = () => {
               <PlusIcon className="h-5 w-5" />
               <span>Create</span>
             </Link>
+
+            <ConnectWallet />
 
             <ThemeSelector />
 

@@ -1,8 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Play, Pause, ChevronLeft, Send, Bot, CheckCircle, Lock, Wallet } from 'lucide-react';
+import { Play, Pause, ChevronLeft, Send, Bot, CheckCircle, Lock, Wallet, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseUnits, formatUnits } from 'viem';
+import { MNEE_CONTRACT_ADDRESS, MNEE_ABI } from '../../lib/wagmi';
+import { MNEE_CONFIG } from '../../lib/mnee';
+
+// Treasury Address for receiving payments (Mock address for hackathon)
+const TREASURY_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
 // Mock Data
 const MODULE_DATA = {
@@ -46,22 +53,37 @@ export const ModuleViewerPage = () => {
   const [messages, setMessages] = useState(CHAT_INITIAL_STATE);
   const [newMessage, setNewMessage] = useState('');
   const [isMentorActive, setIsMentorActive] = useState(false);
-  const [walletBalance, setWalletBalance] = useState('100');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Web3 State
+  const { address, isConnected } = useAccount();
+  const { data: balance } = useBalance({
+    address,
+    token: MNEE_CONTRACT_ADDRESS,
+  } as any);
+  const { writeContract, data: hash, isPending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const module = MODULE_DATA[id as keyof typeof MODULE_DATA] || MODULE_DATA['1'];
 
   useEffect(() => {
-    const storedBalance = localStorage.getItem('mnee_balance');
-    if (storedBalance) {
-      setWalletBalance(storedBalance);
-    }
-  }, []);
-
-  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (isConfirmed) {
+        setIsMentorActive(true);
+        toast.success('Mentor Mode Activated!');
+        setMessages(prev => [...prev, {
+            id: Date.now(),
+            sender: 'ai',
+            text: "I'm now in Mentor Mode! I'll guide you step-by-step and track your progress. Let's start with the first concept."
+        }]);
+    }
+  }, [isConfirmed]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,25 +108,34 @@ export const ModuleViewerPage = () => {
   };
 
   const activateMentor = () => {
-    const cost = 1.0; // 1 MNEE per session
-    const currentBalance = parseFloat(walletBalance);
+    if (!isConnected) {
+        toast.error('Please connect your wallet first');
+        navigate('/wallet');
+        return;
+    }
 
-    if (currentBalance < cost) {
+    const cost = 1.0;
+    const requiredAmount = parseUnits(cost.toString(), MNEE_CONFIG.decimals);
+
+    if (!balance || balance.value < requiredAmount) {
       toast.error(`Insufficient MNEE. You need ${cost} MNEE.`);
+      navigate('/wallet');
       return;
     }
 
-    const newBalance = currentBalance - cost;
-    localStorage.setItem('mnee_balance', newBalance.toString());
-    setWalletBalance(newBalance.toString());
-    setIsMentorActive(true);
-    toast.success('Mentor Mode Activated! (-1.00 MNEE)');
-
-    setMessages(prev => [...prev, {
-      id: Date.now(),
-      sender: 'ai',
-      text: "I'm now in Mentor Mode! I'll guide you step-by-step and track your progress. Let's start with the first concept."
-    }]);
+    try {
+        writeContract({
+            address: MNEE_CONTRACT_ADDRESS,
+            abi: MNEE_ABI,
+            functionName: 'transfer',
+            args: [TREASURY_ADDRESS, requiredAmount],
+            account: address,
+            chain: undefined,
+        });
+    } catch (error) {
+        console.error('Payment failed:', error);
+        toast.error('Payment failed to initiate.');
+    }
   };
 
   const togglePlay = () => {
@@ -181,10 +212,11 @@ export const ModuleViewerPage = () => {
           {!isMentorActive && (
             <button
                 onClick={activateMentor}
-                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg text-xs font-bold hover:from-purple-500 hover:to-pink-500 transition-all"
+                disabled={isPending || isConfirming}
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg text-xs font-bold hover:from-purple-500 hover:to-pink-500 transition-all disabled:opacity-50"
             >
-                <Wallet className="w-3 h-3" />
-                Hire (1 MNEE)
+                {isPending || isConfirming ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wallet className="w-3 h-3" />}
+                {isPending ? 'Confirming...' : 'Hire (1 MNEE)'}
             </button>
           )}
            {isMentorActive && (
@@ -215,9 +247,10 @@ export const ModuleViewerPage = () => {
                     <p className="text-sm text-gray-300 mb-2">Unlock full mentorship to get personalized feedback and code reviews.</p>
                     <button
                         onClick={activateMentor}
-                        className="w-full py-2 bg-purple-600 rounded-lg text-sm font-bold hover:bg-purple-500"
+                        disabled={isPending || isConfirming}
+                        className="w-full py-2 bg-purple-600 rounded-lg text-sm font-bold hover:bg-purple-500 disabled:opacity-50"
                     >
-                        Unlock for 1.00 MNEE
+                        {isPending ? 'Confirming Transaction...' : 'Unlock for 1.00 MNEE'}
                     </button>
                  </div>
              </div>
@@ -244,7 +277,9 @@ export const ModuleViewerPage = () => {
             </button>
           </div>
           <div className="mt-2 text-center">
-             <span className="text-[10px] text-gray-500">Balance: {parseFloat(walletBalance).toFixed(2)} MNEE</span>
+             <span className="text-[10px] text-gray-500">
+                Balance: {balance ? `${parseFloat(formatUnits(balance.value, balance.decimals)).toFixed(2)} MNEE` : 'Connect Wallet'}
+             </span>
           </div>
         </form>
       </div>

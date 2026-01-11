@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { ECONOMY_LAYERS, FAVORITISM_TIERS, MNEE_CONFIG, generatePaymentLink } from '../../lib/mnee';
-import { Bot, Zap, Star, Clock, DollarSign, Users, Briefcase, Search, Plus, X, Wallet } from 'lucide-react';
+import { Bot, Zap, Star, Clock, DollarSign, Users, Briefcase, Search, Plus, X, Wallet, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseUnits, formatUnits } from 'viem';
+import { MNEE_CONTRACT_ADDRESS, MNEE_ABI } from '../../lib/wagmi';
+
+// Treasury Address for receiving payments (Mock address for hackathon)
+const TREASURY_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; // Example generic address
 
 interface Agent {
   id: string;
@@ -50,8 +56,18 @@ export function AgentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [walletBalance, setWalletBalance] = useState('100');
   
+  // Web3 State
+  const { address, isConnected } = useAccount();
+  const { data: balance } = useBalance({
+    address,
+    token: MNEE_CONTRACT_ADDRESS,
+  } as any);
+  const { writeContract, data: hash, isPending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
+
   // Job posting form state
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -67,13 +83,15 @@ export function AgentsPage() {
   useEffect(() => {
     loadAgents();
     if (user) loadMyJobs();
-
-    // Load balance
-    const storedBalance = localStorage.getItem('mnee_balance');
-    if (storedBalance) {
-      setWalletBalance(storedBalance);
-    }
   }, [user]);
+
+  useEffect(() => {
+    if (isConfirmed && selectedAgent) {
+        toast.success(`Payment confirmed! You have successfully hired ${selectedAgent.name}.`);
+        setShowHireModal(false);
+        // Here you would also update the database to record the job
+    }
+  }, [isConfirmed, selectedAgent]);
 
   const loadAgents = async () => {
     setLoading(true);
@@ -151,27 +169,35 @@ export function AgentsPage() {
 
   const confirmHire = () => {
     if (!selectedAgent) return;
-    const totalCost = selectedAgent.hourly_rate * parseFloat(hireHours);
 
-    // Check balance
-    const currentBalance = parseFloat(localStorage.getItem('mnee_balance') || '100');
-
-    if (currentBalance < totalCost) {
-        toast.error(`Insufficient MNEE balance. You need ${(totalCost - currentBalance).toFixed(2)} more MNEE.`);
+    if (!isConnected) {
+        toast.error('Please connect your wallet first');
         navigate('/wallet');
         return;
     }
 
-    // Deduct balance
-    const newBalance = currentBalance - totalCost;
-    localStorage.setItem('mnee_balance', newBalance.toString());
-    setWalletBalance(newBalance.toString());
+    const totalCost = selectedAgent.hourly_rate * parseFloat(hireHours);
+    const requiredAmount = parseUnits(totalCost.toString(), MNEE_CONFIG.decimals);
 
-    // const paymentUrl = generatePaymentLink(MNEE_CONFIG.address, totalCost.toString());
-    // window.open(paymentUrl, '_blank');
+    if (!balance || balance.value < requiredAmount) {
+        toast.error(`Insufficient MNEE balance. You need ${totalCost} MNEE.`);
+        navigate('/wallet');
+        return;
+    }
 
-    setShowHireModal(false);
-    toast.success(`Hired ${selectedAgent.name} successfully! Balance: ${newBalance.toFixed(2)} MNEE`);
+    try {
+        writeContract({
+            address: MNEE_CONTRACT_ADDRESS,
+            abi: MNEE_ABI,
+            functionName: 'transfer',
+            args: [TREASURY_ADDRESS, requiredAmount],
+            account: address,
+            chain: undefined,
+        });
+    } catch (error) {
+        console.error('Payment failed:', error);
+        toast.error('Payment failed to initiate.');
+    }
   };
 
   const filteredAgents = agents.filter(agent => {
@@ -203,7 +229,7 @@ export function AgentsPage() {
               >
                 <Wallet className="w-4 h-4 text-green-400" />
                 <span className="text-green-400 font-mono">
-                   {parseFloat(walletBalance).toFixed(2)} MNEE
+                   {balance ? `${parseFloat(formatUnits(balance.value, balance.decimals)).toFixed(2)} MNEE` : 'Connect Wallet'}
                 </span>
               </button>
         </div>
@@ -617,9 +643,11 @@ export function AgentsPage() {
             
             <button
               onClick={confirmHire}
-              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-bold hover:from-purple-500 hover:to-pink-500 transition-all"
+              disabled={isPending || isConfirming}
+              className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-bold hover:from-purple-500 hover:to-pink-500 transition-all flex items-center justify-center gap-2"
             >
-              Confirm Payment
+              {isPending || isConfirming ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
+              {isPending ? 'Confirming in Wallet...' : isConfirming ? 'Processing...' : 'Confirm Payment'}
             </button>
           </div>
         </div>
