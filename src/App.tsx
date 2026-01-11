@@ -31,6 +31,7 @@ import { AgentsPage } from './pages/agents/AgentsPage';
 import { LearningPage } from './pages/learning/LearningPage';
 import { ModuleViewerPage } from './pages/learning/ModuleViewerPage';
 import { WalletPage } from './pages/wallet/WalletPage';
+import { SubscriptionPage } from './pages/monetization/SubscriptionPage';
 import './App.css';
 
 function App() {
@@ -81,6 +82,12 @@ function App() {
                 <Route path="/wallet" element={
                   <Layout>
                     <WalletPage />
+                  </Layout>
+                } />
+
+                <Route path="/subscription" element={
+                  <Layout>
+                    <SubscriptionPage />
                   </Layout>
                 } />
                 

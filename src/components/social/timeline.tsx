@@ -10,6 +10,12 @@ interface PostWithInteractions extends Post {
   bookmarks_count: number;
   is_liked: boolean;
   is_bookmarked: boolean;
+  poll?: {
+    question: string;
+    options: { id: string; text: string; votes: number }[];
+    total_votes: number;
+    user_vote?: string;
+  };
   profiles?: {
     user_id: string;
     full_name: string | null;
@@ -137,7 +143,7 @@ const PostContent = ({ text }: { text: string }) => {
   const parts = text.split(/(\#[a-zA-Z0-9_]+)/g);
 
   return (
-    <p className="text-gray-900 dark:text-white text-base leading-relaxed">
+    <p className="text-gray-900 dark:text-white text-base leading-relaxed whitespace-pre-wrap">
       {parts.map((part, index) => {
         if (part.startsWith('#')) {
           return (
@@ -149,6 +155,61 @@ const PostContent = ({ text }: { text: string }) => {
         return part;
       })}
     </p>
+  );
+};
+
+const PollDisplay = ({ poll }: { poll: NonNullable<PostWithInteractions['poll']> }) => {
+  const [selectedOption, setSelectedOption] = useState<string | null>(poll.user_vote || null);
+  const [totalVotes, setTotalVotes] = useState(poll.total_votes);
+  const [options, setOptions] = useState(poll.options);
+
+  const handleVote = (optionId: string) => {
+    if (selectedOption) return;
+
+    setSelectedOption(optionId);
+    setTotalVotes(prev => prev + 1);
+    setOptions(prev => prev.map(opt =>
+        opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
+    ));
+  };
+
+  return (
+    <div className="mt-3 space-y-2">
+      {options.map((option) => {
+        const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+        const isSelected = selectedOption === option.id;
+
+        return (
+          <div key={option.id} className="relative">
+            {/* Background Bar */}
+            {selectedOption && (
+                <div
+                    className="absolute inset-0 bg-blue-500/10 rounded-lg transition-all duration-500"
+                    style={{ width: `${percentage}%` }}
+                />
+            )}
+
+            <button
+                onClick={() => handleVote(option.id)}
+                disabled={!!selectedOption}
+                className={`relative w-full text-left px-4 py-3 rounded-lg border transition-all flex justify-between items-center ${
+                    isSelected
+                        ? 'border-blue-500 text-blue-500'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+            >
+                <span className="font-medium">{option.text}</span>
+                {selectedOption && (
+                    <span className="text-sm font-bold">{percentage}%</span>
+                )}
+            </button>
+          </div>
+        );
+      })}
+      <div className="text-sm text-gray-500 mt-2">
+        {totalVotes.toLocaleString()} votes • {selectedOption ? 'Final results' : 'Poll open'}
+      </div>
+    </div>
   );
 };
 
@@ -241,6 +302,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
           {/* Post Content */}
           <div className="mt-2">
             <PostContent text={post.content} />
+            {post.poll && <PollDisplay poll={post.poll} />}
           </div>
           
           {/* Post Actions */}
@@ -338,6 +400,20 @@ const Timeline = () => {
           } catch (error) {
             console.error('Error getting likes count:', error);
           }
+
+          // Mock Poll Data for specific posts (demonstration)
+          let pollData = undefined;
+          if (post.content.includes("Poll:") || post.content.includes("Vote")) {
+             pollData = {
+                 question: "Best Web3 Feature?",
+                 total_votes: 142,
+                 options: [
+                     { id: '1', text: 'Agent Economy', votes: 85 },
+                     { id: '2', text: 'MNEE Token', votes: 42 },
+                     { id: '3', text: 'Custom Rooms', votes: 15 }
+                 ]
+             };
+          }
           
           return {
             ...post,
@@ -345,7 +421,8 @@ const Timeline = () => {
             replies_count: 0, // TODO: implement replies
             bookmarks_count: 0, // TODO: implement bookmark count
             is_liked: isLiked,
-            is_bookmarked: isBookmarked
+            is_bookmarked: isBookmarked,
+            poll: pollData
           };
         })
       );

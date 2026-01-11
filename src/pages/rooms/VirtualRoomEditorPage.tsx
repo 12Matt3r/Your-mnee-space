@@ -15,8 +15,10 @@ import {
   CubeIcon,
   EyeIcon,
   CheckIcon,
-  TrashIcon
+  TrashIcon,
+  CommandLineIcon
 } from '@heroicons/react/24/outline'
+import Editor from '@monaco-editor/react'
 import toast from 'react-hot-toast'
 
 interface EditorTab {
@@ -28,7 +30,8 @@ interface EditorTab {
 const editorTabs: EditorTab[] = [
   { id: 'room', name: 'Room Settings', icon: Cog6ToothIcon },
   { id: 'appearance', name: 'Appearance', icon: PaintBrushIcon },
-  { id: 'assets', name: 'Assets', icon: CubeIcon }
+  { id: 'assets', name: 'Assets', icon: CubeIcon },
+  { id: 'code', name: 'Advanced', icon: CommandLineIcon }
 ]
 
 export const VirtualRoomEditorPage: React.FC = () => {
@@ -89,7 +92,8 @@ export const VirtualRoomEditorPage: React.FC = () => {
       floor_texture: room.floor_texture,
       wall_texture: room.wall_texture,
       ceiling_texture: room.ceiling_texture,
-      ambient_lighting: room.ambient_lighting
+      ambient_lighting: room.ambient_lighting,
+      custom_css: room.custom_css
     })
     
     if (success) {
@@ -191,6 +195,9 @@ export const VirtualRoomEditorPage: React.FC = () => {
               {activeTab === 'assets' && (
                 <AssetsTab roomId={room.id} assets={roomAssets} />
               )}
+              {activeTab === 'code' && (
+                <CodeEditorTab room={room} onChange={handleRoomChange} />
+              )}
             </div>
           </div>
         )}
@@ -205,6 +212,38 @@ export const VirtualRoomEditorPage: React.FC = () => {
             readOnly={!previewMode}
           />
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Code Editor Tab
+interface CodeEditorTabProps {
+  room: VirtualRoom
+  onChange: (updates: Partial<VirtualRoom>) => void
+}
+
+const CodeEditorTab: React.FC<CodeEditorTabProps> = ({ room, onChange }) => {
+  return (
+    <div className="h-full flex flex-col">
+      <h3 className="text-lg font-semibold text-white mb-4">Custom CSS (Level 3)</h3>
+      <p className="text-gray-400 text-xs mb-4">
+        Inject custom CSS to override room styling or profile appearance. Use with caution.
+      </p>
+      <div className="flex-1 min-h-[400px] border border-gray-700 rounded-lg overflow-hidden">
+        <Editor
+          height="100%"
+          defaultLanguage="css"
+          theme="vs-dark"
+          value={room.custom_css || '/* Add your custom CSS here */\n\n.room-container {\n  \n}'}
+          onChange={(value) => onChange({ custom_css: value })}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 12,
+            scrollBeyondLastLine: false,
+            padding: { top: 16 }
+          }}
+        />
       </div>
     </div>
   )
