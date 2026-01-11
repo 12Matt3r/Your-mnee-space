@@ -89,9 +89,26 @@ export function AgentsPage() {
     if (isConfirmed && selectedAgent) {
         toast.success(`Payment confirmed! You have successfully hired ${selectedAgent.name}.`);
         setShowHireModal(false);
-        // Here you would also update the database to record the job
+
+        // Add job to "My Jobs"
+        const newJob: AgentJob = {
+            id: `job_${Date.now()}`,
+            agent_id: selectedAgent.id,
+            requester_id: user?.id || 'anon',
+            title: `Task for ${selectedAgent.name}`,
+            description: `Hired via Web3 payment (Tx: ${hash})`,
+            status: 'in_progress', // Active immediately
+            budget: selectedAgent.hourly_rate * parseFloat(hireHours),
+            created_at: new Date().toISOString(),
+        };
+
+        // Update local state for demo purposes
+        setMyJobs(prev => [newJob, ...prev]);
+
+        // In a real app, we would save to Supabase here:
+        // await supabase.from('agent_jobs').insert(newJob);
     }
-  }, [isConfirmed, selectedAgent]);
+  }, [isConfirmed, selectedAgent, user, hash, hireHours]);
 
   const loadAgents = async () => {
     setLoading(true);

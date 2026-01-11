@@ -6,6 +6,14 @@ import { MNEE_CONTRACT_ADDRESS, MNEE_ABI } from '../../lib/wagmi';
 import { MNEE_CONFIG, formatMNEE } from '../../lib/mnee';
 import { ConnectWallet } from '../../components/web3/ConnectWallet';
 
+interface LocalTransaction {
+    hash: string;
+    to: string;
+    amount: string;
+    timestamp: number;
+    status: 'pending' | 'confirmed';
+}
+
 export const WalletPage = () => {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
@@ -22,6 +30,53 @@ export const WalletPage = () => {
   const [copied, setCopied] = useState(false);
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
+  const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
+
+  useEffect(() => {
+      // Load local transactions
+      const stored = localStorage.getItem('local_mnee_transactions');
+      if (stored) {
+          try {
+              setTransactions(JSON.parse(stored));
+          } catch (e) {
+              console.error("Failed to parse local transactions", e);
+          }
+      }
+  }, []);
+
+  useEffect(() => {
+      // Save pending transaction
+      if (hash && amount && recipient) {
+          const newTx: LocalTransaction = {
+              hash,
+              to: recipient,
+              amount,
+              timestamp: Date.now(),
+              status: 'pending'
+          };
+
+          const updated = [newTx, ...transactions];
+          setTransactions(updated);
+          localStorage.setItem('local_mnee_transactions', JSON.stringify(updated));
+      }
+  }, [hash]); // Only run when hash is generated
+
+  useEffect(() => {
+    if (isConfirmed) {
+        setAmount('');
+        setRecipient('');
+        refetch();
+
+        // Update transaction status
+        if (hash) {
+            const updated = transactions.map(tx =>
+                tx.hash === hash ? { ...tx, status: 'confirmed' as const } : tx
+            );
+            setTransactions(updated);
+            localStorage.setItem('local_mnee_transactions', JSON.stringify(updated));
+        }
+    }
+  }, [isConfirmed, refetch, hash]);
 
   const copyAddress = () => {
     if (address) {
@@ -48,14 +103,6 @@ export const WalletPage = () => {
       console.error("Transfer failed", err);
     }
   };
-
-  useEffect(() => {
-    if (isConfirmed) {
-        setAmount('');
-        setRecipient('');
-        refetch();
-    }
-  }, [isConfirmed, refetch]);
 
   if (!isConnected) {
     return (
@@ -119,58 +166,101 @@ export const WalletPage = () => {
         </div>
       </div>
 
-      {/* Send Form */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <ArrowUpRight className="w-5 h-5" />
-            Send MNEE
-        </h3>
-        <form onSubmit={handleSend} className="space-y-4">
-            <div>
-                <label className="block text-sm font-medium mb-1">Recipient Address</label>
-                <input
-                    type="text"
-                    placeholder="0x..."
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
-                    required
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium mb-1">Amount</label>
-                <input
-                    type="number"
-                    placeholder="0.00"
-                    step="0.00001"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
-                    required
-                />
-            </div>
-
-            {writeError && (
-                <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
-                    {writeError.message.split('\n')[0]}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Send Form */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <ArrowUpRight className="w-5 h-5" />
+                Send MNEE
+            </h3>
+            <form onSubmit={handleSend} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium mb-1">Recipient Address</label>
+                    <input
+                        type="text"
+                        placeholder="0x..."
+                        value={recipient}
+                        onChange={(e) => setRecipient(e.target.value)}
+                        className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
+                        required
+                    />
                 </div>
-            )}
-
-            {hash && (
-                <div className="text-blue-500 text-sm bg-blue-50 p-3 rounded-lg break-all">
-                    Transaction Hash: {hash}
+                <div>
+                    <label className="block text-sm font-medium mb-1">Amount</label>
+                    <input
+                        type="number"
+                        placeholder="0.00"
+                        step="0.00001"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="w-full p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg"
+                        required
+                    />
                 </div>
-            )}
 
-            <button
-                type="submit"
-                disabled={isPending || isConfirming || !recipient || !amount}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-                {isPending || isConfirming ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUpRight className="w-5 h-5" />}
-                {isPending ? 'Confirming in Wallet...' : isConfirming ? 'Processing...' : 'Send Transaction'}
-            </button>
-        </form>
+                {writeError && (
+                    <div className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
+                        {writeError.message.split('\n')[0]}
+                    </div>
+                )}
+
+                <button
+                    type="submit"
+                    disabled={isPending || isConfirming || !recipient || !amount}
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                    {isPending || isConfirming ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUpRight className="w-5 h-5" />}
+                    {isPending ? 'Confirming in Wallet...' : isConfirming ? 'Processing...' : 'Send Transaction'}
+                </button>
+            </form>
+        </div>
+
+        {/* Local Transaction History */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                    <History className="w-5 h-5" />
+                    Recent Activity
+                </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto max-h-[400px] p-4 space-y-3">
+                {transactions.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">No recent transactions found on this device.</div>
+                ) : (
+                    transactions.map((tx) => (
+                        <div key={tx.hash} className="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div className="flex justify-between items-start mb-2">
+                                <span className="font-bold text-blue-600">Sent MNEE</span>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                    tx.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                    {tx.status}
+                                </span>
+                            </div>
+                            <div className="text-sm text-gray-600 dark:text-gray-400 break-all">
+                                To: {tx.to}
+                            </div>
+                            <div className="flex justify-between items-end mt-2">
+                                <div className="text-xs text-gray-500">
+                                    {new Date(tx.timestamp).toLocaleString()}
+                                </div>
+                                <div className="font-mono font-bold">
+                                    -{tx.amount} MNEE
+                                </div>
+                            </div>
+                            <a
+                                href={`https://etherscan.io/tx/${tx.hash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-blue-500 hover:underline mt-2 block"
+                            >
+                                View on Explorer
+                            </a>
+                        </div>
+                    ))
+                )}
+            </div>
+        </div>
       </div>
     </div>
   );
