@@ -15,6 +15,8 @@ export const LoadingSpinner = ({ size = 'md', className }: LoadingSpinnerProps) 
 
   return (
     <div
+      role="status"
+      aria-label="Loading"
       className={cn(
         'loading-spinner',
         sizeClasses[size],

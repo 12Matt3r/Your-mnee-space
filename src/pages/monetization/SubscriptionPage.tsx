@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Check, Star, Zap, Crown, BuildingOffice2Icon, Sparkles, Loader2 } from 'lucide-react';
+import { Check, Star, Zap, Crown, Building2, Sparkles, Loader2 } from 'lucide-react';
 import { MNEE_CONFIG, formatMNEE } from '../../lib/mnee';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -147,7 +147,7 @@ export const SubscriptionPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
                 <div>
                     <div className="w-12 h-12 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <BuildingOffice2Icon className="w-6 h-6 text-blue-400" />
+                        <Building2 className="w-6 h-6 text-blue-400" />
                     </div>
                     <h3 className="font-bold text-white mb-2">Build Your Empire</h3>
                     <p className="text-gray-400 text-sm">Get the tools you need to customize your space and grow your brand.</p>
