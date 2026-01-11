@@ -1,58 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from '@use-gesture/react';
-import { X, Heart, Info, DollarSign } from 'lucide-react';
+import { X, Heart, Info, DollarSign, Loader2 } from 'lucide-react';
 import { formatMNEE } from '../../lib/mnee';
+import { supabase } from '../../lib/supabase';
 
-// Mock Data for Swipe Cards
-const CARDS = [
-  {
-    id: 1,
-    title: 'Neon City Ambience',
-    creator: 'VibeMaster',
-    type: 'Video',
-    image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-    reward: 0.5
-  },
-  {
-    id: 2,
-    title: 'Cyberpunk Character Model',
-    creator: '3D_Wizard',
-    type: '3D Model',
-    image: 'https://images.unsplash.com/photo-1614728853913-1e2211d0d99b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-    reward: 0.3
-  },
-  {
-    id: 3,
-    title: 'Synthwave Beats Vol. 1',
-    creator: 'AudioNinja',
-    type: 'Audio',
-    image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-    reward: 0.2
-  },
-];
+interface SwipeCard {
+    id: string;
+    title: string;
+    description: string;
+    file_url: string;
+    content_type: string;
+    reward: number;
+    creator?: {
+        display_name: string;
+    };
+}
 
 export const SwipeMode = () => {
-  const [cards, setCards] = useState(CARDS);
+  const [cards, setCards] = useState<SwipeCard[]>([]);
+  const [loading, setLoading] = useState(true);
   const [lastDirection, setLastDirection] = useState<string | null>(null);
   const [earned, setEarned] = useState(0);
 
-  const removeCard = (id: number) => {
+  useEffect(() => {
+      const fetchContent = async () => {
+          setLoading(true);
+          // Fetch from content table or posts table? Let's use posts for now as it has images
+          // Assuming 'posts' or 'content' exists. The useContent hook uses 'content'.
+          // Let's assume there is a 'content' view or table.
+          // Based on previous files, useContent hits 'content'.
+
+          const { data, error } = await supabase
+            .from('posts') // Fallback to posts if content view isn't set up yet, or check useContent.
+            // Actually useContent fetched from 'content' which likely maps to posts+media
+            .select(`
+                id,
+                content,
+                image_url,
+                created_at,
+                profiles (display_name)
+            `)
+            .not('image_url', 'is', null)
+            .limit(10);
+
+          if (data) {
+              const formatted = data.map((item: any) => ({
+                  id: item.id,
+                  title: item.content?.substring(0, 30) || 'Untitled',
+                  description: item.content,
+                  file_url: item.image_url,
+                  content_type: 'Image',
+                  reward: 0.1 + Math.random() * 0.5, // Random reward for demo
+                  creator: item.profiles
+              }));
+              setCards(formatted);
+          }
+          setLoading(false);
+      };
+      fetchContent();
+  }, []);
+
+  const removeCard = (id: string) => {
     setCards(cards => cards.filter(card => card.id !== id));
   };
 
   const swipe = (dir: string) => {
     if (cards.length === 0) return;
-    const currentCard = cards[0]; // Simple queue logic for demo
+    const currentCard = cards[0];
     setLastDirection(dir);
 
     if (dir === 'right') {
         setEarned(prev => prev + currentCard.reward);
     }
 
-    // Animate out (simplified for React/DOM without complex gesture lib setup in this snippet)
     setTimeout(() => removeCard(currentCard.id), 200);
   };
+
+  if (loading) return <div className="flex justify-center p-20"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /></div>;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[600px] w-full max-w-md mx-auto relative">
@@ -64,7 +89,7 @@ export const SwipeMode = () => {
       {cards.length > 0 ? (
         <div className="relative w-full h-[500px] bg-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
             <img
-                src={cards[0].image}
+                src={cards[0].file_url}
                 alt={cards[0].title}
                 className="w-full h-full object-cover"
             />
@@ -72,20 +97,15 @@ export const SwipeMode = () => {
                 <div className="flex justify-between items-end">
                     <div>
                         <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full mb-2 inline-block">
-                            {cards[0].type}
+                            {cards[0].content_type}
                         </span>
                         <h2 className="text-2xl font-bold text-white">{cards[0].title}</h2>
-                        <p className="text-gray-400">by {cards[0].creator}</p>
+                        <p className="text-gray-400">by {cards[0].creator?.display_name || 'Unknown'}</p>
                     </div>
                     <button className="p-2 bg-white/10 rounded-full hover:bg-white/20">
                         <Info className="w-5 h-5 text-white" />
                     </button>
                 </div>
-            </div>
-
-            {/* Action Buttons Overlay */}
-            <div className="absolute bottom-24 w-full flex justify-center gap-8 pointer-events-none">
-                 {/* Visual indicators only, actual interaction handled below */}
             </div>
         </div>
       ) : (
@@ -93,10 +113,10 @@ export const SwipeMode = () => {
             <h3 className="text-xl font-bold text-white mb-2">All Caught Up!</h3>
             <p className="text-gray-400 mb-4">You've swiped through all available content.</p>
             <button
-                onClick={() => setCards(CARDS)}
+                onClick={() => window.location.reload()}
                 className="px-6 py-2 bg-blue-600 rounded-full text-white hover:bg-blue-500"
             >
-                Reset Stack
+                Refresh
             </button>
         </div>
       )}

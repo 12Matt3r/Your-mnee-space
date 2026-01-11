@@ -36,6 +36,7 @@ import { OnboardingPage } from './pages/onboarding/OnboardingPage';
 import { LivePage } from './pages/live/LivePage';
 import { GovernancePage } from './pages/governance/GovernancePage';
 import { CreateAgentPage } from './pages/agents/CreateAgentPage';
+import { AdminPage } from './pages/admin/AdminPage';
 import './App.css';
 
 function App() {
@@ -117,6 +118,12 @@ function App() {
                 <Route path="/agents/create" element={
                   <Layout>
                     <CreateAgentPage />
+                  </Layout>
+                } />
+
+                <Route path="/admin" element={
+                  <Layout>
+                    <AdminPage />
                   </Layout>
                 } />
                 
