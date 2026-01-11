@@ -3,21 +3,22 @@ import { useAuth } from '../../hooks/useAuth';
 import { PlayIcon, UsersIcon, ChatBubbleLeftIcon, HeartIcon, ShareIcon } from '@heroicons/react/24/solid';
 import { MNEE_CONFIG, formatMNEE } from '../../lib/mnee';
 import { StreamChat } from '../../components/room/StreamChat';
+import { useLiveStream } from '../../hooks/useLiveStream';
+import { Loader2 } from 'lucide-react';
 
 export const LivePage = () => {
   const { user } = useAuth();
-  const [isLive, setIsLive] = useState(false);
+  const { currentStream, startStream, endStream, loading } = useLiveStream();
   const [viewers, setViewers] = useState(0);
-  const [likes, setLikes] = useState(0);
 
-  const startStream = () => {
-    setIsLive(true);
-    setViewers(Math.floor(Math.random() * 50) + 10); // Mock viewers
+  const handleStart = async () => {
+      await startStream(`${user?.email}'s Creative Session`);
+      setViewers(12); // Initial mock viewer count for feedback
   };
 
-  const endStream = () => {
-    setIsLive(false);
-    setViewers(0);
+  const handleEnd = async () => {
+      await endStream();
+      setViewers(0);
   };
 
   return (
@@ -27,7 +28,7 @@ export const LivePage = () => {
         {/* Left Column: Stream Player */}
         <div className="lg:col-span-3 space-y-6">
           <div className="relative aspect-video bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
-            {isLive ? (
+            {currentStream ? (
               <div className="absolute inset-0 bg-gradient-to-br from-purple-900/40 to-black flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-pulse w-32 h-32 bg-purple-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -42,7 +43,7 @@ export const LivePage = () => {
                 <div className="absolute top-4 left-4 flex gap-2">
                     <span className="bg-red-600 text-white px-3 py-1 rounded-md text-sm font-bold animate-pulse">LIVE</span>
                     <span className="bg-black/50 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center gap-1">
-                        <UsersIcon className="w-4 h-4" /> {viewers}
+                        <UsersIcon className="w-4 h-4" /> {currentStream.viewer_count || viewers}
                     </span>
                 </div>
               </div>
@@ -54,10 +55,12 @@ export const LivePage = () => {
                 <h2 className="text-2xl font-bold text-gray-400 mb-2">Stream Offline</h2>
                 <p className="text-gray-500 mb-6">Ready to share your creative process?</p>
                 <button
-                  onClick={startStream}
-                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 rounded-xl font-bold hover:from-red-500 hover:to-pink-500 transition-all shadow-lg shadow-red-900/20"
+                  onClick={handleStart}
+                  disabled={loading}
+                  className="px-8 py-3 bg-gradient-to-r from-red-600 to-pink-600 rounded-xl font-bold hover:from-red-500 hover:to-pink-500 transition-all shadow-lg shadow-red-900/20 flex items-center gap-2"
                 >
-                  Go Live Now
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                  {loading ? 'Starting...' : 'Go Live Now'}
                 </button>
               </div>
             )}
@@ -66,7 +69,7 @@ export const LivePage = () => {
           {/* Stream Info */}
           <div className="bg-gray-900/50 p-6 rounded-xl border border-gray-800 flex justify-between items-start">
             <div>
-                <h1 className="text-2xl font-bold mb-2">{user?.email}'s Creative Session</h1>
+                <h1 className="text-2xl font-bold mb-2">{currentStream ? currentStream.title : `${user?.email}'s Session`}</h1>
                 <div className="flex gap-2">
                     <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-xs font-medium">Creative</span>
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium">Vibe Coding</span>
@@ -76,12 +79,13 @@ export const LivePage = () => {
                 <button className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors">
                     <ShareIcon className="w-5 h-5" /> Share
                 </button>
-                {isLive && (
+                {currentStream && (
                     <button
-                        onClick={endStream}
+                        onClick={handleEnd}
+                        disabled={loading}
                         className="flex items-center gap-2 px-4 py-2 bg-red-900/50 text-red-400 rounded-lg hover:bg-red-900/70 transition-colors border border-red-900"
                     >
-                        End Stream
+                        {loading ? 'Ending...' : 'End Stream'}
                     </button>
                 )}
             </div>
@@ -97,7 +101,7 @@ export const LivePage = () => {
 
             {/* Using mock chat for now or real component if it fits */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {isLive ? (
+                {currentStream ? (
                     <>
                         <div className="text-xs text-gray-500 text-center my-4">Welcome to the chat room!</div>
                         <div className="flex gap-3">
@@ -133,7 +137,7 @@ export const LivePage = () => {
                     type="text"
                     placeholder="Say something..."
                     className="w-full bg-black/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-purple-500 outline-none"
-                    disabled={!isLive}
+                    disabled={!currentStream}
                 />
             </div>
         </div>

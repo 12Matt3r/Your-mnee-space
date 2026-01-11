@@ -80,15 +80,14 @@ export function AgentsPage() {
         setShowHireModal(false);
 
         // Add job to "My Jobs"
-        const newJob: AgentJob = {
-            id: `job_${Date.now()}`,
+        const newJob = {
             agent_id: selectedAgent.id,
             requester_id: user?.id || 'anon',
             title: `Task for ${selectedAgent.name}`,
             description: `Hired via Web3 payment (Tx: ${hash})`,
-            status: 'in_progress', // Active immediately
+            status: 'in_progress' as const, // Active immediately
             budget: selectedAgent.hourly_rate * parseFloat(hireHours),
-            created_at: new Date().toISOString(),
+            transaction_hash: hash
         };
 
         // Use hook to update shared state
