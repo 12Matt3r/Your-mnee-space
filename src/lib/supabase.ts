@@ -103,14 +103,66 @@ export interface MNEETransaction {
   created_at: string;
 }
 
+export interface Proposal {
+  id: string;
+  title: string;
+  description: string | null;
+  status: 'Active' | 'Passed' | 'Rejected' | 'Pending';
+  votes_for: number;
+  votes_against: number;
+  end_date: string;
+  tags: string[];
+  created_at: string;
+}
+
 export interface SubscriptionTier {
   id: string;
-  creator_id: string;
   name: string;
-  price_mnee: number;
+  price: number;
+  mnee_bonus: number;
+  bonus_percent: number;
+  features: string[];
+  recommended: boolean;
+  color: string;
+  created_at: string;
+}
+
+export interface GuestbookEntry {
+  id: string;
+  profile_id: string;
+  author_id: string;
+  message: string;
+  created_at: string;
+  author?: Profile; // Joined
+}
+
+export interface TopEightFriend {
+  id: string;
+  user_id: string;
+  friend_id: string;
+  position: number;
+  friend?: Profile; // Joined
+}
+
+export interface LearningModule {
+  id: string;
+  title: string;
   description: string | null;
-  benefits: string[];
-  subscriber_count: number;
+  video_url: string | null;
+  thumbnail_url: string | null;
+  category: string | null;
+  difficulty_level: string | null;
+  created_at: string;
+  steps?: LearningStep[];
+}
+
+export interface LearningStep {
+  id: string;
+  module_id: string;
+  title: string;
+  content: string | null;
+  order: number;
+  created_at: string;
 }
 
 export interface Post {

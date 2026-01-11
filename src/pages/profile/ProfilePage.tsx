@@ -13,6 +13,9 @@ import {
   Squares2X2Icon,
   ViewColumnsIcon
 } from '@heroicons/react/24/outline'
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { formatDate } from '../../lib/utils'
 import { BioModule } from '../../components/profile/modules/BioModule'
 import { PortfolioModule } from '../../components/profile/modules/PortfolioModule'
@@ -21,6 +24,28 @@ import { MentorshipModule } from '../../components/profile/modules/MentorshipMod
 import { TopEightWidget } from '../../components/profile/widgets/TopEightWidget'
 import { GuestbookWidget } from '../../components/profile/widgets/GuestbookWidget'
 import toast from 'react-hot-toast'
+
+// Sortable Wrapper Component
+const SortableItem = ({ id, children, disabled }: { id: string, children: React.ReactNode, disabled?: boolean }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id, disabled });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={disabled ? '' : 'cursor-grab active:cursor-grabbing touch-none'}>
+      {children}
+    </div>
+  );
+};
 
 export const ProfilePage = () => {
   const { username } = useParams()
@@ -31,7 +56,28 @@ export const ProfilePage = () => {
 
   // New Modular State
   const [layoutMode, setLayoutMode] = useState<'grid' | 'list'>('grid')
-  const [modules, setModules] = useState<string[]>(['bio', 'tipping', 'mentorship', 'portfolio'])
+
+  // Widget Order State
+  const [leftColumnWidgets, setLeftColumnWidgets] = useState(['bio', 'tipping', 'mentorship', 'top8', 'guestbook'])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      setLeftColumnWidgets((items) => {
+        const oldIndex = items.indexOf(active.id);
+        const newIndex = items.indexOf(over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
 
   // Simulated Stats
   const [stats, setStats] = useState({
@@ -234,41 +280,52 @@ export const ProfilePage = () => {
       {/* Modular Content Area */}
       <div className={`grid gap-6 ${layoutMode === 'grid' ? 'grid-cols-1 md:grid-cols-12' : 'grid-cols-1'}`}>
 
-        {/* Left Column (Bio & Tipping) */}
+        {/* Left Column (Sortable Widgets) */}
         <div className={`space-y-6 ${layoutMode === 'grid' ? 'md:col-span-4' : ''}`}>
-          {modules.includes('bio') && (
-            <BioModule
-              content={profileData.bio}
-              editable={isOwnProfile}
-              onEdit={() => toast('Edit Bio Coming Soon', { icon: '📝' })}
-            />
-          )}
-
-          {modules.includes('tipping') && (
-            <TippingModule
-              creatorName={profileData.display_name || profileData.username}
-              onTip={handleTip}
-            />
-          )}
-
-          {modules.includes('mentorship') && (
-            <MentorshipModule
-              creatorName={profileData.display_name || profileData.username}
-            />
-          )}
-
-          <TopEightWidget />
-          <GuestbookWidget />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={leftColumnWidgets}
+              strategy={verticalListSortingStrategy}
+              disabled={!isOwnProfile} // Only allow dragging if own profile
+            >
+              {leftColumnWidgets.map((widgetId) => (
+                <SortableItem key={widgetId} id={widgetId} disabled={!isOwnProfile}>
+                  {widgetId === 'bio' && (
+                    <BioModule
+                      content={profileData.bio}
+                      editable={isOwnProfile}
+                      onEdit={() => toast('Edit Bio Coming Soon', { icon: '📝' })}
+                    />
+                  )}
+                  {widgetId === 'tipping' && (
+                    <TippingModule
+                      creatorName={profileData.display_name || profileData.username}
+                      onTip={handleTip}
+                    />
+                  )}
+                  {widgetId === 'mentorship' && (
+                    <MentorshipModule
+                      creatorName={profileData.display_name || profileData.username}
+                    />
+                  )}
+                  {widgetId === 'top8' && <TopEightWidget />}
+                  {widgetId === 'guestbook' && <GuestbookWidget />}
+                </SortableItem>
+              ))}
+            </SortableContext>
+          </DndContext>
         </div>
 
-        {/* Right Column (Portfolio/Content) */}
+        {/* Right Column (Portfolio/Content - currently fixed) */}
         <div className={`${layoutMode === 'grid' ? 'md:col-span-8' : ''}`}>
-          {modules.includes('portfolio') && (
             <PortfolioModule
               items={content}
               limit={layoutMode === 'grid' ? 6 : 12}
             />
-          )}
         </div>
 
       </div>

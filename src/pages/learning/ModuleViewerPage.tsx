@@ -7,39 +7,11 @@ import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt 
 import { parseUnits, formatUnits } from 'viem';
 import { MNEE_CONTRACT_ADDRESS, MNEE_ABI } from '../../lib/wagmi';
 import { MNEE_CONFIG } from '../../lib/mnee';
+import { useLearning } from '../../hooks/useLearning';
+import { LearningModule } from '../../lib/supabase';
 
 // Treasury Address for receiving payments (Mock address for hackathon)
 const TREASURY_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
-
-// Mock Data
-const MODULE_DATA = {
-  '1': {
-    title: 'Vibe Coding 101: Atmospheric Design',
-    videoUrl: 'https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4',
-    steps: [
-      { id: 1, title: 'Understanding Atmosphere', completed: true },
-      { id: 2, title: 'Color Theory for Mood', completed: false },
-      { id: 3, title: 'Lighting Techniques', completed: false },
-      { id: 4, title: 'Interactive Elements', completed: false },
-    ]
-  },
-  '2': {
-      title: '3D Room Architecture',
-      videoUrl: 'https://archive.org/download/ElephantsDream/ed_1024_512kb.mp4',
-      steps: [
-          { id: 1, title: 'Space Planning', completed: false },
-          { id: 2, title: 'Asset Placement', completed: false },
-      ]
-  },
-  '3': {
-      title: 'Digital Music Production',
-      videoUrl: 'https://archive.org/download/Sintel/sintel-2048-surround.mp4',
-      steps: [
-          { id: 1, title: 'Beat Basics', completed: false },
-          { id: 2, title: 'Synth Waves', completed: false },
-      ]
-  }
-};
 
 const CHAT_INITIAL_STATE = [
   { id: 1, sender: 'ai', text: "Hi! I'm your AI Mentor for this course. I can help you understand the concepts or give you feedback on your work. What would you like to focus on today?" }
@@ -49,6 +21,8 @@ export const ModuleViewerPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { getModuleById } = useLearning();
+  const [module, setModule] = useState<LearningModule | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [messages, setMessages] = useState(CHAT_INITIAL_STATE);
   const [newMessage, setNewMessage] = useState('');
@@ -67,7 +41,13 @@ export const ModuleViewerPage = () => {
     hash,
   });
 
-  const module = MODULE_DATA[id as keyof typeof MODULE_DATA] || MODULE_DATA['1'];
+  useEffect(() => {
+    if (id) {
+        getModuleById(id).then(data => {
+            if (data) setModule(data);
+        });
+    }
+  }, [id]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -149,6 +129,8 @@ export const ModuleViewerPage = () => {
     }
   };
 
+  if (!module) return <div className="flex items-center justify-center h-full"><Loader2 className="w-8 h-8 animate-spin" /></div>;
+
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col md:flex-row overflow-hidden bg-gray-950 text-white">
       {/* Left Column: Content */}
@@ -160,7 +142,7 @@ export const ModuleViewerPage = () => {
           </button>
           <div>
             <h1 className="font-bold text-lg">{module.title}</h1>
-            <p className="text-sm text-gray-400">Lesson 1 of {module.steps.length}</p>
+            <p className="text-sm text-gray-400">Lesson 1 of {module.steps?.length || 0}</p>
           </div>
         </div>
 
@@ -168,7 +150,7 @@ export const ModuleViewerPage = () => {
         <div className="aspect-video bg-black relative group cursor-pointer" onClick={togglePlay}>
           <video
             ref={videoRef}
-            src={module.videoUrl}
+            src={module.video_url || ''}
             className="w-full h-full object-contain"
             loop
           />
@@ -183,19 +165,15 @@ export const ModuleViewerPage = () => {
         <div className="flex-1 overflow-y-auto p-6">
           <h2 className="font-bold mb-4 text-gray-300">Course Steps</h2>
           <div className="space-y-3">
-            {module.steps.map((step) => (
-              <div key={step.id} className={`p-4 rounded-xl border ${step.completed ? 'bg-green-900/20 border-green-800' : 'bg-gray-900 border-gray-800'} flex items-center justify-between`}>
+            {module.steps?.sort((a, b) => a.order - b.order).map((step, index) => (
+              <div key={step.id} className={`p-4 rounded-xl border bg-gray-900 border-gray-800 flex items-center justify-between`}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step.completed ? 'bg-green-500 text-black' : 'bg-gray-800 text-gray-500'}`}>
-                    {step.completed ? <CheckCircle className="w-4 h-4" /> : <span className="text-xs">{step.id}</span>}
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center bg-gray-800 text-gray-500`}>
+                    <span className="text-xs">{step.order}</span>
                   </div>
-                  <span className={step.completed ? 'text-green-400' : 'text-gray-300'}>{step.title}</span>
+                  <span className="text-gray-300">{step.title}</span>
                 </div>
-                {step.completed ? (
-                    <span className="text-xs text-green-500 font-medium">Completed</span>
-                ) : (
-                    <button className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full transition-colors">Start</button>
-                )}
+                <button className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full transition-colors">Start</button>
               </div>
             ))}
           </div>

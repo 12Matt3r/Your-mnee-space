@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { ECONOMY_LAYERS, FAVORITISM_TIERS, MNEE_CONFIG, generatePaymentLink } from '../../lib/mnee';
 import { Bot, Zap, Star, Clock, DollarSign, Users, Briefcase, Search, Plus, X, Wallet, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useAgentJobs, AgentJob } from '../../hooks/useAgentJobs';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAccount, useBalance, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
@@ -26,17 +27,6 @@ interface Agent {
   is_available: boolean;
 }
 
-interface AgentJob {
-  id: string;
-  agent_id: string | null;
-  requester_id: string;
-  title: string;
-  description: string;
-  status: string;
-  budget: number;
-  created_at: string;
-}
-
 const AI_SERVICES = [
   { id: 'minimax', name: 'MiniMax', costPerHour: 50, description: 'Multimodal AI for creative tasks' },
   { id: 'claude', name: 'Claude', costPerHour: 80, description: 'Advanced reasoning and analysis' },
@@ -50,8 +40,8 @@ const AI_SERVICES = [
 export function AgentsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { jobs: myJobs, addJob } = useAgentJobs();
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [myJobs, setMyJobs] = useState<AgentJob[]>([]);
   const [selectedTab, setSelectedTab] = useState<'marketplace' | 'post-job' | 'my-jobs' | 'economy'>('marketplace');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -82,7 +72,6 @@ export function AgentsPage() {
 
   useEffect(() => {
     loadAgents();
-    if (user) loadMyJobs();
   }, [user]);
 
   useEffect(() => {
@@ -102,13 +91,10 @@ export function AgentsPage() {
             created_at: new Date().toISOString(),
         };
 
-        // Update local state for demo purposes
-        setMyJobs(prev => [newJob, ...prev]);
-
-        // In a real app, we would save to Supabase here:
-        // await supabase.from('agent_jobs').insert(newJob);
+        // Use hook to update shared state
+        addJob(newJob);
     }
-  }, [isConfirmed, selectedAgent, user, hash, hireHours]);
+  }, [isConfirmed, selectedAgent, user, hash, hireHours, addJob]);
 
   const loadAgents = async () => {
     setLoading(true);
@@ -127,21 +113,6 @@ export function AgentsPage() {
       console.error('Error loading agents:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadMyJobs = async () => {
-    if (!user) return;
-    try {
-      const { data } = await supabase
-        .from('agent_jobs')
-        .select('*')
-        .eq('requester_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (data) setMyJobs(data);
-    } catch (err) {
-      console.log('No jobs loaded');
     }
   };
 

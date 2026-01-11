@@ -2,16 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { ArrowRight, Bot, CheckCircle, Clock, Zap, AlertCircle, FileText, User } from 'lucide-react';
 import { MNEE_CONFIG, formatMNEE } from '../../../lib/mnee';
-
-interface AgentJob {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  budget: number;
-  agent_id: string;
-  created_at: string;
-}
+import { useAgentJobs, AgentJob } from '../../../hooks/useAgentJobs';
 
 // Mock Sub-Tasks for Visualization
 const MOCK_SUBTASKS = [
@@ -23,34 +14,29 @@ const MOCK_SUBTASKS = [
 
 export const SupervisorDashboard = () => {
   const { user } = useAuth();
-  const [activeJobs, setActiveJobs] = useState<AgentJob[]>([]);
+  const { jobs: activeJobs } = useAgentJobs();
   const [selectedJob, setSelectedJob] = useState<AgentJob | null>(null);
 
   useEffect(() => {
-    // Load jobs from local storage mock (shared with AgentsPage)
-    // In a real app, this would be a Supabase query
-    const loadJobs = () => {
-        // We need to fetch from the same source as AgentsPage
-        // Since AgentsPage uses supabase for `myJobs` but we modified it to use local state for the demo flow...
-        // Let's rely on the fact that we might have persisted it or just mock it if empty for the demo.
-        // Wait, in the previous turn we only updated local state in AgentsPage, we didn't persist to localStorage "my_jobs".
-        // Let's check if we can read from the same place.
-        // Actually, for a robust demo, let's mock a "Live" project if none exists.
-
+    // Select the most recent job by default if available
+    if (activeJobs.length > 0 && !selectedJob) {
+        setSelectedJob(activeJobs[0]);
+    } else if (activeJobs.length === 0) {
+        // Fallback for demo if empty
         const demoJob = {
             id: 'job_demo_123',
-            title: 'Portfolio Site Redesign',
+            title: 'Portfolio Site Redesign (Demo)',
             description: 'Complete overhaul of the personal portfolio with neon theme.',
             status: 'in_progress',
             budget: 150,
             agent_id: 'supervisor_1',
-            created_at: new Date().toISOString()
-        };
-        setActiveJobs([demoJob]);
+            created_at: new Date().toISOString(),
+            requester_id: 'demo'
+        } as AgentJob;
+        // Don't set activeJobs state here as it comes from hook, but we can set selectedJob for display
         setSelectedJob(demoJob);
-    };
-    loadJobs();
-  }, [user]);
+    }
+  }, [activeJobs, user]);
 
   if (!user) return <div className="p-8 text-center text-gray-400">Please sign in to view the dashboard.</div>;
 

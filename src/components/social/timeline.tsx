@@ -10,6 +10,12 @@ interface PostWithInteractions extends Post {
   bookmarks_count: number;
   is_liked: boolean;
   is_bookmarked: boolean;
+  poll?: {
+    question: string;
+    options: { id: string; text: string; votes: number }[];
+    total_votes: number;
+    user_vote?: string;
+  };
   profiles?: {
     user_id: string;
     full_name: string | null;
@@ -21,17 +27,29 @@ interface PostWithInteractions extends Post {
 const ComposerBox = () => {
   const [postText, setPostText] = useState('');
   const [isPosting, setIsPosting] = useState(false);
+  const [mockImage, setMockImage] = useState<string | null>(null);
   const { user, profile } = useAuth();
   const maxChars = 280;
+
+  const handleImageUpload = () => {
+      // Mock image upload
+      const randomImage = `https://picsum.photos/seed/${Date.now()}/800/400`;
+      setMockImage(randomImage);
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!postText.trim() || postText.length > maxChars || !user) return;
+    if ((!postText.trim() && !mockImage) || postText.length > maxChars || !user) return;
     
     setIsPosting(true);
     try {
-      await socialApi.createPost(postText);
+      // In a real app, we'd upload the image to storage and pass the URL
+      // For now, we append the mock image URL to content if it exists to simulate it
+      const content = mockImage ? `${postText}\n\n![Image](${mockImage})` : postText;
+
+      await socialApi.createPost(content);
       setPostText('');
+      setMockImage(null);
       // Trigger a refresh of the timeline
       window.dispatchEvent(new CustomEvent('refreshTimeline'));
     } catch (error) {
@@ -74,10 +92,23 @@ const ComposerBox = () => {
             disabled={isPosting}
           />
           
+          {mockImage && (
+              <div className="relative mt-4 rounded-xl overflow-hidden group">
+                  <img src={mockImage} alt="Upload preview" className="w-full h-48 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setMockImage(null)}
+                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+              </div>
+          )}
+
           {/* Composer Actions */}
           <div className="flex items-center justify-between mt-4">
             <div className="flex items-center space-x-4">
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Image">
+              <button type="button" onClick={handleImageUpload} className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Image">
                 <ImageIcon className="w-5 h-5 text-blue-500" />
               </button>
               <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Poll">
@@ -132,23 +163,95 @@ const ComposerBox = () => {
   );
 };
 
+import { Link } from 'react-router-dom';
+
 const PostContent = ({ text }: { text: string }) => {
-  // Simple regex to find hashtags
-  const parts = text.split(/(\#[a-zA-Z0-9_]+)/g);
+  // Simple regex to find hashtags and images markdown
+  // Very basic parser for demo purposes
+  const parts = text.split(/(\#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
 
   return (
-    <p className="text-gray-900 dark:text-white text-base leading-relaxed">
+    <div className="text-gray-900 dark:text-white text-base leading-relaxed whitespace-pre-wrap">
       {parts.map((part, index) => {
         if (part.startsWith('#')) {
+          const tag = part.substring(1); // remove #
           return (
-            <span key={index} className="text-blue-500 hover:underline cursor-pointer">
+            <Link key={index} to={`/discover?q=${tag}`} className="text-blue-500 hover:underline cursor-pointer">
               {part}
-            </span>
+            </Link>
           );
+        } else if (part.match(/!\[.*?\]\(.*?\)/)) {
+            // Render markdown image
+            const match = part.match(/!\[(.*?)\]\((.*?)\)/);
+            if (match) {
+                return (
+                    <img
+                        key={index}
+                        src={match[2]}
+                        alt={match[1]}
+                        className="mt-3 rounded-xl w-full object-cover max-h-96"
+                    />
+                );
+            }
         }
-        return part;
+        return <span key={index}>{part}</span>;
       })}
-    </p>
+    </div>
+  );
+};
+
+const PollDisplay = ({ poll }: { poll: NonNullable<PostWithInteractions['poll']> }) => {
+  const [selectedOption, setSelectedOption] = useState<string | null>(poll.user_vote || null);
+  const [totalVotes, setTotalVotes] = useState(poll.total_votes);
+  const [options, setOptions] = useState(poll.options);
+
+  const handleVote = (optionId: string) => {
+    if (selectedOption) return;
+
+    setSelectedOption(optionId);
+    setTotalVotes(prev => prev + 1);
+    setOptions(prev => prev.map(opt =>
+        opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
+    ));
+  };
+
+  return (
+    <div className="mt-3 space-y-2">
+      {options.map((option) => {
+        const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+        const isSelected = selectedOption === option.id;
+
+        return (
+          <div key={option.id} className="relative">
+            {/* Background Bar */}
+            {selectedOption && (
+                <div
+                    className="absolute inset-0 bg-blue-500/10 rounded-lg transition-all duration-500"
+                    style={{ width: `${percentage}%` }}
+                />
+            )}
+
+            <button
+                onClick={() => handleVote(option.id)}
+                disabled={!!selectedOption}
+                className={`relative w-full text-left px-4 py-3 rounded-lg border transition-all flex justify-between items-center ${
+                    isSelected
+                        ? 'border-blue-500 text-blue-500'
+                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                }`}
+            >
+                <span className="font-medium">{option.text}</span>
+                {selectedOption && (
+                    <span className="text-sm font-bold">{percentage}%</span>
+                )}
+            </button>
+          </div>
+        );
+      })}
+      <div className="text-sm text-gray-500 mt-2">
+        {totalVotes.toLocaleString()} votes • {selectedOption ? 'Final results' : 'Poll open'}
+      </div>
+    </div>
   );
 };
 
@@ -241,6 +344,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
           {/* Post Content */}
           <div className="mt-2">
             <PostContent text={post.content} />
+            {post.poll && <PollDisplay poll={post.poll} />}
           </div>
           
           {/* Post Actions */}
@@ -338,6 +442,20 @@ const Timeline = () => {
           } catch (error) {
             console.error('Error getting likes count:', error);
           }
+
+          // Mock Poll Data for specific posts (demonstration)
+          let pollData = undefined;
+          if (post.content.includes("Poll:") || post.content.includes("Vote")) {
+             pollData = {
+                 question: "Best Web3 Feature?",
+                 total_votes: 142,
+                 options: [
+                     { id: '1', text: 'Agent Economy', votes: 85 },
+                     { id: '2', text: 'MNEE Token', votes: 42 },
+                     { id: '3', text: 'Custom Rooms', votes: 15 }
+                 ]
+             };
+          }
           
           return {
             ...post,
@@ -345,7 +463,8 @@ const Timeline = () => {
             replies_count: 0, // TODO: implement replies
             bookmarks_count: 0, // TODO: implement bookmark count
             is_liked: isLiked,
-            is_bookmarked: isBookmarked
+            is_bookmarked: isBookmarked,
+            poll: pollData
           };
         })
       );
