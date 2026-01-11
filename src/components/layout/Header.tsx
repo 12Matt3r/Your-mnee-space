@@ -26,6 +26,7 @@ export const Header = () => {
           <input
             type="text"
             placeholder="Search creators, content, collaborations..."
+            aria-label="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
@@ -52,7 +53,10 @@ export const Header = () => {
             <ThemeSelector />
 
             {/* Notifications */}
-            <button className="relative p-2 text-gray-400 hover:text-purple-300 transition-colors">
+            <button
+              className="relative p-2 text-gray-400 hover:text-purple-300 transition-colors"
+              aria-label="Notifications"
+            >
               <BellIcon className="h-6 w-6" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-pink-500 rounded-full"></span>
             </button>
