@@ -37,6 +37,7 @@ import { LivePage } from './pages/live/LivePage';
 import { GovernancePage } from './pages/governance/GovernancePage';
 import { CreateAgentPage } from './pages/agents/CreateAgentPage';
 import { AdminPage } from './pages/admin/AdminPage';
+import { ShopPage } from './pages/marketplace/ShopPage';
 import './App.css';
 
 function App() {
@@ -81,7 +82,7 @@ function App() {
                 
                 <Route path="/marketplace" element={
                   <Layout>
-                    <MarketplacePage />
+                    <ShopPage />
                   </Layout>
                 } />
 

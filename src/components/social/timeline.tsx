@@ -164,6 +164,7 @@ const ComposerBox = () => {
 };
 
 import { Link } from 'react-router-dom';
+import { X } from 'lucide-react';
 
 const PostContent = ({ text }: { text: string }) => {
   // Simple regex to find hashtags and images markdown
@@ -344,7 +345,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
           {/* Post Content */}
           <div className="mt-2">
             <PostContent text={post.content} />
-            {post.poll && <PollDisplay poll={post.poll} />}
+            {post.poll && <PollDisplay poll={post.poll} postId={post.id} />}
           </div>
           
           {/* Post Actions */}
@@ -443,18 +444,33 @@ const Timeline = () => {
             console.error('Error getting likes count:', error);
           }
 
-          // Mock Poll Data for specific posts (demonstration)
+          // Fetch real poll data
           let pollData = undefined;
-          if (post.content.includes("Poll:") || post.content.includes("Vote")) {
-             pollData = {
-                 question: "Best Web3 Feature?",
-                 total_votes: 142,
-                 options: [
-                     { id: '1', text: 'Agent Economy', votes: 85 },
-                     { id: '2', text: 'MNEE Token', votes: 42 },
-                     { id: '3', text: 'Custom Rooms', votes: 15 }
-                 ]
-             };
+          try {
+              const { data: poll } = await supabase
+                .from('polls')
+                .select('*')
+                .eq('post_id', post.id)
+                .maybeSingle();
+
+              if (poll) {
+                  const { data: userVote } = await supabase
+                    .from('poll_votes')
+                    .select('option_id')
+                    .eq('poll_id', poll.id)
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+
+                  pollData = {
+                      id: poll.id,
+                      question: poll.question,
+                      options: poll.options,
+                      total_votes: poll.options.reduce((acc: number, curr: any) => acc + (curr.votes || 0), 0),
+                      user_vote: userVote?.option_id
+                  };
+              }
+          } catch (e) {
+              // No poll for this post
           }
           
           return {
