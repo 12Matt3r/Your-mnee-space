@@ -2,13 +2,15 @@
 import { useState, useEffect } from 'react'
 import { useContent } from '../../hooks/useContent'
 import { AudioContentCard } from '../../components/music/AudioContentCard'
+import { SwipeMode } from '../../components/discovery/SwipeMode'
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
   FireIcon,
   ClockIcon,
   HeartIcon,
-  EyeIcon
+  EyeIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 import { cn, formatRelativeTime } from '../../lib/utils'
 
@@ -43,6 +45,7 @@ export const DiscoverPage = () => {
   const [selectedVibe, setSelectedVibe] = useState<string | null>(null)
   const [selectedSort, setSelectedSort] = useState('trending')
   const [filteredContent, setFilteredContent] = useState<any[]>([])
+  const [viewMode, setViewMode] = useState<'grid' | 'swipe'>('grid')
 
   useEffect(() => {
     // Fetch public content
@@ -99,8 +102,40 @@ export const DiscoverPage = () => {
         <p className="text-gray-400 text-lg">
           Explore the latest creations from the YourSpace community
         </p>
+
+        {/* View Mode Toggle */}
+        <div className="flex justify-center mt-6">
+            <div className="bg-black/40 p-1 rounded-xl border border-purple-500/20 inline-flex">
+                <button
+                    onClick={() => setViewMode('grid')}
+                    className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                        viewMode === 'grid' ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"
+                    )}
+                >
+                    <MagnifyingGlassIcon className="w-4 h-4" />
+                    Browse
+                </button>
+                <button
+                    onClick={() => setViewMode('swipe')}
+                    className={cn(
+                        "px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2",
+                        viewMode === 'swipe' ? "bg-pink-600 text-white" : "text-gray-400 hover:text-white"
+                    )}
+                >
+                    <SparklesIcon className="w-4 h-4" />
+                    Swipe Mode
+                </button>
+            </div>
+        </div>
       </div>
 
+      {viewMode === 'swipe' ? (
+          <div className="max-w-2xl mx-auto py-8">
+              <SwipeMode />
+          </div>
+      ) : (
+      <>
       {/* Search and Filters */}
       <div className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6">
         {/* Search Bar */}
@@ -279,6 +314,8 @@ export const DiscoverPage = () => {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   )
 }

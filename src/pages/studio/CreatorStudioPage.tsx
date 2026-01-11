@@ -8,6 +8,7 @@ import { TipCreatorModal } from '../../components/payments/TipCreatorModal'
 import { SubscriptionModal } from '../../components/payments/SubscriptionModal'
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner'
 import { EPKBuilder } from '../../components/epk/EPKBuilder'
+import { SupervisorDashboard } from './supervisor/SupervisorDashboard'
 import {
   FilmIcon,
   EyeIcon,
@@ -24,7 +25,8 @@ import {
   MicrophoneIcon,
   DocumentTextIcon,
   SparklesIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  CpuChipIcon
 } from '@heroicons/react/24/outline'
 import { cn } from '../../lib/utils'
 
@@ -35,7 +37,7 @@ export const CreatorStudioPage = () => {
   const { hasEPK } = useEPK()
   const [showTipModal, setShowTipModal] = useState(false)
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false)
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'content' | 'analytics' | 'monetize' | 'epk'>('overview')
+  const [selectedTab, setSelectedTab] = useState<'overview' | 'content' | 'analytics' | 'monetize' | 'epk' | 'supervisor'>('overview')
   const [uploadType, setUploadType] = useState<'video' | 'audio' | 'image' | 'text' | null>(null)
 
   // Filter user's content
@@ -136,9 +138,10 @@ export const CreatorStudioPage = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 bg-black/50 p-2 rounded-xl mb-8">
+        <div className="flex space-x-1 bg-black/50 p-2 rounded-xl mb-8 overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview', icon: ChartBarIcon },
+            { id: 'supervisor', label: 'Supervisor AI', icon: CpuChipIcon },
             { id: 'content', label: 'Content', icon: FilmIcon },
             { id: 'analytics', label: 'Analytics', icon: EyeIcon },
             { id: 'monetize', label: 'Monetize', icon: CurrencyDollarIcon },
@@ -148,7 +151,7 @@ export const CreatorStudioPage = () => {
               key={tab.id}
               onClick={() => setSelectedTab(tab.id as any)}
               className={cn(
-                'flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all',
+                'flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap',
                 selectedTab === tab.id
                   ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -159,6 +162,11 @@ export const CreatorStudioPage = () => {
             </button>
           ))}
         </div>
+
+        {/* Supervisor Tab */}
+        {selectedTab === 'supervisor' && (
+          <SupervisorDashboard />
+        )}
 
         {/* Overview Tab */}
         {selectedTab === 'overview' && (

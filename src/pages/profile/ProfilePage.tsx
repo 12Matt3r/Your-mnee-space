@@ -18,6 +18,8 @@ import { BioModule } from '../../components/profile/modules/BioModule'
 import { PortfolioModule } from '../../components/profile/modules/PortfolioModule'
 import { TippingModule } from '../../components/profile/modules/TippingModule'
 import { MentorshipModule } from '../../components/profile/modules/MentorshipModule'
+import { TopEightWidget } from '../../components/profile/widgets/TopEightWidget'
+import { GuestbookWidget } from '../../components/profile/widgets/GuestbookWidget'
 import toast from 'react-hot-toast'
 
 export const ProfilePage = () => {
@@ -254,6 +256,9 @@ export const ProfilePage = () => {
               creatorName={profileData.display_name || profileData.username}
             />
           )}
+
+          <TopEightWidget />
+          <GuestbookWidget />
         </div>
 
         {/* Right Column (Portfolio/Content) */}
