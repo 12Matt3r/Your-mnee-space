@@ -437,8 +437,7 @@ const Timeline = () => {
           // Get like count
           let likesCount = 0;
           try {
-            const likes = await socialApi.getPostLikes(post.id);
-            likesCount = likes.length;
+            likesCount = await socialApi.getPostLikeCount(post.id);
           } catch (error) {
             console.error('Error getting likes count:', error);
           }
