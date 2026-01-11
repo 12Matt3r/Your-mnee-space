@@ -32,6 +32,8 @@ import { LearningPage } from './pages/learning/LearningPage';
 import { ModuleViewerPage } from './pages/learning/ModuleViewerPage';
 import { WalletPage } from './pages/wallet/WalletPage';
 import { SubscriptionPage } from './pages/monetization/SubscriptionPage';
+import { OnboardingPage } from './pages/onboarding/OnboardingPage';
+import { LivePage } from './pages/live/LivePage';
 import './App.css';
 
 function App() {
@@ -46,6 +48,7 @@ function App() {
                 {/* Auth routes without layout */}
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
+                <Route path="/welcome" element={<OnboardingPage />} />
                 <Route path="/auth/discord/callback" element={<DiscordCallbackPage />} />
 
                 {/* Main app routes with layout */}
@@ -88,6 +91,12 @@ function App() {
                 <Route path="/subscription" element={
                   <Layout>
                     <SubscriptionPage />
+                  </Layout>
+                } />
+
+                <Route path="/live" element={
+                  <Layout>
+                    <LivePage />
                   </Layout>
                 } />
                 
