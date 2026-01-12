@@ -50,6 +50,263 @@ Traditional social platforms treat creators as content generators for ad revenue
 
 ---
 
+## MNEE Integration — The Economic Engine
+
+> **YourSpace is built on MNEE** — the world's fastest USD-backed stablecoin. Every transaction, tip, payment, and AI agent operation flows through MNEE, enabling instant, sub-penny micropayments that traditional payment rails simply cannot support.
+
+### Why MNEE is Perfect for Creator Platforms
+
+| Challenge | Traditional Solution | MNEE Solution |
+|-----------|---------------------|---------------|
+| **Microtips** ($0.10-$1.00) | Impossible — fees eat 30%+ | ✅ Fees < 1/10th of a penny |
+| **Instant Payouts** | 3-5 business days | ✅ < 1 second settlement |
+| **Global Access** | Bank account required | ✅ Wallet-based, no banks |
+| **AI Agent Payments** | Not supported | ✅ Programmable money for autonomous transactions |
+| **Real-Time Earnings** | Batch processing | ✅ Stream earnings in real-time |
+
+### How YourSpace Uses MNEE
+
+#### 1. AI Agent Payments (Autonomous Commerce)
+
+Our Supervisor AI and subordinate agents don't just monitor — they **transact autonomously using MNEE**. This is the future of agent-to-agent commerce:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    AI AGENT PAYMENT FLOWS                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌──────────────┐    MNEE     ┌──────────────┐                 │
+│  │ Content      │───────────▶│ Moderation   │                 │
+│  │ Agent        │  $0.001    │ API Service  │                 │
+│  └──────────────┘            └──────────────┘                 │
+│         │                                                       │
+│         │ MNEE $0.0005                                         │
+│         ▼                                                       │
+│  ┌──────────────┐    MNEE     ┌──────────────┐                 │
+│  │ Analytics    │───────────▶│ Data         │                 │
+│  │ Agent        │  $0.002    │ Provider     │                 │
+│  └──────────────┘            └──────────────┘                 │
+│         │                                                       │
+│         │ MNEE $0.01                                           │
+│         ▼                                                       │
+│  ┌──────────────┐    MNEE     ┌──────────────┐                 │
+│  │ Creative     │───────────▶│ AI Model     │                 │
+│  │ Assistant    │  $0.05     │ Inference    │                 │
+│  └──────────────┘            └──────────────┘                 │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Real Example — Live Stream Moderation:**
+```typescript
+// Agent pays for each moderation API call using MNEE
+async function moderateMessage(message: string) {
+  // Supervisor AI approves payment
+  const approval = await supervisorAI.validateOutput({
+    action: "pay_for_service",
+    amount: 0.001, // $0.001 MNEE
+    recipient: "moderation-api.eth"
+  });
+  
+  if (approval.valid) {
+    // Execute MNEE micropayment
+    await mneeClient.transfer({
+      to: MODERATION_API_WALLET,
+      amount: "0.001",
+      memo: `mod:${message.id}`
+    });
+    
+    // Call moderation API (now paid for)
+    return await moderationAPI.analyze(message);
+  }
+}
+```
+
+**Why This Matters:** AI agents can now operate economically independently. They pay for their own API calls, data access, and compute resources — all tracked and audited by Supervisor AI.
+
+#### 2. Creator Economy (Commerce & Creator Tools)
+
+MNEE powers every creator monetization feature in YourSpace:
+
+| Feature | How MNEE is Used | Transaction Size |
+|---------|------------------|------------------|
+| **Live Stream Tips** | Fans send MNEE tips during Discord streams | $0.10 - $100+ |
+| **Content Paywalls** | Unlock exclusive vault content | $1 - $50 |
+| **Subscription Access** | Monthly creator subscriptions | $5 - $25/month |
+| **Arcade Purchases** | In-game currency and items | $0.01 - $10 |
+| **Guestbook Highlights** | Pay to pin guestbook messages | $0.25 - $5 |
+| **EPK Downloads** | Industry contacts pay for press kit | $0 - $10 |
+
+**Implementation — Tipping During Streams:**
+```typescript
+// src/hooks/useMNEEPayments.tsx
+export function useTipping() {
+  const sendTip = async (creatorId: string, amount: number) => {
+    // Get creator's MNEE wallet from profile
+    const { data: creator } = await supabase
+      .from('profiles')
+      .select('wallet_address')
+      .eq('id', creatorId)
+      .single();
+    
+    // Execute MNEE transfer
+    const tx = await mneeContract.transfer(
+      creator.wallet_address,
+      ethers.parseUnits(amount.toString(), 6) // MNEE uses 6 decimals
+    );
+    
+    // Record in database for analytics
+    await supabase.from('transactions').insert({
+      sender_id: user.id,
+      recipient_id: creatorId,
+      amount,
+      type: 'tip',
+      tx_hash: tx.hash,
+      created_at: new Date().toISOString()
+    });
+    
+    // Trigger real-time notification
+    await supabase.channel(`creator:${creatorId}`)
+      .send({ type: 'tip', amount, from: user.username });
+  };
+  
+  return { sendTip };
+}
+```
+
+#### 3. Programmable Finance & Automation
+
+YourSpace uses MNEE for automated financial workflows that run without human intervention:
+
+**Revenue Splitting:**
+```typescript
+// Automatic revenue split when creator earns
+async function processEarning(creatorId: string, amount: number) {
+  const splits = await getRevenueSplits(creatorId);
+  // Example: Creator 85%, Platform 10%, Agent Fund 5%
+  
+  for (const split of splits) {
+    await mneeContract.transfer(
+      split.wallet,
+      ethers.parseUnits((amount * split.percentage).toString(), 6)
+    );
+  }
+}
+```
+
+**Escrow for Collaborations:**
+```typescript
+// Creator collaboration with escrow
+async function createCollabEscrow(terms: CollabTerms) {
+  const escrowContract = await MNEEEscrow.deploy(
+    terms.creator1Wallet,
+    terms.creator2Wallet,
+    terms.totalAmount,
+    terms.milestones
+  );
+  
+  // Funds released automatically when milestones complete
+  // Supervisor AI validates milestone completion
+}
+```
+
+**Subscription Auto-Renewal:**
+```typescript
+// Monthly subscription check (runs via cron)
+async function processSubscriptions() {
+  const dueSubscriptions = await supabase
+    .from('subscriptions')
+    .select('*')
+    .lte('next_billing', new Date().toISOString());
+  
+  for (const sub of dueSubscriptions) {
+    // Attempt MNEE charge
+    const success = await mneeContract.transferFrom(
+      sub.subscriber_wallet,
+      sub.creator_wallet,
+      sub.amount
+    );
+    
+    if (success) {
+      // Extend subscription
+      await supabase.from('subscriptions')
+        .update({ next_billing: addMonths(1) })
+        .eq('id', sub.id);
+    }
+  }
+}
+```
+
+### MNEE Technical Specifications
+
+| Specification | Value |
+|--------------|-------|
+| **Token Standard** | ERC-20 (Ethereum) |
+| **Contract Address** | `0x8ccedbAe4916b79da7F3F612EfB2EB93A2bFB6cF` |
+| **Decimals** | 6 |
+| **Backing** | 1:1 USD (T-bills, cash, stablecoin equivalents) |
+| **Settlement Time** | < 1 second |
+| **Transaction Cost** | < $0.01 (sub-penny for micropayments) |
+| **Attestation** | Monthly third-party audits (Wolf & Company, P.C.) |
+| **Compliance** | GENIUS Act pathway |
+
+### MNEE Wallet Integration
+
+YourSpace supports multiple wallet connection methods:
+
+```typescript
+// src/lib/mnee-wallet.ts
+export async function connectWallet(): Promise<WalletConnection> {
+  // Option 1: MetaMask/Browser Wallet
+  if (window.ethereum) {
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
+    return { type: 'browser', signer };
+  }
+  
+  // Option 2: Embedded Wallet (for non-crypto users)
+  const embeddedWallet = await createEmbeddedWallet(user.id);
+  return { type: 'embedded', signer: embeddedWallet };
+  
+  // Option 3: RockWallet Integration
+  const rockWallet = await RockWallet.connect();
+  return { type: 'rockwallet', signer: rockWallet };
+}
+```
+
+### Why MNEE Over Other Payment Options?
+
+| Comparison | MNEE | Stripe | PayPal | Crypto (ETH/BTC) |
+|------------|------|--------|--------|------------------|
+| **$0.25 tip** | $0.001 fee ✅ | $0.32 fee ❌ | $0.35 fee ❌ | $2+ gas ❌ |
+| **Settlement** | < 1 sec ✅ | 2-7 days | 1-3 days | 1-60 min |
+| **Global** | ✅ Instant | Partial | Partial | ✅ |
+| **AI Agents** | ✅ Native | ❌ | ❌ | Expensive |
+| **Programmable** | ✅ Smart contracts | API only | API only | ✅ |
+| **Price Stable** | ✅ $1 = 1 MNEE | N/A | N/A | ❌ Volatile |
+
+### MNEE in the Hackathon Context
+
+YourSpace demonstrates all three hackathon tracks:
+
+| Track | Our Implementation |
+|-------|-------------------|
+| **AI & Agent Payments** | Supervisor AI agents pay for moderation APIs, data services, and compute resources autonomously using MNEE micropayments |
+| **Commerce & Creator Tools** | Live stream tipping, content paywalls, subscription payments, arcade in-game purchases — all via MNEE |
+| **Financial Automation** | Programmable revenue splits, escrow contracts for collaborations, auto-renewal subscriptions |
+
+### Judging Criteria Alignment
+
+| Criteria | How YourSpace Delivers |
+|----------|----------------------|
+| **Technological Implementation** | Production-ready Supabase backend, Edge Functions, real-time WebRTC streaming, Supervisor AI MCP integration |
+| **Design & User Experience** | Immersive "Enter the Void" virtual rooms, one-click Discord streaming, intuitive wallet UX |
+| **Impact Potential** | Solves real creator monetization pain (fees, delays, global access), enables AI agent economy |
+| **Originality** | First platform combining AI agent supervision with MNEE micropayments for creator tools |
+| **Solves Coordination Problems** | Transparent creator-fan economics, auditable AI agent actions, programmable revenue sharing |
+
+---
+
 ## Supervisor AI — The Core Intelligence
 
 ### What is Supervisor AI?
