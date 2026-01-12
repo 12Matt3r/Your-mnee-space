@@ -16,7 +16,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo user data constants to ensure consistency between login and restoration
+// Demo user data constants
 const DEMO_USER = {
   id: 'demo-user-001',
   email: 'demo@yourspace.io',
@@ -45,95 +45,105 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user on mount (one-time check)
+  // Consolidated Auth Logic
   useEffect(() => {
-    async function loadUser() {
-      setLoading(true);
+    let mounted = true;
+
+    async function initializeAuth() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        setLoading(true);
         
-        if (session) {
-          setSession(session);
-          setUser(session.user);
-          const userProfile = await socialApi.getCurrentUserProfile();
-          setProfile(userProfile);
-        } else {
-          // Check for persisted demo mode
-          const isDemo = localStorage.getItem('yourspace_demo_mode');
-          if (isDemo === 'true') {
-            console.log('Restoring demo session...');
-            setUser(DEMO_USER);
-            setProfile(DEMO_PROFILE);
+        // 1. Check for Demo Mode first
+        const isDemo = localStorage.getItem('yourspace_demo_mode') === 'true';
+        if (isDemo) {
+            if (mounted) {
+                setSession({ user: DEMO_USER } as Session);
+                setUser(DEMO_USER);
+                setProfile(DEMO_PROFILE);
+                setLoading(false);
+            }
+            return;
+        }
+
+        // 2. Check Supabase Session
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+
+        if (initialSession && mounted) {
+          setSession(initialSession);
+          setUser(initialSession.user);
+
+          // Fetch profile immediately
+          try {
+             const userProfile = await socialApi.getCurrentUserProfile();
+             if (mounted) setProfile(userProfile);
+          } catch (err) {
+             console.error("Error fetching initial profile", err);
           }
         }
       } catch (error) {
-        console.error('Error loading user:', error);
+        console.error('Error initializing auth:', error);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
     }
-    loadUser();
 
-    // Set up auth listener - KEEP SIMPLE, avoid any async operations in callback
+    initializeAuth();
+
+    // 3. Listen for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        // If we are in demo mode and Supabase sends a null session (expected), ignore it
-        // to prevent overwriting our demo state.
-        const isDemo = localStorage.getItem('yourspace_demo_mode');
+      async (event, newSession) => {
+        if (!mounted) return;
 
-        if (session) {
-          // Real session takes precedence
-          setSession(session);
-          setUser(session.user);
-          // We let the profile effect handle the profile fetch
-          if (isDemo) {
-            localStorage.removeItem('yourspace_demo_mode');
-          }
-        } else if (!isDemo) {
-          // Only clear state if NOT in demo mode
-          setSession(null);
-          setUser(null);
-          setProfile(null);
+        // Ignore updates if we are explicitly in demo mode (unless it's a sign-out event which might clear it)
+        // But usually demo mode bypasses this. However, if we sign in via Supabase, we should clear demo mode.
+        if (newSession) {
+             localStorage.removeItem('yourspace_demo_mode');
+             setSession(newSession);
+             setUser(newSession.user);
+
+             // Fetch profile on session change
+             try {
+                const userProfile = await socialApi.getCurrentUserProfile();
+                if (mounted) setProfile(userProfile);
+             } catch (err) {
+                 console.error("Error fetching profile on auth change", err);
+             }
+        } else {
+             // If session is null, check if we reverted to demo mode (unlikely via onAuthStateChange)
+             // Or just sign out
+             const isDemo = localStorage.getItem('yourspace_demo_mode') === 'true';
+             if (!isDemo) {
+                 setSession(null);
+                 setUser(null);
+                 setProfile(null);
+             }
         }
+        setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Load profile when user changes (only for real users)
-  useEffect(() => {
-    async function loadProfile() {
-      const isDemo = localStorage.getItem('yourspace_demo_mode');
-      if (user && !profile && !isDemo) {
-        try {
-          const userProfile = await socialApi.getCurrentUserProfile();
-          setProfile(userProfile);
-        } catch (error) {
-          console.error('Error loading profile:', error);
-        }
-      }
-    }
-    loadProfile();
-  }, [user, profile]);
-
-  // Demo login for hackathon - bypasses real auth
+  // Demo login
   async function demoLogin() {
     localStorage.setItem('yourspace_demo_mode', 'true');
     setUser(DEMO_USER);
     setProfile(DEMO_PROFILE);
+    setSession({ user: DEMO_USER } as Session);
     return { data: { user: DEMO_USER }, error: null };
   }
 
   // Auth methods
   async function signIn(email: string, password: string) {
-    const result = await socialApi.signIn(email, password);
-    return result;
+    return socialApi.signIn(email, password);
   }
 
   async function signUp(email: string, password: string, fullName?: string) {
-    const result = await socialApi.signUp(email, password, fullName);
-    return result;
+    return socialApi.signUp(email, password, fullName);
   }
 
   async function signOut() {
