@@ -79,6 +79,27 @@ export const socialApi = {
     return count || 0;
   },
 
+  async getPostsLikesCounts(postIds: string[]) {
+    const { data, error } = await supabase
+      .from('likes')
+      .select('post_id')
+      .in('post_id', postIds);
+
+    if (error) throw error;
+
+    const counts: Record<string, number> = {};
+    // Initialize all to 0
+    postIds.forEach(id => { counts[id] = 0; });
+
+    data?.forEach(like => {
+      if (counts[like.post_id] !== undefined) {
+        counts[like.post_id]++;
+      }
+    });
+
+    return counts;
+  },
+
   async checkIfUserLikedPost(postId: string, userId: string) {
     const { data, error } = await supabase
       .from('likes')

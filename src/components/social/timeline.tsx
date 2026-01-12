@@ -461,15 +461,22 @@ const Timeline = () => {
       // Batch fetch user interactions if logged in
       let likedPostIds = new Set<string>();
       let bookmarkedPostIds = new Set<string>();
+      let postsLikesCounts: Record<string, number> = {};
 
-      if (user && postsData.length > 0) {
+      if (postsData.length > 0) {
+        const postIds = postsData.map(p => p.id);
+
         try {
-          const postIds = postsData.map(p => p.id);
-          const interactions = await socialApi.getUserInteractionsForPosts(postIds, user.id);
-          likedPostIds = interactions.likedPostIds;
-          bookmarkedPostIds = interactions.bookmarkedPostIds;
+          // Batch fetch like counts for all posts
+          postsLikesCounts = await socialApi.getPostsLikesCounts(postIds);
+
+          if (user) {
+            const interactions = await socialApi.getUserInteractionsForPosts(postIds, user.id);
+            likedPostIds = interactions.likedPostIds;
+            bookmarkedPostIds = interactions.bookmarkedPostIds;
+          }
         } catch (error) {
-          console.error('Error fetching user interactions:', error);
+          console.error('Error fetching interactions/counts:', error);
         }
       }
 
@@ -478,15 +485,7 @@ const Timeline = () => {
         postsData.map(async (post) => {
           const isLiked = likedPostIds.has(post.id);
           const isBookmarked = bookmarkedPostIds.has(post.id);
-          
-          // Get like count
-          let likesCount = 0;
-          try {
-            const likes = await socialApi.getPostLikes(post.id);
-            likesCount = likes.length;
-          } catch (error) {
-            console.error('Error getting likes count:', error);
-          }
+          const likesCount = postsLikesCounts[post.id] || 0;
 
           // Mock Poll Data for specific posts (demonstration)
           let pollData = undefined;
