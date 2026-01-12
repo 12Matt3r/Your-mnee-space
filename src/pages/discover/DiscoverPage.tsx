@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useContent } from '../../hooks/useContent'
 import { AudioContentCard } from '../../components/music/AudioContentCard'
 import { SwipeMode } from '../../components/discovery/SwipeMode'
+import { MOCK_DISCOVERY_CONTENT } from '../../data/mockContent'
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -53,7 +54,11 @@ export const DiscoverPage = () => {
   }, [])
 
   useEffect(() => {
-    let filtered = [...content]
+    // Merge real content (if any) with mock content
+    // Deduplicate by ID just in case
+    const allContent = [...MOCK_DISCOVERY_CONTENT, ...content].filter((v,i,a)=>a.findIndex(v2=>(v2.id===v.id))===i);
+
+    let filtered = [...allContent]
 
     // Apply search filter
     if (searchQuery) {

@@ -177,7 +177,9 @@ export const LoginPage = () => {
                 setIsLoading(true)
                 try {
                   await demoLogin()
-                  navigate('/')
+                  // Force navigation to home with a hard reload feel if needed, but react router is fine
+                  // We add a small delay to ensure context updates
+                  setTimeout(() => navigate('/'), 100);
                 } finally {
                   setIsLoading(false)
                 }
@@ -185,7 +187,7 @@ export const LoginPage = () => {
               className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2"
             >
               <SparklesIcon className="w-5 h-5" />
-              Quick Demo Login
+              Enter Demo Mode
             </button>
 
             {/* Discord Login */}

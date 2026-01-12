@@ -1,3 +1,4 @@
+import { MneeTransactionButton } from '../../components/web3/MneeTransactionButton'
 // YourSpace MNEE - Creator Marketplace with MNEE Payments
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -143,26 +144,6 @@ export const MarketplacePage = () => {
     setShowTipModal(true)
   }
 
-  const confirmTip = () => {
-    if (!selectedCreator) return
-    const paymentUrl = generatePaymentLink(selectedCreator, tipAmount)
-    window.open(paymentUrl, '_blank')
-    setShowTipModal(false)
-    toast.success('Opening MNEE payment portal...')
-  }
-
-  const handleSubscribe = (tierPrice: number, creatorAddress: string) => {
-    const paymentUrl = generatePaymentLink(creatorAddress || MNEE_CONFIG.address, tierPrice.toString())
-    window.open(paymentUrl, '_blank')
-    toast.success('Opening MNEE payment portal for subscription...')
-  }
-
-  const handlePurchase = (price: number) => {
-    const paymentUrl = generatePaymentLink(MNEE_CONFIG.address, price.toString())
-    window.open(paymentUrl, '_blank')
-    toast.success('Opening MNEE payment portal...')
-  }
-
   const filteredContent = filterType === 'all' 
     ? creatorContent 
     : creatorContent.filter(c => c.type === filterType)
@@ -269,12 +250,12 @@ export const MarketplacePage = () => {
                           <span className="text-2xl font-bold text-green-400">{item.price} MNEE</span>
                           <span className="text-xs text-gray-500 ml-1">(~${item.price} USD)</span>
                         </div>
-                        <button 
-                          onClick={() => handlePurchase(item.price)}
-                          className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg font-semibold hover:from-purple-500 hover:to-pink-500 transition-all"
-                        >
-                          Buy Now
-                        </button>
+                        <MneeTransactionButton
+                            recipientAddress={MNEE_CONFIG.address} // Treasury/Creator Address
+                            amount={item.price.toString()}
+                            label="Buy Now"
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg hover:from-purple-500 hover:to-pink-500 text-white"
+                        />
                       </div>
                     </div>
                   </div>
@@ -320,17 +301,17 @@ export const MarketplacePage = () => {
                     ))}
                   </ul>
                   
-                  <button
-                    onClick={() => tier.price > 0 && handleSubscribe(tier.price, MNEE_CONFIG.address)}
+                  <MneeTransactionButton
+                    recipientAddress={MNEE_CONFIG.address}
+                    amount={tier.price.toString()}
+                    label={tier.price === 0 ? 'Current Plan' : 'Subscribe'}
                     disabled={tier.price === 0}
                     className={`w-full py-3 rounded-lg font-semibold transition-all ${
-                      tier.price === 0
-                        ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
+                        tier.price === 0
+                            ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white'
                     }`}
-                  >
-                    {tier.price === 0 ? 'Current Plan' : 'Subscribe'}
-                  </button>
+                  />
                 </div>
               ))}
             </div>
@@ -348,9 +329,9 @@ export const MarketplacePage = () => {
                       </div>
                       <button
                         onClick={() => handleTip(creator.payout_address || MNEE_CONFIG.address)}
-                        className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-semibold hover:from-yellow-400 hover:to-orange-400"
+                        className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-semibold hover:from-yellow-400 hover:to-orange-400 flex items-center gap-1"
                       >
-                        <CurrencyDollarIcon className="w-5 h-5 inline mr-1" />
+                        <CurrencyDollarIcon className="w-5 h-5 inline" />
                         Tip
                       </button>
                     </div>
@@ -441,12 +422,13 @@ export const MarketplacePage = () => {
               ))}
             </div>
             
-            <button
-              onClick={confirmTip}
-              className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-bold hover:from-yellow-400 hover:to-orange-400 transition-all"
-            >
-              Send {tipAmount} MNEE Tip
-            </button>
+            <MneeTransactionButton
+                recipientAddress={selectedCreator || MNEE_CONFIG.address}
+                amount={tipAmount}
+                label={`Send ${tipAmount} MNEE Tip`}
+                onSuccess={() => setShowTipModal(false)}
+                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg font-bold hover:from-yellow-400 hover:to-orange-400 transition-all text-white"
+            />
           </div>
         </div>
       )}
