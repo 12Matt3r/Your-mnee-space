@@ -1,0 +1,135 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase, Profile } from '../lib/supabase';
+import { socialApi } from '../lib/api';
+
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  profile: Profile | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, fullName?: string) => Promise<any>;
+  signOut: () => Promise<void>;
+  demoLogin: () => Promise<any>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Load user on mount (one-time check)
+  useEffect(() => {
+    async function loadUser() {
+      setLoading(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          const userProfile = await socialApi.getCurrentUserProfile();
+          setProfile(userProfile);
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUser();
+
+    // Set up auth listener - KEEP SIMPLE, avoid any async operations in callback
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        // NEVER use any async operations in callback
+        setSession(session);
+        setUser(session?.user || null);
+        if (!session?.user) {
+          setProfile(null);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Load profile when user changes
+  useEffect(() => {
+    async function loadProfile() {
+      if (user && !profile) {
+        try {
+          const userProfile = await socialApi.getCurrentUserProfile();
+          setProfile(userProfile);
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
+      }
+    }
+    loadProfile();
+  }, [user, profile]);
+
+  // Demo login for hackathon - bypasses real auth
+  async function demoLogin() {
+    const demoUser = {
+      id: 'demo-user-001',
+      email: 'demo@yourspace.io',
+      user_metadata: { full_name: 'Demo Creator' },
+      app_metadata: {},
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+    } as any;
+    
+    const demoProfile = {
+      id: 'demo-user-001',
+      user_id: 'demo-user-001',
+      username: 'DemoCreator',
+      display_name: 'Demo Creator',
+      bio: 'Welcome to YourSpace! This is a demo account.',
+      avatar_url: null,
+      followers_count: 1250,
+      following_count: 89,
+      is_creator: true,
+      creator_type: 'musician',
+    } as any;
+    
+    setUser(demoUser);
+    setProfile(demoProfile);
+    return { data: { user: demoUser }, error: null };
+  }
+
+  // Auth methods
+  async function signIn(email: string, password: string) {
+    const result = await socialApi.signIn(email, password);
+    return result;
+  }
+
+  async function signUp(email: string, password: string, fullName?: string) {
+    const result = await socialApi.signUp(email, password, fullName);
+    return result;
+  }
+
+  async function signOut() {
+    await socialApi.signOut();
+    setProfile(null);
+    setSession(null);
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, session, profile, loading, signIn, signUp, signOut, demoLogin }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
