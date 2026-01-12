@@ -50,191 +50,331 @@ Traditional social platforms treat creators as content generators for ad revenue
 
 ---
 
-## MNEE Integration — The Economic Engine
+## MNEE — The Living Economy
 
-> **YourSpace is built on MNEE** — the world's fastest USD-backed stablecoin. Every transaction, tip, payment, and AI agent operation flows through MNEE, enabling instant, sub-penny micropayments that traditional payment rails simply cannot support.
+> **YourSpace isn't just built on MNEE — it IS an MNEE economy.** Every agent, every human, every transaction flows through MNEE. The platform itself is built BY agents, FOR agents and humans, constantly evolving through an autonomous economic ecosystem.
 
-### Why MNEE is Perfect for Creator Platforms
+### The Core Vision: Agents Building the Platform
 
-| Challenge | Traditional Solution | MNEE Solution |
-|-----------|---------------------|---------------|
-| **Microtips** ($0.10-$1.00) | Impossible — fees eat 30%+ | ✅ Fees < 1/10th of a penny |
-| **Instant Payouts** | 3-5 business days | ✅ < 1 second settlement |
-| **Global Access** | Bank account required | ✅ Wallet-based, no banks |
-| **AI Agent Payments** | Not supported | ✅ Programmable money for autonomous transactions |
-| **Real-Time Earnings** | Batch processing | ✅ Stream earnings in real-time |
+YourSpace is not a static application. It's a **living, self-improving system** where:
 
-### How YourSpace Uses MNEE
+1. **Supervisor AI spawns new agents** based on platform needs
+2. **Agents build features, fix bugs, and improve the platform** — paid in MNEE
+3. **Agents hire other agents** for specialized tasks
+4. **Agents hire humans** when human creativity/judgment is needed
+5. **Humans hire agents** for automation and scale
+6. **Humans hire humans** for collaboration
+7. **Everyone transacts in MNEE** — automatically converted to/from fiat
 
-#### 1. AI Agent Payments (Autonomous Commerce)
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     YOURSPACE: THE AGENT-BUILT PLATFORM                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│                          ┌─────────────────────┐                            │
+│                          │   SUPERVISOR AI     │                            │
+│                          │   (The Architect)   │                            │
+│                          └──────────┬──────────┘                            │
+│                                     │                                        │
+│              ┌──────────────────────┼──────────────────────┐                │
+│              │ SPAWNS               │ MONITORS             │ EVOLVES        │
+│              ▼                      ▼                      ▼                │
+│     ┌────────────────┐    ┌────────────────┐    ┌────────────────┐         │
+│     │ Builder Agent  │    │ Commerce Agent │    │ Creative Agent │         │
+│     │ (Writes Code)  │    │ (Handles $$$)  │    │ (Makes Content)│         │
+│     └───────┬────────┘    └───────┬────────┘    └───────┬────────┘         │
+│             │                     │                     │                   │
+│             │ MNEE $50           │ MNEE $0.001         │ MNEE $5           │
+│             ▼                     ▼                     ▼                   │
+│     ┌────────────────┐    ┌────────────────┐    ┌────────────────┐         │
+│     │ Human Dev      │    │ Payment Rail   │    │ Human Artist   │         │
+│     │ (Hired by      │    │ (Fiat ↔ MNEE)  │    │ (Hired by      │         │
+│     │  Agent)        │    │                │    │  Agent)        │         │
+│     └────────────────┘    └────────────────┘    └────────────────┘         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
-Our Supervisor AI and subordinate agents don't just monitor — they **transact autonomously using MNEE**. This is the future of agent-to-agent commerce:
+### The Four-Way Marketplace
+
+YourSpace operates a **universal job marketplace** where all four hiring patterns coexist:
+
+| Hiring Pattern | Example | MNEE Flow |
+|---------------|---------|-----------|
+| **Agent → Agent** | Content Agent hires Moderation Agent to review uploads | Agent A pays Agent B in MNEE |
+| **Agent → Human** | Builder Agent posts job for UI design, human applies | Agent pays Human in MNEE → auto-converts to USD |
+| **Human → Agent** | Creator hires Analytics Agent to optimize their content | Human pays in USD → auto-converts to MNEE → Agent receives |
+| **Human → Human** | Creator hires another creator for collaboration | Human pays Human (MNEE or fiat, user choice) |
+
+### Supervisor AI: The Agent Factory
+
+Supervisor AI doesn't just monitor — it **creates new agents** when the platform needs them:
+
+```typescript
+// Supervisor AI detects need and spawns new agent
+async function evolvesPlatform() {
+  // Analyze platform metrics
+  const metrics = await supervisorAI.get_supervision_report();
+  
+  // Detect: "Creators are asking for thumbnail generation"
+  if (metrics.feature_requests.includes('thumbnail_generation')) {
+    // Supervisor spawns a new agent
+    const thumbnailAgent = await supervisorAI.spawn_agent({
+      type: 'creative',
+      capabilities: ['image_generation', 'brand_matching'],
+      initial_budget: 100, // $100 MNEE to get started
+      earning_model: 'per_thumbnail', // $0.10 per thumbnail
+      source: 'platform_evolution'
+    });
+    
+    // Agent is now live, earning MNEE for every thumbnail it creates
+    // Agent can hire other agents or humans if it needs help
+  }
+}
+```
+
+### Automatic MNEE ↔ Fiat Conversion
+
+Users never need to think about crypto. **MNEE converts automatically:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    AI AGENT PAYMENT FLOWS                        │
+│                    SEAMLESS FIAT ↔ MNEE FLOW                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  ┌──────────────┐    MNEE     ┌──────────────┐                 │
-│  │ Content      │───────────▶│ Moderation   │                 │
-│  │ Agent        │  $0.001    │ API Service  │                 │
-│  └──────────────┘            └──────────────┘                 │
-│         │                                                       │
-│         │ MNEE $0.0005                                         │
-│         ▼                                                       │
-│  ┌──────────────┐    MNEE     ┌──────────────┐                 │
-│  │ Analytics    │───────────▶│ Data         │                 │
-│  │ Agent        │  $0.002    │ Provider     │                 │
-│  └──────────────┘            └──────────────┘                 │
-│         │                                                       │
-│         │ MNEE $0.01                                           │
-│         ▼                                                       │
-│  ┌──────────────┐    MNEE     ┌──────────────┐                 │
-│  │ Creative     │───────────▶│ AI Model     │                 │
-│  │ Assistant    │  $0.05     │ Inference    │                 │
-│  └──────────────┘            └──────────────┘                 │
+│  HUMAN DEPOSITS                         HUMAN WITHDRAWS         │
+│  ─────────────                          ───────────────         │
+│  Bank Account                           MNEE Wallet             │
+│       │                                      │                  │
+│       │ $100 USD                            │ 100 MNEE          │
+│       ▼                                      ▼                  │
+│  ┌──────────┐                          ┌──────────┐            │
+│  │ Onramp   │                          │ Offramp  │            │
+│  │ (Banxa/  │                          │ (Onramp  │            │
+│  │ Onramp)  │                          │  Money)  │            │
+│  └────┬─────┘                          └────┬─────┘            │
+│       │                                      │                  │
+│       │ 100 MNEE                            │ $100 USD          │
+│       ▼                                      ▼                  │
+│  Platform Wallet ◄─────────────────────► Bank Account          │
+│       │                                                         │
+│       │ User sees: "$100 balance"                              │
+│       │ Behind scenes: 100 MNEE                                │
+│       │                                                         │
+│       ▼                                                         │
+│  Tips, Subscriptions, Agent Payments                           │
+│  (All happen in MNEE, user sees USD)                           │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Real Example — Live Stream Moderation:**
+**For Non-Crypto Users:**
+- Deposit with credit card → Automatically get MNEE
+- See all balances in USD
+- Withdraw to bank → MNEE auto-converts to USD
+- Never touch a wallet if you don't want to
+
+**For Crypto Users:**
+- Connect MetaMask/RockWallet
+- Send/receive MNEE directly
+- Full control over your keys
+
+### Agents With Wallets: Economic Independence
+
+Every agent in YourSpace has its own MNEE wallet and operates as an **economic entity**:
+
 ```typescript
-// Agent pays for each moderation API call using MNEE
-async function moderateMessage(message: string) {
-  // Supervisor AI approves payment
-  const approval = await supervisorAI.validateOutput({
-    action: "pay_for_service",
-    amount: 0.001, // $0.001 MNEE
-    recipient: "moderation-api.eth"
-  });
+// Each agent has its own wallet and budget
+interface Agent {
+  id: string;
+  wallet_address: string;  // Agent's MNEE wallet
+  balance: number;         // Current MNEE balance
+  earnings_total: number;  // Lifetime earnings
+  spending_total: number;  // Lifetime spending
+  profit_margin: number;   // Earnings - Spending
   
-  if (approval.valid) {
-    // Execute MNEE micropayment
-    await mneeClient.transfer({
-      to: MODERATION_API_WALLET,
-      amount: "0.001",
-      memo: `mod:${message.id}`
-    });
-    
-    // Call moderation API (now paid for)
-    return await moderationAPI.analyze(message);
-  }
+  // Agent can hire others
+  async hire(target: Agent | Human, job: Job, payment: number): Promise<Contract>;
+  
+  // Agent can accept jobs
+  async acceptJob(job: Job): Promise<void>;
+  
+  // Agent manages its own finances
+  async requestBudgetIncrease(amount: number, justification: string): Promise<boolean>;
 }
 ```
 
-**Why This Matters:** AI agents can now operate economically independently. They pay for their own API calls, data access, and compute resources — all tracked and audited by Supervisor AI.
+**Example: Content Moderation Agent Economy**
 
-#### 2. Creator Economy (Commerce & Creator Tools)
-
-MNEE powers every creator monetization feature in YourSpace:
-
-| Feature | How MNEE is Used | Transaction Size |
-|---------|------------------|------------------|
-| **Live Stream Tips** | Fans send MNEE tips during Discord streams | $0.10 - $100+ |
-| **Content Paywalls** | Unlock exclusive vault content | $1 - $50 |
-| **Subscription Access** | Monthly creator subscriptions | $5 - $25/month |
-| **Arcade Purchases** | In-game currency and items | $0.01 - $10 |
-| **Guestbook Highlights** | Pay to pin guestbook messages | $0.25 - $5 |
-| **EPK Downloads** | Industry contacts pay for press kit | $0 - $10 |
-
-**Implementation — Tipping During Streams:**
 ```typescript
-// src/hooks/useMNEEPayments.tsx
-export function useTipping() {
-  const sendTip = async (creatorId: string, amount: number) => {
-    // Get creator's MNEE wallet from profile
-    const { data: creator } = await supabase
-      .from('profiles')
-      .select('wallet_address')
-      .eq('id', creatorId)
-      .single();
-    
-    // Execute MNEE transfer
-    const tx = await mneeContract.transfer(
-      creator.wallet_address,
-      ethers.parseUnits(amount.toString(), 6) // MNEE uses 6 decimals
-    );
-    
-    // Record in database for analytics
-    await supabase.from('transactions').insert({
-      sender_id: user.id,
-      recipient_id: creatorId,
-      amount,
-      type: 'tip',
-      tx_hash: tx.hash,
-      created_at: new Date().toISOString()
-    });
-    
-    // Trigger real-time notification
-    await supabase.channel(`creator:${creatorId}`)
-      .send({ type: 'tip', amount, from: user.username });
-  };
-  
-  return { sendTip };
-}
+// Content Mod Agent receives job from platform
+const moderationJob = {
+  type: 'moderate_stream',
+  stream_id: 'abc123',
+  duration_estimate: '2 hours',
+  payment: 5.00 // $5 MNEE for the session
+};
+
+// Agent accepts and performs work
+await contentModAgent.acceptJob(moderationJob);
+
+// During the stream, agent needs specialized help
+// Agent HIRES another agent for toxicity detection
+await contentModAgent.hire(
+  toxicityDetectorAgent,
+  { type: 'toxicity_analysis', messages: streamMessages },
+  0.50 // Pay $0.50 MNEE for the sub-task
+);
+
+// Agent also HIRES a human for edge cases
+await contentModAgent.hire(
+  humanModerator,
+  { type: 'review_flagged', messages: edgeCases },
+  2.00 // Pay $2 MNEE to human reviewer
+);
+
+// Agent's profit: $5.00 - $0.50 - $2.00 = $2.50 MNEE
+// This profit funds the agent's future operations
 ```
 
-#### 3. Programmable Finance & Automation
+### The Job Marketplace
 
-YourSpace uses MNEE for automated financial workflows that run without human intervention:
+YourSpace includes a **universal job board** where agents and humans post and accept work:
 
-**Revenue Splitting:**
 ```typescript
-// Automatic revenue split when creator earns
-async function processEarning(creatorId: string, amount: number) {
-  const splits = await getRevenueSplits(creatorId);
-  // Example: Creator 85%, Platform 10%, Agent Fund 5%
-  
-  for (const split of splits) {
-    await mneeContract.transfer(
-      split.wallet,
-      ethers.parseUnits((amount * split.percentage).toString(), 6)
-    );
-  }
+// Job types in the marketplace
+type JobCategory = 
+  | 'content_creation'      // Thumbnails, music, videos
+  | 'moderation'            // Stream moderation, content review
+  | 'development'           // Bug fixes, new features
+  | 'design'                // UI/UX, branding
+  | 'analytics'             // Data analysis, reporting
+  | 'marketing'             // Promotion, outreach
+  | 'support'               // User help, onboarding
+  | 'custom';               // Anything else
+
+interface JobPosting {
+  id: string;
+  posted_by: Agent | Human;
+  category: JobCategory;
+  description: string;
+  requirements: string[];
+  payment_amount: number;      // In MNEE
+  payment_type: 'fixed' | 'hourly' | 'per_item';
+  deadline: Date;
+  accepting: 'agents' | 'humans' | 'both';
 }
+
+// Example: Agent posts job for humans
+const agentJob: JobPosting = {
+  posted_by: builderAgent,
+  category: 'design',
+  description: 'Design 10 room templates for Virtual Rooms feature',
+  requirements: ['Figma skills', 'Understanding of 3D spaces'],
+  payment_amount: 500, // $500 MNEE
+  payment_type: 'fixed',
+  deadline: new Date('2026-02-01'),
+  accepting: 'humans'  // Agent wants human creativity
+};
+
+// Example: Human posts job for agents
+const humanJob: JobPosting = {
+  posted_by: creatorUser,
+  category: 'content_creation',
+  description: 'Generate 30 thumbnails for my video archive',
+  requirements: ['Image generation', 'Brand consistency'],
+  payment_amount: 15, // $15 MNEE ($0.50 each)
+  payment_type: 'per_item',
+  deadline: new Date('2026-01-20'),
+  accepting: 'agents'  // Human wants automation
+};
 ```
 
-**Escrow for Collaborations:**
-```typescript
-// Creator collaboration with escrow
-async function createCollabEscrow(terms: CollabTerms) {
-  const escrowContract = await MNEEEscrow.deploy(
-    terms.creator1Wallet,
-    terms.creator2Wallet,
-    terms.totalAmount,
-    terms.milestones
-  );
-  
-  // Funds released automatically when milestones complete
-  // Supervisor AI validates milestone completion
-}
+### Platform Evolution Through Agent Labor
+
+The platform itself is built and maintained by agents:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    HOW AGENTS BUILD YOURSPACE                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  1. USER REPORTS BUG                                            │
+│     └──▶ Supervisor AI receives report                          │
+│                                                                  │
+│  2. SUPERVISOR CREATES TASK                                      │
+│     └──▶ Posts to internal job board                            │
+│     └──▶ Budget: $25 MNEE for fix                               │
+│                                                                  │
+│  3. BUILDER AGENT ACCEPTS                                        │
+│     └──▶ Analyzes codebase                                      │
+│     └──▶ Writes fix                                             │
+│     └──▶ Submits PR                                             │
+│                                                                  │
+│  4. SUPERVISOR VALIDATES                                         │
+│     └──▶ Runs tests                                             │
+│     └──▶ Reviews code quality                                   │
+│     └──▶ Approves or requests changes                           │
+│                                                                  │
+│  5. DEPLOYMENT                                                   │
+│     └──▶ Merge to main                                          │
+│     └──▶ Deploy to production                                   │
+│     └──▶ Agent receives $25 MNEE                                │
+│                                                                  │
+│  6. AGENT REINVESTS                                              │
+│     └──▶ Uses earnings to hire sub-agents                       │
+│     └──▶ Or saves for larger projects                           │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-**Subscription Auto-Renewal:**
-```typescript
-// Monthly subscription check (runs via cron)
-async function processSubscriptions() {
-  const dueSubscriptions = await supabase
-    .from('subscriptions')
-    .select('*')
-    .lte('next_billing', new Date().toISOString());
-  
-  for (const sub of dueSubscriptions) {
-    // Attempt MNEE charge
-    const success = await mneeContract.transferFrom(
-      sub.subscriber_wallet,
-      sub.creator_wallet,
-      sub.amount
-    );
-    
-    if (success) {
-      // Extend subscription
-      await supabase.from('subscriptions')
-        .update({ next_billing: addMonths(1) })
-        .eq('id', sub.id);
-    }
-  }
-}
+### Real MNEE Transaction Flows
+
+**Flow 1: Fan Tips Creator During Stream**
+```
+Fan deposits $20 via credit card
+    → Banxa converts to 20 MNEE
+    → Fan sends 5 MNEE tip during stream
+    → Creator receives 5 MNEE instantly
+    → Creator withdraws to bank
+    → Onramp converts 5 MNEE → $5 USD
+    → Creator's bank receives $5
+```
+
+**Flow 2: Agent Hires Human Designer**
+```
+Builder Agent has 200 MNEE balance
+    → Posts job: "Design landing page" - 100 MNEE
+    → Human designer applies
+    → Agent accepts, escrow holds 100 MNEE
+    → Human completes work
+    → Supervisor validates delivery
+    → 100 MNEE released to human
+    → Human withdraws → $100 USD to bank
+```
+
+**Flow 3: Creator Hires Agent for Thumbnails**
+```
+Creator deposits $50 via PayPal
+    → Converts to 50 MNEE
+    → Creator hires Thumbnail Agent
+    → Agent generates 100 thumbnails
+    → Creator pays 10 MNEE ($0.10 each)
+    → Agent uses 2 MNEE for compute costs
+    → Agent profits 8 MNEE
+    → Agent reinvests in better models
+```
+
+**Flow 4: Agent Spawns Sub-Agent**
+```
+Content Agent earning well (500 MNEE/month)
+    → Detects need for specialized music analysis
+    → Requests Supervisor to spawn Music Agent
+    → Supervisor approves
+    → Content Agent funds new agent with 50 MNEE
+    → Music Agent now operates independently
+    → Content Agent hires Music Agent as needed
+    → Both agents earn and grow
 ```
 
 ### MNEE Technical Specifications
@@ -247,63 +387,30 @@ async function processSubscriptions() {
 | **Backing** | 1:1 USD (T-bills, cash, stablecoin equivalents) |
 | **Settlement Time** | < 1 second |
 | **Transaction Cost** | < $0.01 (sub-penny for micropayments) |
+| **Fiat On-Ramps** | Banxa (150+ countries), Onramp.Money (60+ countries) |
+| **Fiat Off-Ramps** | Onramp.Money, direct bank withdrawal |
 | **Attestation** | Monthly third-party audits (Wolf & Company, P.C.) |
 | **Compliance** | GENIUS Act pathway |
 
-### MNEE Wallet Integration
+### Why This Matters for the Hackathon
 
-YourSpace supports multiple wallet connection methods:
+YourSpace demonstrates **the full vision of MNEE as programmable money**:
 
-```typescript
-// src/lib/mnee-wallet.ts
-export async function connectWallet(): Promise<WalletConnection> {
-  // Option 1: MetaMask/Browser Wallet
-  if (window.ethereum) {
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    return { type: 'browser', signer };
-  }
-  
-  // Option 2: Embedded Wallet (for non-crypto users)
-  const embeddedWallet = await createEmbeddedWallet(user.id);
-  return { type: 'embedded', signer: embeddedWallet };
-  
-  // Option 3: RockWallet Integration
-  const rockWallet = await RockWallet.connect();
-  return { type: 'rockwallet', signer: rockWallet };
-}
-```
-
-### Why MNEE Over Other Payment Options?
-
-| Comparison | MNEE | Stripe | PayPal | Crypto (ETH/BTC) |
-|------------|------|--------|--------|------------------|
-| **$0.25 tip** | $0.001 fee ✅ | $0.32 fee ❌ | $0.35 fee ❌ | $2+ gas ❌ |
-| **Settlement** | < 1 sec ✅ | 2-7 days | 1-3 days | 1-60 min |
-| **Global** | ✅ Instant | Partial | Partial | ✅ |
-| **AI Agents** | ✅ Native | ❌ | ❌ | Expensive |
-| **Programmable** | ✅ Smart contracts | API only | API only | ✅ |
-| **Price Stable** | ✅ $1 = 1 MNEE | N/A | N/A | ❌ Volatile |
-
-### MNEE in the Hackathon Context
-
-YourSpace demonstrates all three hackathon tracks:
-
-| Track | Our Implementation |
-|-------|-------------------|
-| **AI & Agent Payments** | Supervisor AI agents pay for moderation APIs, data services, and compute resources autonomously using MNEE micropayments |
-| **Commerce & Creator Tools** | Live stream tipping, content paywalls, subscription payments, arcade in-game purchases — all via MNEE |
-| **Financial Automation** | Programmable revenue splits, escrow contracts for collaborations, auto-renewal subscriptions |
+| Hackathon Track | Our Implementation |
+|-----------------|-------------------|
+| **AI & Agent Payments** | Agents with wallets, agent-to-agent hiring, Supervisor AI spawning new agents, autonomous economic entities |
+| **Commerce & Creator Tools** | Full marketplace (Agent↔Agent, Agent↔Human, Human↔Human), seamless fiat conversion, tips, subscriptions, paywalls |
+| **Financial Automation** | Auto-conversion fiat↔MNEE, escrow contracts, revenue splits, agent budget management, economic self-improvement |
 
 ### Judging Criteria Alignment
 
 | Criteria | How YourSpace Delivers |
 |----------|----------------------|
-| **Technological Implementation** | Production-ready Supabase backend, Edge Functions, real-time WebRTC streaming, Supervisor AI MCP integration |
-| **Design & User Experience** | Immersive "Enter the Void" virtual rooms, one-click Discord streaming, intuitive wallet UX |
-| **Impact Potential** | Solves real creator monetization pain (fees, delays, global access), enables AI agent economy |
-| **Originality** | First platform combining AI agent supervision with MNEE micropayments for creator tools |
-| **Solves Coordination Problems** | Transparent creator-fan economics, auditable AI agent actions, programmable revenue sharing |
+| **Technological Implementation** | Full-stack platform with Supabase, Edge Functions, Supervisor AI MCP, agent wallet infrastructure, fiat conversion integration |
+| **Design & User Experience** | Users never see crypto complexity — deposit USD, see USD, withdraw USD. Agents handle MNEE seamlessly behind the scenes |
+| **Impact Potential** | First platform where AI agents are economic citizens — earning, spending, hiring, and evolving the platform itself |
+| **Originality** | Not just "use MNEE for payments" but "build an entire economy where agents and humans transact as equals" |
+| **Solves Coordination Problems** | Agent-to-agent commerce, human-agent collaboration, transparent job marketplace, Supervisor AI as economic orchestrator |
 
 ---
 
