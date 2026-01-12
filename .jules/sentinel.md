@@ -1,5 +1,6 @@
-## 2024-05-23 - Hardcoded Secrets & Scope Creep
-**Vulnerability:** Found hardcoded Supabase URL and Anon Key directly in `src/lib/supabase.ts`.
-**Learning:** Even "public" keys like Supabase Anon Key should be in environment variables for proper configuration management and to avoid accidental commits of sensitive keys (like Service Role).
-**Prevention:** Use `import.meta.env` (Vite) or `process.env` (Node) and validate presence at runtime.
-**Scope Lesson:** I initially tried to fix syntax errors in `src/hooks/useStreamingSession.tsx` to get the build passing. This was a mistake. It introduced risk and breaking changes (renaming exports in `useDiscord.tsx`). Security fixes must be surgical. If the build is already broken, fix ONLY the security issue and verify that specific change, rather than trying to fix the whole repo.
+# Sentinel Security Journal
+
+## 2025-05-15 - Hardcoded API Key in Source Code
+**Vulnerability:** Found a live OpenRouter API key ('sk-or-v1-...') hardcoded in `src/lib/openrouter-ai.ts`.
+**Learning:** It seems the key was pasted directly into the config object, likely for quick testing, and then committed. The file structure suggests a config object pattern where values are hardcoded.
+**Prevention:** Always use `import.meta.env` (or `process.env`) for secrets. Use pre-commit hooks (like `git-secrets` or `trufflehog`) to scan for high-entropy strings or known key patterns before commit.

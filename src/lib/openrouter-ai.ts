@@ -9,7 +9,7 @@ export const OPENROUTER_CONFIG = {
   description: 'OpenRouter - Unified API for 100+ AI models from top providers',
   
   // OpenRouter API key provided by user
-  apiKey: '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',
+  apiKey: import.meta.env.VITE_OPENROUTER_API_KEY || '',
   
   // OpenRouter API endpoint
   apiBase: 'https://openrouter.ai/api/v1',
