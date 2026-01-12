@@ -2,16 +2,30 @@ import React from 'react'
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi'
 import { MNEE_CONTRACT_ADDRESS } from '../../lib/wagmi'
 import { formatUnits } from 'viem'
-import { Wallet, LogOut } from 'lucide-react'
+import { Wallet, LogOut, Loader2 } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export function ConnectWallet() {
   const { address, isConnected } = useAccount()
-  const { connectors, connect } = useConnect()
+  const { connectors, connect, error } = useConnect({
+    mutation: {
+        onError: (err) => {
+            console.error('Connection error:', err);
+            toast.error(`Failed to connect wallet: ${err.message}`);
+        }
+    }
+  })
   const { disconnect } = useDisconnect()
-  const { data: balance } = useBalance({
+  const { data: balance, isLoading: isBalanceLoading } = useBalance({
     address,
     token: MNEE_CONTRACT_ADDRESS,
   } as any)
+
+  // Filter connectors to just Injected (Metamask) and Coinbase for simplicity/demo
+  const validConnectors = connectors.filter(c => c.id === 'injected' || c.id === 'coinbaseWalletSDK' || c.name.toLowerCase().includes('metamask'));
+  // De-duplicate by name
+  const uniqueConnectors = validConnectors.filter((v,i,a)=>a.findIndex(v2=>(v2.name===v.name))===i);
+
 
   if (isConnected && address) {
     return (
@@ -23,7 +37,13 @@ export function ConnectWallet() {
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Balance</span>
             <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-300">
-              {balance ? `${parseFloat(formatUnits(balance.value, balance.decimals)).toFixed(2)} MNEE` : 'Loading...'}
+              {isBalanceLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-green-400" />
+              ) : balance ? (
+                  `${parseFloat(formatUnits(balance.value, balance.decimals)).toFixed(2)} MNEE`
+              ) : (
+                  '0.00 MNEE'
+              )}
             </span>
           </div>
         </div>
@@ -47,16 +67,22 @@ export function ConnectWallet() {
 
   return (
     <div className="flex gap-2">
-      {connectors.map((connector) => (
+      {uniqueConnectors.length > 0 ? uniqueConnectors.map((connector) => (
         <button
           key={connector.uid}
           onClick={() => connect({ connector })}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-colors text-white"
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-lg text-sm font-bold transition-all text-white shadow-lg shadow-blue-900/20"
         >
           <Wallet className="w-4 h-4" />
           {connector.name}
         </button>
-      ))}
+      )) : (
+         <button
+          className="flex items-center gap-2 px-4 py-2 bg-gray-700 rounded-lg text-sm font-bold text-gray-400 cursor-not-allowed"
+        >
+          No Wallet Found
+        </button>
+      )}
     </div>
   )
 }

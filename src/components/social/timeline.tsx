@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
+import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, ImageIcon, Smile, Calendar, MapPin, BarChart2, Coins } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 import { Post } from '../../lib/supabase';
+import { MneeTransactionButton } from '../web3/MneeTransactionButton';
+import { Link } from 'react-router-dom';
+import { MOCK_POSTS } from '../../data/mockContent';
 
 interface PostWithInteractions extends Post {
   likes_count: number;
@@ -10,6 +13,9 @@ interface PostWithInteractions extends Post {
   bookmarks_count: number;
   is_liked: boolean;
   is_bookmarked: boolean;
+  is_locked?: boolean;
+  unlock_price?: number;
+  unlocked_by_user?: boolean;
   poll?: {
     question: string;
     options: { id: string; text: string; votes: number }[];
@@ -21,6 +27,7 @@ interface PostWithInteractions extends Post {
     full_name: string | null;
     username: string | null;
     avatar_url: string | null;
+    wallet_address?: string;
   };
 }
 
@@ -163,8 +170,6 @@ const ComposerBox = () => {
   );
 };
 
-import { Link } from 'react-router-dom';
-
 const PostContent = ({ text }: { text: string }) => {
   // Simple regex to find hashtags and images markdown
   // Very basic parser for demo purposes
@@ -260,6 +265,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isBookmarked, setIsBookmarked] = useState(post.is_bookmarked);
   const [likes, setLikes] = useState(post.likes_count);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(post.unlocked_by_user || false);
   const { user } = useAuth();
 
   const handleLike = async () => {
@@ -319,6 +325,9 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const username = profile?.username || `user${post.user_id.slice(0, 8)}`;
   const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
 
+  // Use a fallback treasury address if the user profile doesn't have one
+  const recipientAddress = profile?.wallet_address || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+
   return (
     <article className="border-b border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer">
       <div className="flex space-x-3">
@@ -343,8 +352,31 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
           
           {/* Post Content */}
           <div className="mt-2">
-            <PostContent text={post.content} />
-            {post.poll && <PollDisplay poll={post.poll} />}
+            {post.is_locked && !isUnlocked ? (
+                <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 p-8 text-center backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20 filter blur-xl"></div>
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                            <Coins className="w-6 h-6 text-yellow-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Premium Content</h3>
+                        <p className="text-gray-400 mb-6 max-w-sm">
+                            This post contains exclusive content. Unlock it to view and support {displayName}.
+                        </p>
+                        <MneeTransactionButton
+                            recipientAddress={recipientAddress}
+                            amount={post.unlock_price?.toString() || "1.0"}
+                            label={`Unlock for ${post.unlock_price || 1} MNEE`}
+                            onSuccess={() => setIsUnlocked(true)}
+                        />
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <PostContent text={post.content} />
+                    {post.poll && <PollDisplay poll={post.poll} />}
+                </>
+            )}
           </div>
           
           {/* Post Actions */}
@@ -375,6 +407,19 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
               </div>
               <span className="text-sm">{likes}</span>
             </button>
+
+            {/* Tipping Button - Only show if not locked or unlocked */}
+            {(!post.is_locked || isUnlocked) && (
+                <div className="flex items-center">
+                    <MneeTransactionButton
+                        recipientAddress={recipientAddress}
+                        amount="5.0"
+                        label="Tip 5"
+                        className="!px-3 !py-1 !text-xs !bg-none !bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-500/30"
+                        icon={<Coins className="w-3 h-3 text-yellow-400 mr-1" />}
+                    />
+                </div>
+            )}
             
             <div className="flex items-center space-x-1">
               <button 
@@ -468,18 +513,42 @@ const Timeline = () => {
           };
         })
       );
+
+      // Merge Mock Posts
+      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
+          ...p,
+          likes_count: Math.floor(Math.random() * 500),
+          replies_count: Math.floor(Math.random() * 50),
+          bookmarks_count: Math.floor(Math.random() * 100),
+          is_liked: false,
+          is_bookmarked: false
+      })) as unknown as PostWithInteractions[];
+
+      const allPosts = [...mockPostsWithInteractions, ...postsWithInteractions];
       
       // Sort based on feed type if needed
       if (feedType === 'trending') {
-        postsWithInteractions.sort((a, b) => b.likes_count - a.likes_count);
+        allPosts.sort((a, b) => b.likes_count - a.likes_count);
       } else {
         // Already chronological from API
+         allPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
 
-      setPosts(postsWithInteractions);
+      setPosts(allPosts);
     } catch (err) {
       console.error('Error loading posts:', err);
-      setError('Failed to load posts. Please try again later.');
+
+      // Fallback to purely mock data on error
+      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
+          ...p,
+          likes_count: Math.floor(Math.random() * 500),
+          replies_count: Math.floor(Math.random() * 50),
+          bookmarks_count: Math.floor(Math.random() * 100),
+          is_liked: false,
+          is_bookmarked: false
+      })) as unknown as PostWithInteractions[];
+
+      setPosts(mockPostsWithInteractions);
     } finally {
       setLoading(false);
     }
@@ -497,26 +566,8 @@ const Timeline = () => {
     return () => window.removeEventListener('refreshTimeline', handleRefresh);
   }, [user, feedType]);
 
-  if (error) {
-    return (
-      <div className="min-h-screen">
-        <div className="sticky top-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 z-10">
-          <div className="px-4 py-3">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Home</h1>
-          </div>
-        </div>
-        <div className="p-8 text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button 
-            onClick={loadPosts}
-            className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // Removed the explicit Error state return to allow fallbacks or empty states
+  // if (error) { ... }
 
   return (
     <div className="min-h-screen">
