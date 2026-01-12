@@ -94,7 +94,10 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
             <span className="text-gray-500 dark:text-gray-400 truncate">@{username}</span>
             <span className="text-gray-500 dark:text-gray-400">·</span>
             <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{timeAgo(post.created_at)}</span>
-            <button className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
+            <button
+              aria-label="More options"
+              className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+            >
               <MoreHorizontal className="w-5 h-5 text-gray-500" />
             </button>
           </div>
@@ -130,14 +133,20 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
 
           {/* Post Actions */}
           <div className="flex items-center justify-between mt-4 max-w-md">
-            <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors group">
+            <button
+              aria-label={`Reply to ${displayName}`}
+              className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors group"
+            >
               <div className="p-2 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                 <MessageCircle className="w-5 h-5" />
               </div>
               <span className="text-sm">{post.replies_count}</span>
             </button>
 
-            <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors group">
+            <button
+              aria-label="Repost"
+              className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors group"
+            >
               <div className="p-2 rounded-full group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">
                 <Repeat2 className="w-5 h-5" />
               </div>
@@ -146,6 +155,8 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
 
             <button
               onClick={handleLike}
+              aria-label={isLiked ? "Unlike post" : "Like post"}
+              aria-pressed={isLiked}
               disabled={!user || isLoading}
               className={`flex items-center space-x-2 transition-colors group ${
                 isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
@@ -173,6 +184,8 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
             <div className="flex items-center space-x-1">
               <button
                 onClick={handleBookmark}
+                aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
+                aria-pressed={isBookmarked}
                 disabled={!user || isLoading}
                 className={`p-2 rounded-full transition-colors ${
                   isBookmarked
@@ -183,7 +196,10 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                 <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
               </button>
 
-              <button className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+              <button
+                aria-label="Share post"
+                className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+              >
                 <Share className="w-5 h-5" />
               </button>
             </div>
