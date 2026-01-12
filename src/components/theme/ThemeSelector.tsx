@@ -13,6 +13,7 @@ export const ThemeSelector = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Customize Vibe"
         className="p-2 rounded-lg bg-black/30 hover:bg-black/50 border border-purple-500/20 hover:border-purple-500/50 transition-all text-purple-300"
         title="Customize Vibe"
       >
@@ -28,6 +29,7 @@ export const ThemeSelector = () => {
             </h3>
             <button
               onClick={() => setIsOpen(false)}
+              aria-label="Close settings"
               className="text-gray-400 hover:text-white"
             >
               ×
@@ -45,6 +47,7 @@ export const ThemeSelector = () => {
                   <button
                     key={theme}
                     onClick={() => setTheme(theme)}
+                    aria-label={`Select ${theme} theme`}
                     className={cn(
                       'w-8 h-8 rounded-full border-2 transition-all hover:scale-110',
                       currentTheme === theme ? 'border-white scale-110' : 'border-transparent'
@@ -61,6 +64,8 @@ export const ThemeSelector = () => {
               <span className="text-sm text-gray-300">Dark Mode</span>
               <button
                 onClick={toggleDarkMode}
+                aria-pressed={isDarkMode}
+                aria-label="Toggle dark mode"
                 className={cn(
                   'w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out',
                   isDarkMode ? 'bg-purple-600' : 'bg-gray-600'

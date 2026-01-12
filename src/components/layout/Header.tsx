@@ -43,6 +43,7 @@ export const Header = () => {
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-mnee-gray" />
           <input
             type="text"
+            aria-label="Search content"
             placeholder="Search agents, creators, content..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -59,6 +60,7 @@ export const Header = () => {
             {/* Quick Create Button */}
             <Link
               to="/create"
+              aria-label="Create new content"
               className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200"
             >
               <PlusIcon className="h-5 w-5" />
@@ -70,7 +72,10 @@ export const Header = () => {
             <ThemeSelector />
 
             {/* Notifications */}
-            <button className="relative p-2 text-mnee-gray hover:text-mnee-gold transition-colors">
+            <button
+              aria-label="View notifications"
+              className="relative p-2 text-mnee-gray hover:text-mnee-gold transition-colors"
+            >
               <BellIcon className="h-6 w-6" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-mnee-gold rounded-full"></span>
             </button>
