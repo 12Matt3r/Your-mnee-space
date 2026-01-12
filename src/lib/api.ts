@@ -40,6 +40,37 @@ export const socialApi = {
     return data;
   },
 
+  async getPostsWithStats(limit = 20) {
+    // 1. Fetch posts
+    const posts = await this.getPosts(limit);
+    if (!posts || posts.length === 0) return [];
+
+    const postIds = posts.map(p => p.id);
+
+    // 2. Fetch interaction counts
+    // We try to fetch counts efficiently.
+    // Since we can't easily do a GROUP BY count without RPC, we'll use Promise.all with HEAD requests
+    // which is still N+1 but much lighter than fetching all rows.
+    // Ideally, we would use a 'posts_with_stats' view or RPC on the backend.
+
+    const postsWithStats = await Promise.all(posts.map(async (post) => {
+      const [likesCount, bookmarksCount] = await Promise.all([
+        this.getPostLikeCount(post.id),
+        // We assume a similar count method for bookmarks, or default to 0 if not exists
+        supabase.from('bookmarks').select('*', { count: 'exact', head: true }).eq('post_id', post.id).then(res => res.count || 0)
+      ]);
+
+      return {
+        ...post,
+        likes_count: likesCount,
+        bookmarks_count: bookmarksCount,
+        replies_count: 0 // Placeholder until replies table is integrated
+      };
+    }));
+
+    return postsWithStats;
+  },
+
   // Likes
   async likePost(postId: string) {
     const { data, error } = await supabase.functions.invoke('like-post', {
@@ -77,6 +108,12 @@ export const socialApi = {
 
     if (error) throw error;
     return count || 0;
+  },
+
+  async getLikesCountForPosts(postIds: string[]) {
+    // This method would be useful if we could do a group by query
+    // For now, we rely on individual counts or the batched approach in getPostsWithStats
+    return {};
   },
 
   async checkIfUserLikedPost(postId: string, userId: string) {
