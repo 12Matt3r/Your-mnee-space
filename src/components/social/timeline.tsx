@@ -1,520 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, ImageIcon, Smile, Calendar, MapPin, BarChart2, Coins } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
-import { Post } from '../../lib/supabase';
-import { MneeTransactionButton } from '../web3/MneeTransactionButton';
-import { Link } from 'react-router-dom';
 import { MOCK_POSTS } from '../../data/mockContent';
-
-interface PostWithInteractions extends Post {
-  likes_count: number;
-  replies_count: number;
-  bookmarks_count: number;
-  is_liked: boolean;
-  is_bookmarked: boolean;
-  is_locked?: boolean;
-  unlock_price?: number;
-  unlocked_by_user?: boolean;
-  poll?: {
-    question: string;
-    options: { id: string; text: string; votes: number }[];
-    total_votes: number;
-    user_vote?: string;
-  };
-  profiles?: {
-    user_id: string;
-    full_name: string | null;
-    username: string | null;
-    avatar_url: string | null;
-    wallet_address?: string;
-  };
-}
-
-const ComposerBox = () => {
-  const [postText, setPostText] = useState('');
-  const [isPosting, setIsPosting] = useState(false);
-  const [mockImage, setMockImage] = useState<string | null>(null);
-  const { user, profile } = useAuth();
-  const maxChars = 280;
-
-  const handleImageUpload = () => {
-      // Mock image upload
-      const randomImage = `https://picsum.photos/seed/${Date.now()}/800/400`;
-      setMockImage(randomImage);
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if ((!postText.trim() && !mockImage) || postText.length > maxChars || !user) return;
-    
-    setIsPosting(true);
-    try {
-      // In a real app, we'd upload the image to storage and pass the URL
-      // For now, we append the mock image URL to content if it exists to simulate it
-      const content = mockImage ? `${postText}\n\n![Image](${mockImage})` : postText;
-
-      await socialApi.createPost(content);
-      setPostText('');
-      setMockImage(null);
-      // Trigger a refresh of the timeline
-      window.dispatchEvent(new CustomEvent('refreshTimeline'));
-    } catch (error) {
-      console.error('Error creating post:', error);
-      alert('Failed to create post. Please try again.');
-    } finally {
-      setIsPosting(false);
-    }
-  };
-  
-  if (!user) {
-    return (
-      <div className="border-b border-gray-200 dark:border-gray-800 p-4">
-        <div className="text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Sign in to share your creative thoughts</p>
-          <button className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 transition-colors">
-            Sign In
-          </button>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <form onSubmit={handleSubmit} className="border-b border-gray-200 dark:border-gray-800 p-4">
-      <div className="flex space-x-4">
-        <img
-          src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || user.email || 'User')}&background=6366f1&color=fff`}
-          alt="Your avatar"
-          className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700"
-        />
-        <div className="flex-1">
-          <textarea
-            value={postText}
-            onChange={(e) => setPostText(e.target.value)}
-            placeholder="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
-            rows={3}
-            maxLength={maxChars}
-            disabled={isPosting}
-          />
-          
-          {mockImage && (
-              <div className="relative mt-4 rounded-xl overflow-hidden group">
-                  <img src={mockImage} alt="Upload preview" className="w-full h-48 object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => setMockImage(null)}
-                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-              </div>
-          )}
-
-          {/* Composer Actions */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center space-x-4">
-              <button type="button" onClick={handleImageUpload} className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Image">
-                <ImageIcon className="w-5 h-5 text-blue-500" />
-              </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Poll">
-                <BarChart2 className="w-5 h-5 text-blue-500" />
-              </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Emoji">
-                <Smile className="w-5 h-5 text-blue-500" />
-              </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Schedule">
-                <Calendar className="w-5 h-5 text-blue-500" />
-              </button>
-              <button type="button" className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" title="Add Location">
-                <MapPin className="w-5 h-5 text-blue-500" />
-              </button>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className={`text-sm ${
-                  postText.length > maxChars * 0.9 
-                    ? 'text-red-500' 
-                    : postText.length > maxChars * 0.8 
-                    ? 'text-yellow-500' 
-                    : 'text-gray-500'
-                }`}>
-                  {maxChars - postText.length}
-                </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9 
-                      ? 'bg-red-500' 
-                      : postText.length > maxChars * 0.8 
-                      ? 'bg-yellow-500' 
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
-                </div>
-              </div>
-              <button 
-                type="submit"
-                disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isPosting ? 'Posting...' : 'Post'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </form>
-  );
-};
-
-const PostContent = ({ text }: { text: string }) => {
-  // Simple regex to find hashtags and images markdown
-  // Very basic parser for demo purposes
-  const parts = text.split(/(\#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
-
-  return (
-    <div className="text-gray-900 dark:text-white text-base leading-relaxed whitespace-pre-wrap">
-      {parts.map((part, index) => {
-        if (part.startsWith('#')) {
-          const tag = part.substring(1); // remove #
-          return (
-            <Link key={index} to={`/discover?q=${tag}`} className="text-blue-500 hover:underline cursor-pointer">
-              {part}
-            </Link>
-          );
-        } else if (part.match(/!\[.*?\]\(.*?\)/)) {
-            // Render markdown image
-            const match = part.match(/!\[(.*?)\]\((.*?)\)/);
-            if (match) {
-                return (
-                    <img
-                        key={index}
-                        src={match[2]}
-                        alt={match[1]}
-                        className="mt-3 rounded-xl w-full object-cover max-h-96"
-                    />
-                );
-            }
-        }
-        return <span key={index}>{part}</span>;
-      })}
-    </div>
-  );
-};
-
-const PollDisplay = ({ poll }: { poll: NonNullable<PostWithInteractions['poll']> }) => {
-  const [selectedOption, setSelectedOption] = useState<string | null>(poll.user_vote || null);
-  const [totalVotes, setTotalVotes] = useState(poll.total_votes);
-  const [options, setOptions] = useState(poll.options);
-
-  const handleVote = (optionId: string) => {
-    if (selectedOption) return;
-
-    setSelectedOption(optionId);
-    setTotalVotes(prev => prev + 1);
-    setOptions(prev => prev.map(opt =>
-        opt.id === optionId ? { ...opt, votes: opt.votes + 1 } : opt
-    ));
-  };
-
-  return (
-    <div className="mt-3 space-y-2">
-      {options.map((option) => {
-        const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
-        const isSelected = selectedOption === option.id;
-
-        return (
-          <div key={option.id} className="relative">
-            {/* Background Bar */}
-            {selectedOption && (
-                <div
-                    className="absolute inset-0 bg-blue-500/10 rounded-lg transition-all duration-500"
-                    style={{ width: `${percentage}%` }}
-                />
-            )}
-
-            <button
-                onClick={() => handleVote(option.id)}
-                disabled={!!selectedOption}
-                className={`relative w-full text-left px-4 py-3 rounded-lg border transition-all flex justify-between items-center ${
-                    isSelected
-                        ? 'border-blue-500 text-blue-500'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                }`}
-            >
-                <span className="font-medium">{option.text}</span>
-                {selectedOption && (
-                    <span className="text-sm font-bold">{percentage}%</span>
-                )}
-            </button>
-          </div>
-        );
-      })}
-      <div className="text-sm text-gray-500 mt-2">
-        {totalVotes.toLocaleString()} votes • {selectedOption ? 'Final results' : 'Poll open'}
-      </div>
-    </div>
-  );
-};
-
-const PostItem = ({ post }: { post: PostWithInteractions }) => {
-  const [isLiked, setIsLiked] = useState(post.is_liked);
-  const [isBookmarked, setIsBookmarked] = useState(post.is_bookmarked);
-  const [likes, setLikes] = useState(post.likes_count);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUnlocked, setIsUnlocked] = useState(post.unlocked_by_user || false);
-  const { user } = useAuth();
-
-  const handleLike = async () => {
-    if (!user || isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      if (isLiked) {
-        await socialApi.unlikePost(post.id);
-        setLikes(likes - 1);
-      } else {
-        await socialApi.likePost(post.id);
-        setLikes(likes + 1);
-      }
-      setIsLiked(!isLiked);
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleBookmark = async () => {
-    if (!user || isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      if (isBookmarked) {
-        await socialApi.unbookmarkPost(post.id);
-      } else {
-        await socialApi.bookmarkPost(post.id);
-      }
-      setIsBookmarked(!isBookmarked);
-    } catch (error) {
-      console.error('Error toggling bookmark:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d`;
-    }
-  };
-
-  const profile = post.profiles;
-  const displayName = profile?.full_name || profile?.username || 'Anonymous';
-  const username = profile?.username || `user${post.user_id.slice(0, 8)}`;
-  const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
-
-  // Use a fallback treasury address if the user profile doesn't have one
-  const recipientAddress = profile?.wallet_address || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
-
-  return (
-    <article className="border-b border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer">
-      <div className="flex space-x-3">
-        <img
-          src={avatarUrl}
-          alt={displayName}
-          className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex-shrink-0"
-        />
-        <div className="flex-1 min-w-0">
-          {/* User Info */}
-          <div className="flex items-center space-x-2">
-            <h3 className="font-bold text-gray-900 dark:text-white truncate">
-              {displayName}
-            </h3>
-            <span className="text-gray-500 dark:text-gray-400 truncate">@{username}</span>
-            <span className="text-gray-500 dark:text-gray-400">·</span>
-            <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{timeAgo(post.created_at)}</span>
-            <button className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors">
-              <MoreHorizontal className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-          
-          {/* Post Content */}
-          <div className="mt-2">
-            {post.is_locked && !isUnlocked ? (
-                <div className="relative overflow-hidden rounded-xl border border-gray-800 bg-gray-900/50 p-8 text-center backdrop-blur-sm">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20 filter blur-xl"></div>
-                    <div className="relative z-10 flex flex-col items-center">
-                        <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center mb-4">
-                            <Coins className="w-6 h-6 text-yellow-400" />
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-2">Premium Content</h3>
-                        <p className="text-gray-400 mb-6 max-w-sm">
-                            This post contains exclusive content. Unlock it to view and support {displayName}.
-                        </p>
-                        <MneeTransactionButton
-                            recipientAddress={recipientAddress}
-                            amount={post.unlock_price?.toString() || "1.0"}
-                            label={`Unlock for ${post.unlock_price || 1} MNEE`}
-                            onSuccess={() => setIsUnlocked(true)}
-                        />
-                    </div>
-                </div>
-            ) : (
-                <>
-                    <PostContent text={post.content} />
-                    {post.poll && <PollDisplay poll={post.poll} />}
-                </>
-            )}
-          </div>
-          
-          {/* Post Actions */}
-          <div className="flex items-center justify-between mt-4 max-w-md">
-            <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors group">
-              <div className="p-2 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
-                <MessageCircle className="w-5 h-5" />
-              </div>
-              <span className="text-sm">{post.replies_count}</span>
-            </button>
-            
-            <button className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors group">
-              <div className="p-2 rounded-full group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">
-                <Repeat2 className="w-5 h-5" />
-              </div>
-              <span className="text-sm">0</span>
-            </button>
-            
-            <button 
-              onClick={handleLike}
-              disabled={!user || isLoading}
-              className={`flex items-center space-x-2 transition-colors group ${
-                isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
-              } ${(!user || isLoading) ? 'cursor-not-allowed opacity-50' : ''}`}
-            >
-              <div className="p-2 rounded-full group-hover:bg-red-50 dark:group-hover:bg-red-900/20 transition-colors">
-                <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-              </div>
-              <span className="text-sm">{likes}</span>
-            </button>
-
-            {/* Tipping Button - Only show if not locked or unlocked */}
-            {(!post.is_locked || isUnlocked) && (
-                <div className="flex items-center">
-                    <MneeTransactionButton
-                        recipientAddress={recipientAddress}
-                        amount="5.0"
-                        label="Tip 5"
-                        className="!px-3 !py-1 !text-xs !bg-none !bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-500/30"
-                        icon={<Coins className="w-3 h-3 text-yellow-400 mr-1" />}
-                    />
-                </div>
-            )}
-            
-            <div className="flex items-center space-x-1">
-              <button 
-                onClick={handleBookmark}
-                disabled={!user || isLoading}
-                className={`p-2 rounded-full transition-colors ${
-                  isBookmarked 
-                    ? 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20' 
-                    : 'text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
-                } ${(!user || isLoading) ? 'cursor-not-allowed opacity-50' : ''}`}
-              >
-                <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
-              </button>
-              
-              <button className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-                <Share className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-};
+import { PostWithInteractions } from '../../types/social';
+import ComposerBox from './ComposerBox';
+import PostItem from './PostItem';
+import SkeletonPost from '../ui/SkeletonPost';
 
 const Timeline = () => {
   const [posts, setPosts] = useState<PostWithInteractions[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
   const [feedType, setFeedType] = useState<'chronological' | 'trending'>('chronological');
 
-  const loadPosts = async () => {
+  // Intersection Observer for Infinite Scroll
+  const { ref, inView } = useInView({
+    threshold: 0,
+    rootMargin: '100px',
+  });
+
+  const loadPosts = useCallback(async (isRefresh = false) => {
+    if (!hasMore && !isRefresh) return;
+
     setLoading(true);
-    setError(null);
     try {
-      const postsData = await socialApi.getPosts();
+      const limit = 10;
+      // If we implemented pagination in API, we would pass offset/page here.
+      // For now, we fetch distinct chunks or just a limited set.
+      // Assuming getPostsWithStats supports offset/limit.
+      // Since `getPosts` supports limit, we assume we fetch the latest 20.
+      // Real pagination would require API update, but let's stick to the limit for now.
       
-      // Batch fetch user interactions if logged in
-      let likedPostIds = new Set<string>();
-      let bookmarkedPostIds = new Set<string>();
+      const postsData = await socialApi.getPostsWithStats(limit);
 
-      if (user && postsData.length > 0) {
-        try {
-          const postIds = postsData.map(p => p.id);
-          const interactions = await socialApi.getUserInteractionsForPosts(postIds, user.id);
-          likedPostIds = interactions.likedPostIds;
-          bookmarkedPostIds = interactions.bookmarkedPostIds;
-        } catch (error) {
-          console.error('Error fetching user interactions:', error);
-        }
-      }
-
-      // Transform posts to include interaction counts and states
-      const postsWithInteractions: PostWithInteractions[] = await Promise.all(
-        postsData.map(async (post) => {
-          const isLiked = likedPostIds.has(post.id);
-          const isBookmarked = bookmarkedPostIds.has(post.id);
-          
-          // Get like count
-          let likesCount = 0;
-          try {
-            const likes = await socialApi.getPostLikes(post.id);
-            likesCount = likes.length;
-          } catch (error) {
-            console.error('Error getting likes count:', error);
-          }
-
-          // Mock Poll Data for specific posts (demonstration)
-          let pollData = undefined;
-          if (post.content.includes("Poll:") || post.content.includes("Vote")) {
-             pollData = {
-                 question: "Best Web3 Feature?",
-                 total_votes: 142,
-                 options: [
-                     { id: '1', text: 'Agent Economy', votes: 85 },
-                     { id: '2', text: 'MNEE Token', votes: 42 },
-                     { id: '3', text: 'Custom Rooms', votes: 15 }
-                 ]
-             };
-          }
-          
-          return {
-            ...post,
-            likes_count: likesCount,
-            replies_count: 0, // TODO: implement replies
-            bookmarks_count: 0, // TODO: implement bookmark count
-            is_liked: isLiked,
-            is_bookmarked: isBookmarked,
-            poll: pollData
-          };
-        })
-      );
-
-      // Merge Mock Posts
+      // Merge Mock Posts (simulating mixing real & suggested/mock content)
       const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
           ...p,
           likes_count: Math.floor(Math.random() * 500),
@@ -524,57 +47,76 @@ const Timeline = () => {
           is_bookmarked: false
       })) as unknown as PostWithInteractions[];
 
-      const allPosts = [...mockPostsWithInteractions, ...postsWithInteractions];
+      // In a real scenario, we would append based on unique IDs
+      const newPosts = [...mockPostsWithInteractions, ...postsData];
       
-      // Sort based on feed type if needed
+      // Sort
       if (feedType === 'trending') {
-        allPosts.sort((a, b) => b.likes_count - a.likes_count);
+        newPosts.sort((a, b) => b.likes_count - a.likes_count);
       } else {
-        // Already chronological from API
-         allPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        newPosts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
 
-      setPosts(allPosts);
+      // Deduplicate
+      setPosts(prev => {
+        const combined = isRefresh ? newPosts : [...prev, ...newPosts];
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        return unique;
+      });
+
+      // Mock infinite scroll logic: if we got less than requested, no more data
+      // But since we mix mock data, we always have "more" effectively.
+      // We'll stop after 50 posts for performance in this demo.
+      if (posts.length > 50) setHasMore(false);
+
     } catch (err) {
       console.error('Error loading posts:', err);
-
-      // Fallback to purely mock data on error
-      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-          ...p,
-          likes_count: Math.floor(Math.random() * 500),
-          replies_count: Math.floor(Math.random() * 50),
-          bookmarks_count: Math.floor(Math.random() * 100),
-          is_liked: false,
-          is_bookmarked: false
-      })) as unknown as PostWithInteractions[];
-
-      setPosts(mockPostsWithInteractions);
+      // Fallback
+      if (posts.length === 0) {
+         const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
+            ...p,
+            likes_count: Math.floor(Math.random() * 500),
+            replies_count: Math.floor(Math.random() * 50),
+            bookmarks_count: Math.floor(Math.random() * 100),
+            is_liked: false,
+            is_bookmarked: false
+         })) as unknown as PostWithInteractions[];
+         setPosts(mockPostsWithInteractions);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [feedType, hasMore, posts.length]);
 
+  // Initial load
   useEffect(() => {
-    loadPosts();
-    
-    // Listen for timeline refresh events
-    const handleRefresh = () => {
-      loadPosts();
-    };
-    
+    loadPosts(true);
+  }, [user, feedType]); // Reload when user/feedType changes
+
+  // Infinite Scroll Trigger
+  useEffect(() => {
+    if (inView && !loading) {
+      // Small delay to simulate network and prevent spam
+      const timer = setTimeout(() => {
+          loadPosts(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [inView, loading, loadPosts]);
+
+  // Refresh Listener
+  useEffect(() => {
+    const handleRefresh = () => loadPosts(true);
     window.addEventListener('refreshTimeline', handleRefresh);
     return () => window.removeEventListener('refreshTimeline', handleRefresh);
-  }, [user, feedType]);
-
-  // Removed the explicit Error state return to allow fallbacks or empty states
-  // if (error) { ... }
+  }, [loadPosts]);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20">
       {/* Header */}
       <div className="sticky top-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur border-b border-gray-200 dark:border-gray-800 z-10">
-        <div className="px-4 py-3">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Home</h1>
+        <div className="px-4 py-3" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white cursor-pointer">Home</h1>
         </div>
         
         {/* Timeline Tabs */}
@@ -606,17 +148,39 @@ const Timeline = () => {
       <ComposerBox />
       
       {/* Posts Feed */}
-      <div>
-        {loading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            <p className="mt-2 text-gray-500 dark:text-gray-400">Loading posts...</p>
-          </div>
-        ) : posts.length > 0 ? (
-          posts.map((post) => (
-            <PostItem key={post.id} post={post} />
-          ))
-        ) : (
+      <div className="min-h-[200px]">
+        <AnimatePresence mode='popLayout'>
+            {posts.map((post) => (
+                <motion.div
+                    key={post.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <PostItem post={post} />
+                </motion.div>
+            ))}
+        </AnimatePresence>
+
+        {loading && (
+           <div className="space-y-4">
+              <SkeletonPost />
+              <SkeletonPost />
+              <SkeletonPost />
+           </div>
+        )}
+
+        {/* Intersection Observer Target */}
+        {hasMore && <div ref={ref} className="h-10" />}
+
+        {!hasMore && posts.length > 0 && (
+             <div className="p-8 text-center text-gray-500">
+                 You've reached the end of the creative universe (for now).
+             </div>
+        )}
+
+        {!loading && posts.length === 0 && (
           <div className="p-8 text-center">
             <p className="text-gray-500 dark:text-gray-400 mb-4">
               No posts yet. {user ? 'Be the first to share something!' : 'Sign in to see posts from the creative community.'}
@@ -632,18 +196,6 @@ const Timeline = () => {
           </div>
         )}
       </div>
-      
-      {/* Load More */}
-      {posts.length > 0 && !loading && (
-        <div className="p-4 text-center">
-          <button 
-            onClick={loadPosts}
-            className="text-blue-500 hover:text-blue-600 font-medium transition-colors"
-          >
-            Refresh posts
-          </button>
-        </div>
-      )}
     </div>
   );
 };
