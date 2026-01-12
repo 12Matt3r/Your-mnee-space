@@ -12,6 +12,7 @@ import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { ThemeSelector } from '../theme/ThemeSelector'
 import { ConnectWallet } from '../web3/ConnectWallet'
+import { BuyMNEEButton } from '../mnee/BuyMNEEButton'
 
 export const Header = () => {
   const { user, profile, signOut } = useAuth()
@@ -57,6 +58,9 @@ export const Header = () => {
         {user ? (
           // Authenticated User Content
           <>
+            {/* Buy MNEE & Subscribe */}
+            <BuyMNEEButton variant="header" />
+
             {/* Quick Create Button */}
             <Link
               to="/create"
@@ -172,9 +176,9 @@ export const Header = () => {
         ) : (
           // Guest User Content
           <>
-            <div className="text-sm text-mnee-gray hidden md:block">
-              Sign up to create agents
-            </div>
+            {/* Buy MNEE for guests too */}
+            <BuyMNEEButton variant="header" showSubscribe={true} />
+            
             <div className="flex items-center space-x-3">
               <Link
                 to="/login"

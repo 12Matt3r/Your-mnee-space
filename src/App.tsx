@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/theme/ThemeProvider';
 import { GlobalMusicProvider } from './components/music/GlobalMusicProvider';
+import { MusicPlayerProvider } from './contexts/MusicPlayerContext';
 import { Web3Provider } from './components/web3/Web3Provider';
 import { Layout } from './components/layout/Layout';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
@@ -39,6 +40,8 @@ import { LivePage } from './pages/live/LivePage';
 import { GovernancePage } from './pages/governance/GovernancePage';
 import { CreateAgentPage } from './pages/agents/CreateAgentPage';
 import { AdminPage } from './pages/admin/AdminPage';
+import BuyMNEE from './pages/BuyMNEE';
+import Subscribe from './pages/Subscribe';
 import './App.css';
 
 function App() {
@@ -48,6 +51,7 @@ function App() {
         <Web3Provider>
           <ThemeProvider>
             <GlobalMusicProvider>
+              <MusicPlayerProvider>
               <div className="App">
                 <Routes>
                 {/* Auth routes without layout */}
@@ -122,6 +126,9 @@ function App() {
                     <GovernancePage />
                   </Layout>
                 } />
+                
+                <Route path="/buy-mnee" element={<BuyMNEE />} />
+                <Route path="/subscribe" element={<Subscribe />} />
                 
                 <Route path="/agents" element={
                   <Layout>
@@ -242,6 +249,7 @@ function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </div>
+              </MusicPlayerProvider>
             </GlobalMusicProvider>
           </ThemeProvider>
         </Web3Provider>

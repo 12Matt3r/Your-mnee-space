@@ -162,9 +162,13 @@ const LiveStreamManager: React.FC<LiveStreamManagerProps> = ({ roomId, onClose }
           track.enabled = isVideoEnabled;
         });
 
-        // Set video source
+        // Set video source and play
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
+          // Ensure the video plays after setting source
+          localVideoRef.current.play().catch((err) => {
+            console.log('Video autoplay was prevented:', err);
+          });
         }
       } catch (error) {
         console.error('Error initializing local video:', error);

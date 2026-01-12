@@ -14,10 +14,11 @@ interface ArcadeMachine {
   color: string
   glowColor: string
   description: string
-  type: 'quest' | 'game' | 'challenge' | 'tournament'
+  type: 'quest' | 'game' | 'challenge' | 'tournament' | 'websim'
   rewards?: string
   players?: number
   status: 'available' | 'playing' | 'coming_soon'
+  externalUrl?: string
 }
 
 export const Arcade: React.FC<ArcadeProps> = ({ onBack, onInteraction }) => {
@@ -98,6 +99,151 @@ export const Arcade: React.FC<ArcadeProps> = ({ onBack, onInteraction }) => {
       rewards: 'Mystery Prize',
       players: 4521,
       status: 'available'
+    },
+    // WebSim Games from Sofa King Sad Boi
+    {
+      id: 'phonkify',
+      name: 'PHONKIFY',
+      icon: '🎧',
+      color: 'from-fuchsia-600 to-pink-700',
+      glowColor: 'pink',
+      description: 'Phonk music experience with 3.7K+ views. Get lost in the beats.',
+      type: 'websim',
+      players: 3796,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/download-options-modal'
+    },
+    {
+      id: 'dreamos',
+      name: 'DreamOS: WAKE UP!',
+      icon: '💤',
+      color: 'from-indigo-600 to-violet-700',
+      glowColor: 'purple',
+      description: 'Surreal OS experience with 1.1K+ views. Enter the dreamscape.',
+      type: 'websim',
+      players: 1132,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/profile'
+    },
+    {
+      id: 'trippy-cam',
+      name: 'TRIPPY CAM STUDIO',
+      icon: '📹',
+      color: 'from-lime-600 to-green-700',
+      glowColor: 'green',
+      description: 'Glitch art & datamosh in real-time. 754 views.',
+      type: 'websim',
+      players: 754,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/take-a-trip-glitch-art-datamosh-in-real-time'
+    },
+    {
+      id: 'monkeys-paw',
+      name: "THE MONKEY'S PAW",
+      icon: '🐵',
+      color: 'from-amber-600 to-yellow-700',
+      glowColor: 'orange',
+      description: 'Be careful what you wish for. 680 views.',
+      type: 'websim',
+      players: 680,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/the-monkey-s-paw'
+    },
+    {
+      id: 'gta6-dnd',
+      name: 'GTA 6 (D&D Edition)',
+      icon: '🎲',
+      color: 'from-red-600 to-orange-600',
+      glowColor: 'red',
+      description: 'Open world RPG mashup. 310 views.',
+      type: 'websim',
+      players: 310,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/gta-6-d-d-edition'
+    },
+    {
+      id: 'lofi-3d-room',
+      name: 'CHILLIN IN MY DREAMS',
+      icon: '🛋️',
+      color: 'from-cyan-600 to-teal-700',
+      glowColor: 'cyan',
+      description: 'Lo-fi 3D room experience. Chill vibes only.',
+      type: 'websim',
+      players: 33,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/lo-fi-3d-room'
+    },
+    {
+      id: 'sprunki-quiz',
+      name: 'SPRUNKI QUIZ ADVENTURE',
+      icon: '❓',
+      color: 'from-emerald-600 to-green-700',
+      glowColor: 'green',
+      description: 'Quiz adventure game. Test your knowledge!',
+      type: 'websim',
+      players: 112,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/sprunki-quiz-adventure-2'
+    },
+    {
+      id: 'drunken-walk',
+      name: 'LAST CALL: DRUNKEN WALK',
+      icon: '🍺',
+      color: 'from-rose-600 to-red-700',
+      glowColor: 'red',
+      description: 'Navigate your way home. Hilarious chaos.',
+      type: 'websim',
+      players: 10,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/last-call-the-drunken-walk-home-4'
+    },
+    {
+      id: 'simpsons-party',
+      name: 'PARTY AT THE SIMPSONS',
+      icon: '🏠',
+      color: 'from-yellow-500 to-amber-600',
+      glowColor: 'orange',
+      description: 'Multiplayer party game at Homer\'s house.',
+      type: 'websim',
+      players: 14,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/homer-s-big-house-adventure'
+    },
+    {
+      id: 'chromashift',
+      name: 'CHROMASHIFT: THE CHROMA QUEST',
+      icon: '🌈',
+      color: 'from-violet-600 to-purple-700',
+      glowColor: 'purple',
+      description: 'Hyper-surreal dreamscape exploration.',
+      type: 'websim',
+      players: 4,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/chromashift-hyper-surreal-dreamscape-3'
+    },
+    {
+      id: 'npc-therapy',
+      name: 'NPC THERAPY',
+      icon: '🧠',
+      color: 'from-blue-600 to-indigo-700',
+      glowColor: 'cyan',
+      description: 'Digital Consciousness Clinic. Get your NPC therapy.',
+      type: 'websim',
+      players: 6,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/npc-therapy-digital-consciousness-clinic-3'
+    },
+    {
+      id: 'beavis-butthead',
+      name: 'BEAVIS & BUTT-HEAD',
+      icon: '📺',
+      color: 'from-gray-600 to-slate-700',
+      glowColor: 'purple',
+      description: 'Music video commentary with the boys.',
+      type: 'websim',
+      players: 34,
+      status: 'available',
+      externalUrl: 'https://websim.com/@SOFAKINGSADBOI/beavis-butt-head-music-video-commentary'
     }
   ]
 
@@ -113,6 +259,13 @@ export const Arcade: React.FC<ArcadeProps> = ({ onBack, onInteraction }) => {
   }, [])
 
   const handlePlayGame = (machine: ArcadeMachine) => {
+    // For WebSim games, open in new tab
+    if (machine.type === 'websim' && machine.externalUrl) {
+      window.open(machine.externalUrl, '_blank')
+      onInteraction?.('arcade_external', { game: machine.id, url: machine.externalUrl, timestamp: Date.now() })
+      return
+    }
+    
     setSelectedMachine(machine)
     setIsPlaying(true)
     setScore(0)
@@ -226,9 +379,10 @@ export const Arcade: React.FC<ArcadeProps> = ({ onBack, onInteraction }) => {
                   machine.type === 'quest' && 'bg-pink-900/50 text-pink-300',
                   machine.type === 'game' && 'bg-purple-900/50 text-purple-300',
                   machine.type === 'challenge' && 'bg-green-900/50 text-green-300',
-                  machine.type === 'tournament' && 'bg-amber-900/50 text-amber-300'
+                  machine.type === 'tournament' && 'bg-amber-900/50 text-amber-300',
+                  machine.type === 'websim' && 'bg-cyan-900/50 text-cyan-300'
                 )}>
-                  {machine.type}
+                  {machine.type === 'websim' ? 'WEBSIM' : machine.type}
                 </span>
               </div>
               <h3 className="text-2xl font-black text-white tracking-wider mb-2">{machine.name}</h3>
@@ -259,7 +413,7 @@ export const Arcade: React.FC<ArcadeProps> = ({ onBack, onInteraction }) => {
                   machine.color
                 )}
               >
-                {machine.status === 'available' ? '▶ PLAY NOW' : 'COMING SOON'}
+                {machine.status === 'available' ? (machine.type === 'websim' ? '🔗 PLAY ON WEBSIM' : '▶ PLAY NOW') : 'COMING SOON'}
               </button>
             </div>
 
@@ -282,7 +436,7 @@ export const Arcade: React.FC<ArcadeProps> = ({ onBack, onInteraction }) => {
           <div className="w-px h-4 bg-gray-600" />
           <div className="flex items-center gap-2">
             <span className="text-purple-400">🎮</span>
-            <span className="text-gray-400">6 games available</span>
+            <span className="text-gray-400">{machines.length} games available</span>
           </div>
           <div className="w-px h-4 bg-gray-600" />
           <div className="flex items-center gap-2">

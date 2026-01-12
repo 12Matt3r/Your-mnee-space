@@ -2,6 +2,7 @@
 import { ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { FloatingBuyMNEE } from '../mnee/BuyMNEEButton'
 
 interface LayoutProps {
   children: ReactNode
@@ -29,6 +30,9 @@ export const Layout = ({ children }: LayoutProps) => {
           </main>
         </div>
       </div>
+      
+      {/* Floating Buy MNEE button - always visible */}
+      <FloatingBuyMNEE />
     </div>
   )
 }

@@ -1,21 +1,22 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useAudioEngine, Track, AudioState } from '../components/music/AudioEngine';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useYouTubeAudioEngine, YouTubeAudioState } from '../components/music/YouTubeAudioEngine';
+import { YouTubeTrack } from '../data/youtubePlaylist';
 
 interface MusicPlayerContextType {
   // State
   isPlaying: boolean;
-  currentTrack: Track | null;
+  currentTrack: YouTubeTrack | null;
   currentTime: number;
   duration: number;
   volume: number;
   isLoading: boolean;
   isShuffle: boolean;
   repeatMode: 'none' | 'one' | 'all';
-  playlist: Track[];
+  playlist: YouTubeTrack[];
   currentIndex: number;
   
   // Methods
-  play: () => Promise<void>;
+  play: () => void;
   pause: () => void;
   stop: () => void;
   setVolume: (volume: number) => void;
@@ -24,9 +25,8 @@ interface MusicPlayerContextType {
   previousTrack: () => void;
   toggleShuffle: () => void;
   toggleRepeat: () => void;
-  setPlaylist: (tracks: Track[]) => void;
   playTrackByIndex: (index: number) => void;
-  playTrack: (track: Track) => Promise<void>;
+  playTrack: (track: YouTubeTrack) => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | null>(null);
@@ -44,10 +44,10 @@ interface MusicPlayerProviderProps {
 }
 
 export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({ children }) => {
-  const { audioEngine, state } = useAudioEngine();
+  const { audioEngine, state } = useYouTubeAudioEngine();
   
   const contextValue: MusicPlayerContextType = {
-    // State properties directly mapped from AudioEngine state
+    // State properties
     isPlaying: state.isPlaying,
     currentTrack: state.currentTrack,
     currentTime: state.currentTime,
@@ -59,19 +59,18 @@ export const MusicPlayerProvider: React.FC<MusicPlayerProviderProps> = ({ childr
     playlist: state.playlist,
     currentIndex: state.currentIndex,
     
-    // Methods directly mapped to AudioEngine methods
-    play: async () => await audioEngine.play(),
-    pause: () => audioEngine.pause(),
-    stop: () => audioEngine.stop(),
-    setVolume: (volume: number) => audioEngine.setVolume(volume),
-    seek: (time: number) => audioEngine.seek(time),
-    nextTrack: () => audioEngine.nextTrack(),
-    previousTrack: () => audioEngine.previousTrack(),
-    toggleShuffle: () => audioEngine.toggleShuffle(),
-    toggleRepeat: () => audioEngine.toggleRepeat(),
-    setPlaylist: (tracks: Track[]) => audioEngine.setPlaylist(tracks),
-    playTrackByIndex: (index: number) => audioEngine.playTrackByIndex(index),
-    playTrack: async (track: Track) => await audioEngine.loadTrack(track),
+    // Methods
+    play: () => audioEngine?.play(),
+    pause: () => audioEngine?.pause(),
+    stop: () => audioEngine?.stop(),
+    setVolume: (volume: number) => audioEngine?.setVolume(volume),
+    seek: (time: number) => audioEngine?.seek(time),
+    nextTrack: () => audioEngine?.nextTrack(),
+    previousTrack: () => audioEngine?.previousTrack(),
+    toggleShuffle: () => audioEngine?.toggleShuffle(),
+    toggleRepeat: () => audioEngine?.toggleRepeat(),
+    playTrackByIndex: (index: number) => audioEngine?.playTrackByIndex(index),
+    playTrack: (track: YouTubeTrack) => audioEngine?.loadTrack(track),
   };
 
   return (
