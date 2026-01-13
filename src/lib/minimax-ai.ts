@@ -7,8 +7,8 @@ export const MINIMAX_CONFIG = {
   name: 'MiniMax AI',
   description: 'MiniMax AI - Advanced language model for text generation and coding assistance',
   
-  // MiniMax API key provided by user
-  apiKey: 'sk-api-B2mot6xzokpd9IVXOh1cWI2fCY_7V2LzWAO0VQgJVmxcyciBxRk_qc7V8H_h9T3LNnbPWUIZM6W_Jm87vczq6iYgBGNYxlYipUTYGIBJZWaTai7MVRi_138',
+  // MiniMax API key from environment
+  apiKey: import.meta.env.VITE_MINIMAX_API_KEY || '',
   
   // MiniMax API endpoint
   apiBase: 'https://api.minimax.chat/v1/text',
