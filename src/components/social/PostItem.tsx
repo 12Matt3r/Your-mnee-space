@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback, useMemo } from 'react';
 import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, Coins } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
@@ -6,6 +6,20 @@ import { MneeTransactionButton } from '../web3/MneeTransactionButton';
 import PostContent from './PostContent';
 import PollDisplay from './PollDisplay';
 import { PostWithInteractions } from '../../types/social';
+
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  } else if (diffInMinutes < 1440) {
+    return `${Math.floor(diffInMinutes / 60)}h`;
+  } else {
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  }
+};
 
 const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLiked, setIsLiked] = useState(post.is_liked);
@@ -55,19 +69,11 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
     }
   };
 
-  const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+  const handleUnlockSuccess = useCallback(() => {
+    setIsUnlocked(true);
+  }, []);
 
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d`;
-    }
-  };
+  const tipIcon = useMemo(() => <Coins className="w-3 h-3 text-yellow-400 mr-1" />, []);
 
   const profile = post.profiles;
   const displayName = profile?.full_name || profile?.username || 'Anonymous';
@@ -76,6 +82,8 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
 
   // Use a fallback treasury address if the user profile doesn't have one
   const recipientAddress = profile?.wallet_address || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+
+  const timeAgoString = formatTimeAgo(post.created_at);
 
   return (
     <article className="border-b border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer">
@@ -93,7 +101,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
             </h3>
             <span className="text-gray-500 dark:text-gray-400 truncate">@{username}</span>
             <span className="text-gray-500 dark:text-gray-400">·</span>
-            <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{timeAgo(post.created_at)}</span>
+            <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{timeAgoString}</span>
             <button
               aria-label="More options"
               className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
@@ -119,7 +127,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                             recipientAddress={recipientAddress}
                             amount={post.unlock_price?.toString() || "1.0"}
                             label={`Unlock for ${post.unlock_price || 1} MNEE`}
-                            onSuccess={() => setIsUnlocked(true)}
+                            onSuccess={handleUnlockSuccess}
                         />
                     </div>
                 </div>
@@ -176,7 +184,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                         amount="5.0"
                         label="Tip 5"
                         className="!px-3 !py-1 !text-xs !bg-none !bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-500/30"
-                        icon={<Coins className="w-3 h-3 text-yellow-400 mr-1" />}
+                        icon={tipIcon}
                     />
                 </div>
             )}
