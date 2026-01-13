@@ -11,7 +11,7 @@ export const JULES_CONFIG = {
 
   // Gemini API key provided by user for the YourSpace platform
   // Standard Google Cloud API key format (AIza...)
-  apiKey: 'AIzaSyCZPeSCkvseCwKTnJrCcpbepw25yy8qaVY',
+  apiKey: import.meta.env.VITE_GOOGLE_JULES_API_KEY || '',
 
   apiBase: 'https://generativelanguage.googleapis.com/v1beta',
 
