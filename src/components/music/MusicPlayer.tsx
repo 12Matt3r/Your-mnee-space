@@ -93,6 +93,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             </div>
             <button
               onClick={onClose}
+              aria-label="Close player"
               className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
             >
               <X size={24} />
@@ -151,6 +152,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <div className="flex items-center justify-center gap-4 mb-6">
               <button
                 onClick={() => musicPlayer.toggleShuffle()}
+                aria-label={musicPlayer.isShuffle ? "Disable shuffle" : "Enable shuffle"}
+                aria-pressed={musicPlayer.isShuffle}
                 className={`p-3 rounded-xl transition-all ${
                   musicPlayer.isShuffle 
                     ? 'bg-purple-600 text-white' 
@@ -162,6 +165,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.previousTrack()}
+                aria-label="Previous track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors"
               >
                 <SkipBack size={20} />
@@ -170,6 +174,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <button
                 onClick={handlePlayPause}
                 disabled={musicPlayer.isLoading}
+                aria-label={musicPlayer.isPlaying ? "Pause" : "Play"}
                 className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 transform hover:scale-105"
               >
                 {musicPlayer.isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -177,6 +182,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.nextTrack()}
+                aria-label="Next track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors"
               >
                 <SkipForward size={20} />
@@ -184,6 +190,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.toggleRepeat()}
+                aria-label={`Repeat mode: ${musicPlayer.repeatMode}`}
                 className={`p-3 rounded-xl transition-all ${
                   musicPlayer.repeatMode !== 'none' 
                     ? 'bg-purple-600 text-white' 
@@ -196,11 +203,15 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
             {/* Volume Control */}
             <div className="flex items-center gap-3 mb-6">
-              <button className="text-purple-300 hover:text-white transition-colors">
+              <button
+                className="text-purple-300 hover:text-white transition-colors"
+                aria-label={musicPlayer.volume === 0 ? "Unmute" : "Mute"}
+              >
                 {musicPlayer.volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
               <input
                 type="range"
+                aria-label="Volume"
                 min="0"
                 max="100"
                 value={musicPlayer.volume}
