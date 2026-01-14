@@ -9,10 +9,19 @@ import ComposerBox from './ComposerBox';
 import PostItem from './PostItem';
 import SkeletonPost from '../ui/SkeletonPost';
 
+// Stabilize mock posts generation to prevent unnecessary re-renders
+const STATIC_MOCK_POSTS = MOCK_POSTS.map(p => ({
+  ...p,
+  likes_count: Math.floor(Math.random() * 500),
+  replies_count: Math.floor(Math.random() * 50),
+  bookmarks_count: Math.floor(Math.random() * 100),
+  is_liked: false,
+  is_bookmarked: false
+})) as unknown as PostWithInteractions[];
+
 const Timeline = () => {
   const [posts, setPosts] = useState<PostWithInteractions[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
   const [feedType, setFeedType] = useState<'chronological' | 'trending'>('chronological');
@@ -37,18 +46,8 @@ const Timeline = () => {
       
       const postsData = await socialApi.getPostsWithStats(limit);
 
-      // Merge Mock Posts (simulating mixing real & suggested/mock content)
-      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-          ...p,
-          likes_count: Math.floor(Math.random() * 500),
-          replies_count: Math.floor(Math.random() * 50),
-          bookmarks_count: Math.floor(Math.random() * 100),
-          is_liked: false,
-          is_bookmarked: false
-      })) as unknown as PostWithInteractions[];
-
       // In a real scenario, we would append based on unique IDs
-      const newPosts = [...mockPostsWithInteractions, ...postsData];
+      const newPosts = [...STATIC_MOCK_POSTS, ...postsData];
       
       // Sort
       if (feedType === 'trending') {
@@ -73,15 +72,7 @@ const Timeline = () => {
       console.error('Error loading posts:', err);
       // Fallback
       if (posts.length === 0) {
-         const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-            ...p,
-            likes_count: Math.floor(Math.random() * 500),
-            replies_count: Math.floor(Math.random() * 50),
-            bookmarks_count: Math.floor(Math.random() * 100),
-            is_liked: false,
-            is_bookmarked: false
-         })) as unknown as PostWithInteractions[];
-         setPosts(mockPostsWithInteractions);
+         setPosts(STATIC_MOCK_POSTS);
       }
     } finally {
       setLoading(false);
