@@ -1,5 +1,6 @@
 import React, { useState, memo } from 'react';
 import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, Coins } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 import { MneeTransactionButton } from '../web3/MneeTransactionButton';
@@ -14,6 +15,13 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(post.unlocked_by_user || false);
   const { user } = useAuth();
+
+  const profile = post.profiles;
+  const displayName = profile?.full_name || profile?.username || 'Anonymous';
+  const username = profile?.username || `user${post.user_id.slice(0, 8)}`;
+  const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+  // Use a fallback treasury address if the user profile doesn't have one
+  const recipientAddress = profile?.wallet_address || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,6 +63,38 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
     }
   };
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/post/${post.id}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by ${displayName}`,
+          text: post.content.substring(0, 100),
+          url: shareUrl
+        });
+        toast.success('Shared successfully!');
+      } catch (error) {
+        if ((error as any).name !== 'AbortError') {
+             console.error('Error sharing:', error);
+             await copyToClipboard(shareUrl);
+        }
+      }
+    } else {
+      await copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = async (text: string) => {
+      try {
+          await navigator.clipboard.writeText(text);
+          toast.success('Link copied to clipboard!');
+      } catch (err) {
+          toast.error('Failed to copy link.');
+      }
+  };
+
   const timeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -68,14 +108,6 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
       return `${Math.floor(diffInMinutes / 1440)}d`;
     }
   };
-
-  const profile = post.profiles;
-  const displayName = profile?.full_name || profile?.username || 'Anonymous';
-  const username = profile?.username || `user${post.user_id.slice(0, 8)}`;
-  const avatarUrl = profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
-
-  // Use a fallback treasury address if the user profile doesn't have one
-  const recipientAddress = profile?.wallet_address || '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
 
   return (
     <article className="border-b border-gray-200 dark:border-gray-800 p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors cursor-pointer">
@@ -197,6 +229,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
               </button>
 
               <button
+                onClick={handleShare}
                 aria-label="Share post"
                 className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
               >
