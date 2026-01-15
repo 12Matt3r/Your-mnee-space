@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 const ComposerBox = () => {
   const [postText, setPostText] = useState('');
@@ -168,9 +169,16 @@ const ComposerBox = () => {
               <button
                 type="submit"
                 disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
-                {isPosting ? 'Posting...' : 'Post'}
+                {isPosting ? (
+                  <>
+                    <LoadingSpinner size="sm" />
+                    <span>Posting...</span>
+                  </>
+                ) : (
+                  'Post'
+                )}
               </button>
             </div>
           </div>
