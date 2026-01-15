@@ -7,6 +7,20 @@ import PostContent from './PostContent';
 import PollDisplay from './PollDisplay';
 import { PostWithInteractions } from '../../types/social';
 
+const timeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  } else if (diffInMinutes < 1440) {
+    return `${Math.floor(diffInMinutes / 60)}h`;
+  } else {
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  }
+};
+
 const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLiked, setIsLiked] = useState(post.is_liked);
   const [isBookmarked, setIsBookmarked] = useState(post.is_bookmarked);
@@ -52,20 +66,6 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
       console.error('Error toggling bookmark:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d`;
     }
   };
 

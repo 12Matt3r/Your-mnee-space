@@ -9,6 +9,16 @@ import ComposerBox from './ComposerBox';
 import PostItem from './PostItem';
 import SkeletonPost from '../ui/SkeletonPost';
 
+// Create stable mock posts outside component to prevent regeneration on every render/fetch
+const STATIC_MOCK_POSTS = MOCK_POSTS.map(p => ({
+  ...p,
+  likes_count: Math.floor(Math.random() * 500),
+  replies_count: Math.floor(Math.random() * 50),
+  bookmarks_count: Math.floor(Math.random() * 100),
+  is_liked: false,
+  is_bookmarked: false
+})) as unknown as PostWithInteractions[];
+
 const Timeline = () => {
   const [posts, setPosts] = useState<PostWithInteractions[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,17 +48,9 @@ const Timeline = () => {
       const postsData = await socialApi.getPostsWithStats(limit);
 
       // Merge Mock Posts (simulating mixing real & suggested/mock content)
-      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-          ...p,
-          likes_count: Math.floor(Math.random() * 500),
-          replies_count: Math.floor(Math.random() * 50),
-          bookmarks_count: Math.floor(Math.random() * 100),
-          is_liked: false,
-          is_bookmarked: false
-      })) as unknown as PostWithInteractions[];
-
+      // Use STATIC_MOCK_POSTS to ensure reference stability and avoid re-renders
       // In a real scenario, we would append based on unique IDs
-      const newPosts = [...mockPostsWithInteractions, ...postsData];
+      const newPosts = [...STATIC_MOCK_POSTS, ...postsData];
       
       // Sort
       if (feedType === 'trending') {
@@ -73,15 +75,7 @@ const Timeline = () => {
       console.error('Error loading posts:', err);
       // Fallback
       if (posts.length === 0) {
-         const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-            ...p,
-            likes_count: Math.floor(Math.random() * 500),
-            replies_count: Math.floor(Math.random() * 50),
-            bookmarks_count: Math.floor(Math.random() * 100),
-            is_liked: false,
-            is_bookmarked: false
-         })) as unknown as PostWithInteractions[];
-         setPosts(mockPostsWithInteractions);
+         setPosts(STATIC_MOCK_POSTS);
       }
     } finally {
       setLoading(false);
