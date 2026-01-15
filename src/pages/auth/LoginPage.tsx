@@ -16,6 +16,7 @@ export const LoginPage = () => {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isDemoLoading, setIsDemoLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Redirect if already logged in
@@ -147,7 +148,7 @@ export const LoginPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isDemoLoading}
               className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-200 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
@@ -174,20 +175,31 @@ export const LoginPage = () => {
             <button
               type="button"
               onClick={async () => {
-                setIsLoading(true)
+                setIsDemoLoading(true)
                 try {
+                  // Add artificial delay for better UX
+                  await new Promise(resolve => setTimeout(resolve, 800))
                   await demoLogin()
-                  // Force navigation to home with a hard reload feel if needed, but react router is fine
-                  // We add a small delay to ensure context updates
-                  setTimeout(() => navigate('/'), 100);
-                } finally {
-                  setIsLoading(false)
+                  navigate('/')
+                } catch (error) {
+                  console.error('Demo login failed:', error)
+                  setIsDemoLoading(false)
                 }
               }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2"
+              disabled={isLoading || isDemoLoading}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <SparklesIcon className="w-5 h-5" />
-              Enter Demo Mode
+              {isDemoLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <span>Entering Demo...</span>
+                </>
+              ) : (
+                <>
+                  <SparklesIcon className="w-5 h-5" />
+                  Enter Demo Mode
+                </>
+              )}
             </button>
 
             {/* Discord Login */}
