@@ -227,7 +227,7 @@ export class YouTubeAudioEngine {
   public previousTrack(): void {
     if (this.state.playlist.length === 0) return;
     
-    let prevIndex = this.state.currentIndex > 0 
+    const prevIndex = this.state.currentIndex > 0
       ? this.state.currentIndex - 1 
       : this.state.playlist.length - 1;
     
