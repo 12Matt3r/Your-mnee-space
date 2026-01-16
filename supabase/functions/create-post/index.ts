@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
     const mentions = content.match(/@[\w\u00c0-\u017f]+/g)?.map(mention => mention.slice(1).toLowerCase()) || [];
 
     // Handle media uploads if any
-    let mediaUrls = [];
+    const mediaUrls = [];
     if (mediaFiles && mediaFiles.length > 0) {
       for (const media of mediaFiles) {
         if (media.data && media.fileName) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,6 +8,13 @@ import { PostWithInteractions } from '../../types/social';
 import ComposerBox from './ComposerBox';
 import PostItem from './PostItem';
 import SkeletonPost from '../ui/SkeletonPost';
+
+const postAnimation = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.95 },
+  transition: { duration: 0.3 }
+};
 
 const Timeline = () => {
   const [posts, setPosts] = useState<PostWithInteractions[]>([]);
@@ -23,6 +30,16 @@ const Timeline = () => {
     rootMargin: '100px',
   });
 
+  // Memoize mock posts generation to ensure stable references and stats across renders/fetches
+  const mockPostsWithInteractions = useMemo(() => MOCK_POSTS.map(p => ({
+      ...p,
+      likes_count: Math.floor(Math.random() * 500),
+      replies_count: Math.floor(Math.random() * 50),
+      bookmarks_count: Math.floor(Math.random() * 100),
+      is_liked: false,
+      is_bookmarked: false
+  })) as unknown as PostWithInteractions[], []);
+
   const loadPosts = useCallback(async (isRefresh = false) => {
     if (!hasMore && !isRefresh) return;
 
@@ -36,16 +53,6 @@ const Timeline = () => {
       // Real pagination would require API update, but let's stick to the limit for now.
       
       const postsData = await socialApi.getPostsWithStats(limit);
-
-      // Merge Mock Posts (simulating mixing real & suggested/mock content)
-      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-          ...p,
-          likes_count: Math.floor(Math.random() * 500),
-          replies_count: Math.floor(Math.random() * 50),
-          bookmarks_count: Math.floor(Math.random() * 100),
-          is_liked: false,
-          is_bookmarked: false
-      })) as unknown as PostWithInteractions[];
 
       // In a real scenario, we would append based on unique IDs
       const newPosts = [...mockPostsWithInteractions, ...postsData];
@@ -73,20 +80,12 @@ const Timeline = () => {
       console.error('Error loading posts:', err);
       // Fallback
       if (posts.length === 0) {
-         const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-            ...p,
-            likes_count: Math.floor(Math.random() * 500),
-            replies_count: Math.floor(Math.random() * 50),
-            bookmarks_count: Math.floor(Math.random() * 100),
-            is_liked: false,
-            is_bookmarked: false
-         })) as unknown as PostWithInteractions[];
          setPosts(mockPostsWithInteractions);
       }
     } finally {
       setLoading(false);
     }
-  }, [feedType, hasMore, posts.length]);
+  }, [feedType, hasMore, posts.length, mockPostsWithInteractions]);
 
   // Initial load
   useEffect(() => {
@@ -153,10 +152,7 @@ const Timeline = () => {
             {posts.map((post) => (
                 <motion.div
                     key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
+                    {...postAnimation}
                 >
                     <PostItem post={post} />
                 </motion.div>
