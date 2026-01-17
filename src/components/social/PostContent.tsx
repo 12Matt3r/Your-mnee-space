@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 
 const PostContent = ({ text }: { text: string }) => {
@@ -36,4 +36,4 @@ const PostContent = ({ text }: { text: string }) => {
   );
 };
 
-export default PostContent;
+export default memo(PostContent);
