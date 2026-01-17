@@ -182,12 +182,14 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
                 onClick={handleMinimize}
                 className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
                 title="Minimize player"
+                aria-label="Minimize player"
               >
                 <Minimize2 size={20} />
               </button>
               <button
                 onClick={onClose}
                 className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
+                aria-label="Close player"
               >
                 <X size={24} />
               </button>
@@ -246,6 +248,8 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
             <div className="flex items-center justify-center gap-4 mb-6">
               <button
                 onClick={() => audioEngine.toggleShuffle()}
+                aria-label="Toggle shuffle"
+                aria-pressed={state.isShuffle}
                 className={`p-3 rounded-xl transition-all ${
                   state.isShuffle 
                     ? 'bg-purple-600 text-white' 
@@ -258,6 +262,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               <button
                 onClick={() => audioEngine.previousTrack()}
                 disabled={tracks.length === 0}
+                aria-label="Previous track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SkipBack size={20} />
@@ -266,6 +271,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               <button
                 onClick={handlePlayPause}
                 disabled={tracks.length === 0 || state.isLoading}
+                aria-label={state.isPlaying ? "Pause" : "Play"}
                 className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -274,6 +280,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               <button
                 onClick={() => audioEngine.nextTrack()}
                 disabled={tracks.length === 0}
+                aria-label="Next track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SkipForward size={20} />
@@ -281,6 +288,8 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               
               <button
                 onClick={() => audioEngine.toggleRepeat()}
+                aria-label={`Toggle repeat (current: ${state.repeatMode})`}
+                aria-pressed={state.repeatMode !== 'none'}
                 className={`p-3 rounded-xl transition-all ${
                   state.repeatMode !== 'none' 
                     ? 'bg-purple-600 text-white' 
@@ -293,7 +302,11 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
 
             {/* Volume Control */}
             <div className="flex items-center gap-3 mb-6">
-              <button className="text-purple-300 hover:text-white transition-colors">
+              <button
+                className="text-purple-300 hover:text-white transition-colors"
+                aria-label={state.volume === 0 ? "Unmute volume" : "Mute volume"}
+                onClick={() => audioEngine.setVolume(state.volume === 0 ? 0.5 : 0)}
+              >
                 {state.volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
               <input
@@ -302,6 +315,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
                 max="100"
                 value={state.volume * 100}
                 onChange={handleVolumeChange}
+                aria-label="Volume control"
                 className="flex-1 h-2 bg-gray-700 rounded-full appearance-none cursor-pointer
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 
                   [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-purple-500 [&::-webkit-slider-thumb]:to-pink-500 
@@ -363,10 +377,11 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
                 </div>
               ) : (
                 tracks.map((track, index) => (
-                  <div
+                  <button
+                    type="button"
                     key={track.id}
                     onClick={() => audioEngine.playTrackByIndex(index)}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${
+                    className={`w-full text-left p-3 rounded-lg cursor-pointer transition-all ${
                       state.currentIndex === index
                         ? 'bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-500/50'
                         : 'bg-gray-800/50 hover:bg-purple-800/30'
@@ -389,7 +404,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 ))
               )}
             </div>
