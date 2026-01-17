@@ -93,6 +93,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             </div>
             <button
               onClick={onClose}
+              aria-label="Close player"
+              title="Close player"
               className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
             >
               <X size={24} />
@@ -131,7 +133,22 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <div className="mb-6">
               <div 
                 ref={progressBarRef}
-                className="w-full h-2 bg-gray-700 rounded-full cursor-pointer group"
+                role="slider"
+                aria-label="Seek slider"
+                aria-valuemin={0}
+                aria-valuemax={musicPlayer.duration || 100}
+                aria-valuenow={musicPlayer.currentTime}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (!musicPlayer.duration) return;
+                  const step = 5; // 5 seconds step
+                  if (e.key === 'ArrowRight') {
+                    musicPlayer.seek(Math.min(musicPlayer.currentTime + step, musicPlayer.duration));
+                  } else if (e.key === 'ArrowLeft') {
+                    musicPlayer.seek(Math.max(musicPlayer.currentTime - step, 0));
+                  }
+                }}
+                className="w-full h-2 bg-gray-700 rounded-full cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
                 onClick={handleProgressClick}
               >
                 <div 
@@ -151,6 +168,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <div className="flex items-center justify-center gap-4 mb-6">
               <button
                 onClick={() => musicPlayer.toggleShuffle()}
+                aria-label={musicPlayer.isShuffle ? "Disable shuffle" : "Enable shuffle"}
+                title={musicPlayer.isShuffle ? "Disable shuffle" : "Enable shuffle"}
                 className={`p-3 rounded-xl transition-all ${
                   musicPlayer.isShuffle 
                     ? 'bg-purple-600 text-white' 
@@ -162,6 +181,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.previousTrack()}
+                aria-label="Previous track"
+                title="Previous track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors"
               >
                 <SkipBack size={20} />
@@ -170,6 +191,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <button
                 onClick={handlePlayPause}
                 disabled={musicPlayer.isLoading}
+                aria-label={musicPlayer.isPlaying ? "Pause" : "Play"}
+                title={musicPlayer.isPlaying ? "Pause" : "Play"}
                 className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 transform hover:scale-105"
               >
                 {musicPlayer.isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -177,6 +200,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.nextTrack()}
+                aria-label="Next track"
+                title="Next track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors"
               >
                 <SkipForward size={20} />
@@ -184,6 +209,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.toggleRepeat()}
+                aria-label={`Repeat mode: ${musicPlayer.repeatMode}`}
+                title={`Repeat mode: ${musicPlayer.repeatMode}`}
                 className={`p-3 rounded-xl transition-all ${
                   musicPlayer.repeatMode !== 'none' 
                     ? 'bg-purple-600 text-white' 
@@ -196,7 +223,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
             {/* Volume Control */}
             <div className="flex items-center gap-3 mb-6">
-              <button className="text-purple-300 hover:text-white transition-colors">
+              <button
+                className="text-purple-300 hover:text-white transition-colors"
+                aria-label={musicPlayer.volume === 0 ? "Unmute" : "Mute"}
+                title={musicPlayer.volume === 0 ? "Unmute" : "Mute"}
+              >
                 {musicPlayer.volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
               <input
@@ -204,6 +235,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                 min="0"
                 max="100"
                 value={musicPlayer.volume}
+                aria-label="Volume control"
                 onChange={handleVolumeChange}
                 className="flex-1 h-2 bg-gray-700 rounded-full appearance-none cursor-pointer
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 
@@ -238,10 +270,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
               {musicPlayer.playlist.map((track, index) => (
-                <div
+                <button
                   key={track.id}
                   onClick={() => musicPlayer.playTrackByIndex(index)}
-                  className={`p-3 rounded-lg cursor-pointer transition-all ${
+                  aria-label={`Play ${track.title} by ${track.artist}`}
+                  className={`w-full text-left p-3 rounded-lg cursor-pointer transition-all ${
                     musicPlayer.currentIndex === index
                       ? 'bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-500/50'
                       : 'bg-gray-800/50 hover:bg-purple-800/30'
@@ -264,7 +297,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
