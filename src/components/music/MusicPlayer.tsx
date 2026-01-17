@@ -93,6 +93,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             </div>
             <button
               onClick={onClose}
+              aria-label="Close player"
               className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
             >
               <X size={24} />
@@ -151,6 +152,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             <div className="flex items-center justify-center gap-4 mb-6">
               <button
                 onClick={() => musicPlayer.toggleShuffle()}
+                aria-label="Toggle shuffle"
+                aria-pressed={musicPlayer.isShuffle}
                 className={`p-3 rounded-xl transition-all ${
                   musicPlayer.isShuffle 
                     ? 'bg-purple-600 text-white' 
@@ -162,6 +165,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.previousTrack()}
+                aria-label="Previous track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors"
               >
                 <SkipBack size={20} />
@@ -170,6 +174,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <button
                 onClick={handlePlayPause}
                 disabled={musicPlayer.isLoading}
+                aria-label={musicPlayer.isPlaying ? "Pause" : "Play"}
                 className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 transform hover:scale-105"
               >
                 {musicPlayer.isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -177,6 +182,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.nextTrack()}
+                aria-label="Next track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors"
               >
                 <SkipForward size={20} />
@@ -184,6 +190,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
               
               <button
                 onClick={() => musicPlayer.toggleRepeat()}
+                aria-label="Toggle repeat"
+                aria-pressed={musicPlayer.repeatMode !== 'none'}
                 className={`p-3 rounded-xl transition-all ${
                   musicPlayer.repeatMode !== 'none' 
                     ? 'bg-purple-600 text-white' 
@@ -196,7 +204,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
 
             {/* Volume Control */}
             <div className="flex items-center gap-3 mb-6">
-              <button className="text-purple-300 hover:text-white transition-colors">
+              <button
+                className="text-purple-300 hover:text-white transition-colors"
+                aria-label={musicPlayer.volume === 0 ? "Unmute volume" : "Mute volume"}
+                onClick={() => musicPlayer.setVolume(musicPlayer.volume === 0 ? 50 : 0)}
+              >
                 {musicPlayer.volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
               <input
@@ -205,6 +217,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                 max="100"
                 value={musicPlayer.volume}
                 onChange={handleVolumeChange}
+                aria-label="Volume control"
                 className="flex-1 h-2 bg-gray-700 rounded-full appearance-none cursor-pointer
                   [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 
                   [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-purple-500 [&::-webkit-slider-thumb]:to-pink-500 
@@ -238,10 +251,11 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
             
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
               {musicPlayer.playlist.map((track, index) => (
-                <div
+                <button
+                  type="button"
                   key={track.id}
                   onClick={() => musicPlayer.playTrackByIndex(index)}
-                  className={`p-3 rounded-lg cursor-pointer transition-all ${
+                  className={`w-full text-left p-3 rounded-lg cursor-pointer transition-all ${
                     musicPlayer.currentIndex === index
                       ? 'bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-500/50'
                       : 'bg-gray-800/50 hover:bg-purple-800/30'
@@ -264,7 +278,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
