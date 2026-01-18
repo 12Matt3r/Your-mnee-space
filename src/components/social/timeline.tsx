@@ -9,6 +9,17 @@ import ComposerBox from './ComposerBox';
 import PostItem from './PostItem';
 import SkeletonPost from '../ui/SkeletonPost';
 
+// Generate mock posts with interactions once to prevent regeneration on every render/fetch
+// This fixes the issue where likes/replies counts jump randomly on infinite scroll updates
+const STATIC_MOCK_POSTS = MOCK_POSTS.map(p => ({
+    ...p,
+    likes_count: Math.floor(Math.random() * 500),
+    replies_count: Math.floor(Math.random() * 50),
+    bookmarks_count: Math.floor(Math.random() * 100),
+    is_liked: false,
+    is_bookmarked: false
+})) as unknown as PostWithInteractions[];
+
 const Timeline = () => {
   const [posts, setPosts] = useState<PostWithInteractions[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,14 +49,8 @@ const Timeline = () => {
       const postsData = await socialApi.getPostsWithStats(limit);
 
       // Merge Mock Posts (simulating mixing real & suggested/mock content)
-      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-          ...p,
-          likes_count: Math.floor(Math.random() * 500),
-          replies_count: Math.floor(Math.random() * 50),
-          bookmarks_count: Math.floor(Math.random() * 100),
-          is_liked: false,
-          is_bookmarked: false
-      })) as unknown as PostWithInteractions[];
+      // Uses the statically generated mock posts to maintain consistency
+      const mockPostsWithInteractions = STATIC_MOCK_POSTS;
 
       // In a real scenario, we would append based on unique IDs
       const newPosts = [...mockPostsWithInteractions, ...postsData];
@@ -73,15 +78,7 @@ const Timeline = () => {
       console.error('Error loading posts:', err);
       // Fallback
       if (posts.length === 0) {
-         const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-            ...p,
-            likes_count: Math.floor(Math.random() * 500),
-            replies_count: Math.floor(Math.random() * 50),
-            bookmarks_count: Math.floor(Math.random() * 100),
-            is_liked: false,
-            is_bookmarked: false
-         })) as unknown as PostWithInteractions[];
-         setPosts(mockPostsWithInteractions);
+         setPosts(STATIC_MOCK_POSTS);
       }
     } finally {
       setLoading(false);
