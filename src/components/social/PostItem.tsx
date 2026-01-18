@@ -7,6 +7,20 @@ import PostContent from './PostContent';
 import PollDisplay from './PollDisplay';
 import { PostWithInteractions } from '../../types/social';
 
+const timeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  } else if (diffInMinutes < 1440) {
+    return `${Math.floor(diffInMinutes / 60)}h`;
+  } else {
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  }
+};
+
 const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLiked, setIsLiked] = useState(post.is_liked);
   const [isBookmarked, setIsBookmarked] = useState(post.is_bookmarked);
@@ -55,20 +69,6 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
     }
   };
 
-  const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d`;
-    }
-  };
-
   const profile = post.profiles;
   const displayName = profile?.full_name || profile?.username || 'Anonymous';
   const username = profile?.username || `user${post.user_id.slice(0, 8)}`;
@@ -83,6 +83,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
         <img
           src={avatarUrl}
           alt={displayName}
+          title={displayName}
           className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex-shrink-0"
         />
         <div className="flex-1 min-w-0">
@@ -93,10 +94,16 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
             </h3>
             <span className="text-gray-500 dark:text-gray-400 truncate">@{username}</span>
             <span className="text-gray-500 dark:text-gray-400">·</span>
-            <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{timeAgo(post.created_at)}</span>
+            <span
+              className="text-gray-500 dark:text-gray-400 flex-shrink-0"
+              title={new Date(post.created_at).toLocaleString()}
+            >
+              {timeAgo(post.created_at)}
+            </span>
             <button
               aria-label="More options"
-              className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+              title="More options"
+              className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
             >
               <MoreHorizontal className="w-5 h-5 text-gray-500" />
             </button>
@@ -135,7 +142,8 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
           <div className="flex items-center justify-between mt-4 max-w-md">
             <button
               aria-label={`Reply to ${displayName}`}
-              className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors group"
+              title="Reply"
+              className="flex items-center space-x-2 text-gray-500 hover:text-blue-500 transition-colors group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-full px-1 -ml-1"
             >
               <div className="p-2 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                 <MessageCircle className="w-5 h-5" />
@@ -145,7 +153,8 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
 
             <button
               aria-label="Repost"
-              className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors group"
+              title="Repost"
+              className="flex items-center space-x-2 text-gray-500 hover:text-green-500 transition-colors group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-full px-1"
             >
               <div className="p-2 rounded-full group-hover:bg-green-50 dark:group-hover:bg-green-900/20 transition-colors">
                 <Repeat2 className="w-5 h-5" />
@@ -157,8 +166,9 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
               onClick={handleLike}
               aria-label={isLiked ? "Unlike post" : "Like post"}
               aria-pressed={isLiked}
+              title={isLiked ? "Unlike" : "Like"}
               disabled={!user || isLoading}
-              className={`flex items-center space-x-2 transition-colors group ${
+              className={`flex items-center space-x-2 transition-colors group focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded-full px-1 ${
                 isLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'
               } ${(!user || isLoading) ? 'cursor-not-allowed opacity-50' : ''}`}
             >
@@ -175,7 +185,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                         recipientAddress={recipientAddress}
                         amount="5.0"
                         label="Tip 5"
-                        className="!px-3 !py-1 !text-xs !bg-none !bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-500/30"
+                        className="!px-3 !py-1 !text-xs !bg-none !bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-500/30 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                         icon={<Coins className="w-3 h-3 text-yellow-400 mr-1" />}
                     />
                 </div>
@@ -186,8 +196,9 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                 onClick={handleBookmark}
                 aria-label={isBookmarked ? "Remove bookmark" : "Bookmark post"}
                 aria-pressed={isBookmarked}
+                title={isBookmarked ? "Remove bookmark" : "Bookmark"}
                 disabled={!user || isLoading}
-                className={`p-2 rounded-full transition-colors ${
+                className={`p-2 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none ${
                   isBookmarked
                     ? 'text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                     : 'text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20'
@@ -198,7 +209,8 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
 
               <button
                 aria-label="Share post"
-                className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                title="Share"
+                className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
               >
                 <Share className="w-5 h-5" />
               </button>
