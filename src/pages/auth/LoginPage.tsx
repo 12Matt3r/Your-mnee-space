@@ -15,8 +15,11 @@ export const LoginPage = () => {
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSignInLoading, setIsSignInLoading] = useState(false)
+  const [isDemoLoading, setIsDemoLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const isLoading = isSignInLoading || isDemoLoading
 
   // Redirect if already logged in
   if (user && !loading) {
@@ -47,14 +50,14 @@ export const LoginPage = () => {
     
     if (!validateForm()) return
 
-    setIsLoading(true)
+    setIsSignInLoading(true)
     try {
       const result = await signIn(formData.email, formData.password)
       console.log('Sign in result:', result)
     } catch (err: any) {
       setErrors({ submit: err.message || 'Invalid email or password. Please try again.' })
     } finally {
-      setIsLoading(false)
+      setIsSignInLoading(false)
     }
   }
 
@@ -96,7 +99,8 @@ export const LoginPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                disabled={isLoading}
+                className="w-full px-4 py-3 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="your@email.com"
               />
               {errors.email && (
@@ -116,7 +120,8 @@ export const LoginPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all"
+                  disabled={isLoading}
+                  className="w-full px-4 py-3 pr-12 bg-black/30 border border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your password"
                 />
                 <button
@@ -150,7 +155,7 @@ export const LoginPage = () => {
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-200 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isSignInLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                   Signing In...
@@ -173,25 +178,30 @@ export const LoginPage = () => {
             {/* Quick Demo Login */}
             <button
               type="button"
+              disabled={isLoading}
               onClick={async () => {
-                setIsLoading(true)
+                setIsDemoLoading(true)
                 try {
                   await demoLogin()
                   // Force navigation to home with a hard reload feel if needed, but react router is fine
                   // We add a small delay to ensure context updates
                   setTimeout(() => navigate('/'), 100);
                 } finally {
-                  setIsLoading(false)
+                  setIsDemoLoading(false)
                 }
               }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <SparklesIcon className="w-5 h-5" />
-              Enter Demo Mode
+              {isDemoLoading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <SparklesIcon className="w-5 h-5" />
+              )}
+              {isDemoLoading ? 'Entering Demo...' : 'Enter Demo Mode'}
             </button>
 
             {/* Discord Login */}
-            <DiscordLogin className="w-full" />
+            <DiscordLogin className="w-full" disabled={isLoading} />
           </form>
 
           {/* Footer */}
