@@ -9,6 +9,14 @@ import ComposerBox from './ComposerBox';
 import PostItem from './PostItem';
 import SkeletonPost from '../ui/SkeletonPost';
 
+const POST_VARIANTS = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.95 }
+};
+
+const POST_TRANSITION = { duration: 0.3 };
+
 const Timeline = () => {
   const [posts, setPosts] = useState<PostWithInteractions[]>([]);
   const [loading, setLoading] = useState(true);
@@ -153,10 +161,11 @@ const Timeline = () => {
             {posts.map((post) => (
                 <motion.div
                     key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3 }}
+                    variants={POST_VARIANTS}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={POST_TRANSITION}
                 >
                     <PostItem post={post} />
                 </motion.div>
