@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
     const offset = page * limit;
     const searchTerm = query.trim().toLowerCase();
     
-    let results = {
+    const results = {
       posts: [],
       users: [],
       hashtags: []
