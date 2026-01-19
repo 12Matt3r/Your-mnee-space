@@ -9,6 +9,7 @@ interface DiscordLoginProps {
   variant?: 'primary' | 'secondary'
   showText?: boolean
   text?: string
+  disabled?: boolean
 }
 
 const DiscordIcon = ({ className }: { className?: string }) => (
@@ -48,7 +49,8 @@ export const DiscordLogin: React.FC<DiscordLoginProps> = ({
   size = 'md',
   variant = 'primary',
   showText = true,
-  text = 'Connect Discord'
+  text = 'Connect Discord',
+  disabled = false
 }) => {
   const { loading, initiateDiscordAuth } = useDiscord()
 
@@ -72,7 +74,7 @@ export const DiscordLogin: React.FC<DiscordLoginProps> = ({
   return (
     <button
       onClick={initiateDiscordAuth}
-      disabled={loading}
+      disabled={loading || disabled}
       className={cn(
         'inline-flex items-center justify-center font-semibold rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#5865F2]/50 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed',
         sizeClasses[size],
