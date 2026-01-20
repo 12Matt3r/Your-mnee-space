@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { PostWithInteractions } from '../../types/social';
 
 const PollDisplay = ({ poll }: { poll: NonNullable<PostWithInteractions['poll']> }) => {
@@ -56,4 +56,4 @@ const PollDisplay = ({ poll }: { poll: NonNullable<PostWithInteractions['poll']>
   );
 };
 
-export default PollDisplay;
+export default memo(PollDisplay);
