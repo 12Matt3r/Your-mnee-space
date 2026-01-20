@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, Coins } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
@@ -6,6 +6,21 @@ import { MneeTransactionButton } from '../web3/MneeTransactionButton';
 import PostContent from './PostContent';
 import PollDisplay from './PollDisplay';
 import { PostWithInteractions } from '../../types/social';
+
+// Moved outside to prevent recreation
+const timeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m`;
+  } else if (diffInMinutes < 1440) {
+    return `${Math.floor(diffInMinutes / 60)}h`;
+  } else {
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  }
+};
 
 const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLiked, setIsLiked] = useState(post.is_liked);
@@ -15,7 +30,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isUnlocked, setIsUnlocked] = useState(post.unlocked_by_user || false);
   const { user } = useAuth();
 
-  const handleLike = async (e: React.MouseEvent) => {
+  const handleLike = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user || isLoading) return;
 
@@ -23,20 +38,20 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
     try {
       if (isLiked) {
         await socialApi.unlikePost(post.id);
-        setLikes(likes - 1);
+        setLikes(prev => prev - 1);
       } else {
         await socialApi.likePost(post.id);
-        setLikes(likes + 1);
+        setLikes(prev => prev + 1);
       }
-      setIsLiked(!isLiked);
+      setIsLiked(prev => !prev);
     } catch (error) {
       console.error('Error toggling like:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, isLoading, isLiked, post.id]);
 
-  const handleBookmark = async (e: React.MouseEvent) => {
+  const handleBookmark = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user || isLoading) return;
 
@@ -47,27 +62,17 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
       } else {
         await socialApi.bookmarkPost(post.id);
       }
-      setIsBookmarked(!isBookmarked);
+      setIsBookmarked(prev => !prev);
     } catch (error) {
       console.error('Error toggling bookmark:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, isLoading, isBookmarked, post.id]);
 
-  const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d`;
-    }
-  };
+  const handleUnlock = useCallback(() => {
+    setIsUnlocked(true);
+  }, []);
 
   const profile = post.profiles;
   const displayName = profile?.full_name || profile?.username || 'Anonymous';
@@ -119,7 +124,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                             recipientAddress={recipientAddress}
                             amount={post.unlock_price?.toString() || "1.0"}
                             label={`Unlock for ${post.unlock_price || 1} MNEE`}
-                            onSuccess={() => setIsUnlocked(true)}
+                            onSuccess={handleUnlock}
                         />
                     </div>
                 </div>
