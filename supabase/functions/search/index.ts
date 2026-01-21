@@ -44,8 +44,10 @@ Deno.serve(async (req) => {
 
     const offset = page * limit;
     const searchTerm = query.trim().toLowerCase();
+    // Encode search term to prevent query injection and handle special characters
+    const encodedSearchTerm = encodeURIComponent(searchTerm);
     
-    let results = {
+    const results = {
       posts: [],
       users: [],
       hashtags: []
@@ -53,7 +55,7 @@ Deno.serve(async (req) => {
 
     // Search posts
     if (searchType === 'all' || searchType === 'posts') {
-      const postsQuery = `${supabaseUrl}/rest/v1/posts?select=*&visibility=eq.public&or=(content.ilike.*${searchTerm}*,hashtags.cs.{"${searchTerm}"})&order=created_at.desc&limit=${limit}&offset=${offset}`;
+      const postsQuery = `${supabaseUrl}/rest/v1/posts?select=*&visibility=eq.public&or=(content.ilike.*${encodedSearchTerm}*,hashtags.cs.{"${encodedSearchTerm}"})&order=created_at.desc&limit=${limit}&offset=${offset}`;
       
       const postsResponse = await fetch(postsQuery, {
         headers: {
@@ -94,7 +96,7 @@ Deno.serve(async (req) => {
 
     // Search users
     if (searchType === 'all' || searchType === 'users') {
-      const usersQuery = `${supabaseUrl}/rest/v1/profiles?select=id,username,display_name,bio,avatar_url,is_verified,follower_count,following_count&or=(username.ilike.*${searchTerm}*,display_name.ilike.*${searchTerm}*,bio.ilike.*${searchTerm}*)&limit=${limit}&offset=${offset}`;
+      const usersQuery = `${supabaseUrl}/rest/v1/profiles?select=id,username,display_name,bio,avatar_url,is_verified,follower_count,following_count&or=(username.ilike.*${encodedSearchTerm}*,display_name.ilike.*${encodedSearchTerm}*,bio.ilike.*${encodedSearchTerm}*)&limit=${limit}&offset=${offset}`;
       
       const usersResponse = await fetch(usersQuery, {
         headers: {
@@ -136,7 +138,7 @@ Deno.serve(async (req) => {
 
     // Search hashtags
     if (searchType === 'all' || searchType === 'hashtags') {
-      const hashtagsQuery = `${supabaseUrl}/rest/v1/hashtags?select=*&name.ilike.*${searchTerm}*&order=post_count.desc&limit=${limit}&offset=${offset}`;
+      const hashtagsQuery = `${supabaseUrl}/rest/v1/hashtags?select=*&name.ilike.*${encodedSearchTerm}*&order=post_count.desc&limit=${limit}&offset=${offset}`;
       
       const hashtagsResponse = await fetch(hashtagsQuery, {
         headers: {
