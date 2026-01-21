@@ -56,6 +56,17 @@ const ComposerBox = () => {
     );
   }
 
+  // Progress Ring Logic
+  const radius = 12;
+  const circumference = 2 * Math.PI * radius;
+  const percent = Math.min((postText.length / maxChars) * 100, 100);
+  const offset = circumference - (percent / 100) * circumference;
+  const isApproachingLimit = postText.length > maxChars * 0.8;
+
+  let colorClass = 'text-blue-500';
+  if (postText.length > maxChars * 0.9) colorClass = 'text-red-500';
+  else if (postText.length > maxChars * 0.8) colorClass = 'text-yellow-500';
+
   return (
     <form onSubmit={handleSubmit} className="border-b border-gray-200 dark:border-gray-800 p-4">
       <div className="flex space-x-4">
@@ -143,26 +154,40 @@ const ComposerBox = () => {
                   aria-live="polite"
                   aria-atomic="true"
                   aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
-                      ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
+                  className={`text-sm font-medium transition-opacity duration-200 ${
+                    isApproachingLimit ? 'opacity-100' : 'opacity-0'
+                  } ${
+                    postText.length > maxChars * 0.9 ? 'text-red-500' :
+                    postText.length > maxChars * 0.8 ? 'text-yellow-500' : 'text-gray-500'
                   }`}
                 >
                   {maxChars - postText.length}
                 </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
+
+                <div className="relative w-8 h-8 flex items-center justify-center">
+                   <svg className="transform -rotate-90 w-full h-full">
+                      <circle
+                         className="text-gray-200 dark:text-gray-700"
+                         strokeWidth="2"
+                         stroke="currentColor"
+                         fill="transparent"
+                         r={radius}
+                         cx="16"
+                         cy="16"
+                      />
+                      <circle
+                         className={`${colorClass} transition-all duration-300 ease-in-out`}
+                         strokeWidth="2"
+                         strokeDasharray={circumference}
+                         strokeDashoffset={offset}
+                         strokeLinecap="round"
+                         stroke="currentColor"
+                         fill="transparent"
+                         r={radius}
+                         cx="16"
+                         cy="16"
+                      />
+                   </svg>
                 </div>
               </div>
               <button
