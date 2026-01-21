@@ -76,6 +76,7 @@ export const ProfileBuilderHeader: React.FC<ProfileBuilderHeaderProps> = ({
           onClick={onToggleLibrary}
           className="p-2 text-gray-400 hover:text-pink-400 transition-colors"
           title="Toggle Widget Library"
+          aria-label="Toggle widget library"
         >
           <Bars3Icon className="w-5 h-5" />
         </button>
@@ -85,6 +86,8 @@ export const ProfileBuilderHeader: React.FC<ProfileBuilderHeaderProps> = ({
           <button
             onClick={() => setShowLayoutMenu(!showLayoutMenu)}
             className="flex items-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors"
+            aria-haspopup="true"
+            aria-expanded={showLayoutMenu}
           >
             <span className="text-white font-medium">
               {activeLayout?.name || 'No Layout'}
@@ -120,6 +123,7 @@ export const ProfileBuilderHeader: React.FC<ProfileBuilderHeaderProps> = ({
                         onClick={() => handleDeleteLayout(layout.id)}
                         className="p-1 text-gray-400 hover:text-red-400 transition-colors"
                         title="Delete Layout"
+                        aria-label="Delete layout"
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
@@ -209,13 +213,17 @@ export const ProfileBuilderHeader: React.FC<ProfileBuilderHeaderProps> = ({
 
         {/* More Actions */}
         <div className="relative group">
-          <button className="p-2 text-gray-400 hover:text-white transition-colors">
+          <button
+            className="p-2 text-gray-400 hover:text-white transition-colors"
+            aria-label="More options"
+            aria-haspopup="true"
+          >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
             </svg>
           </button>
           
-          <div className="absolute right-0 top-full mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-50">
             <div className="p-2 space-y-1">
               <button className="w-full flex items-center space-x-2 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
                 <DocumentDuplicateIcon className="w-4 h-4" />
