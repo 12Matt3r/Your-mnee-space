@@ -18,6 +18,20 @@ export function formatRelativeTime(dateString: string): string {
   return `${Math.floor(diffDays / 365)} years ago`
 }
 
+export function formatShortTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+
+  if (diffInMinutes < 60) {
+    return `${Math.max(0, diffInMinutes)}m`;
+  } else if (diffInMinutes < 1440) {
+    return `${Math.floor(diffInMinutes / 60)}h`;
+  } else {
+    return `${Math.floor(diffInMinutes / 1440)}d`;
+  }
+}
+
 export function formatDuration(seconds: number): string {
   if (!seconds || !isFinite(seconds)) return '0:00'
   
