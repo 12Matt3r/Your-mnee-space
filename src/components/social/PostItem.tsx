@@ -1,5 +1,6 @@
 import React, { useState, memo } from 'react';
 import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, Coins } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 import { MneeTransactionButton } from '../web3/MneeTransactionButton';
@@ -52,6 +53,38 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
       console.error('Error toggling bookmark:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Construct a shareable URL (pointing to social feed for now as deep links aren't implemented)
+    const shareUrl = window.location.origin + '/social';
+    const shareText = `Check out this post by ${displayName} on YourSpace`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by ${displayName}`,
+          text: shareText,
+          url: shareUrl,
+        });
+        toast.success('Shared successfully');
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error sharing:', error);
+          toast.error('Failed to share');
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        toast.error('Failed to copy link');
+      }
     }
   };
 
@@ -197,6 +230,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
               </button>
 
               <button
+                onClick={handleShare}
                 aria-label="Share post"
                 className="p-2 rounded-full text-gray-500 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
               >
