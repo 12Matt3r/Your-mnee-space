@@ -6,6 +6,7 @@ import { GlobalMusicProvider } from './components/music/GlobalMusicProvider';
 import { MusicPlayerProvider } from './contexts/MusicPlayerContext';
 import { Web3Provider } from './components/web3/Web3Provider';
 import { Layout } from './components/layout/Layout';
+import { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Import all pages
@@ -53,6 +54,12 @@ function App() {
             <GlobalMusicProvider>
               <MusicPlayerProvider>
               <div className="App">
+                <Toaster position="bottom-center" toastOptions={{
+                  style: {
+                    background: '#333',
+                    color: '#fff',
+                  },
+                }} />
                 <Routes>
                 {/* Auth routes without layout */}
                 <Route path="/login" element={<LoginPage />} />
