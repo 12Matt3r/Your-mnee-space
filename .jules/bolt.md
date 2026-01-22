@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2024-05-24 - List Item Memoization
+**Learning:** In a social feed where users frequently interact (like, bookmark) with items, un-memoized child components (like `PostContent` which parses regex) re-render unnecessarily on every interaction, causing jank.
+**Action:** Memoize expensive child components (`React.memo`) within list items to isolate interaction state updates to the container only.

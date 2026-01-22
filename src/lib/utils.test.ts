@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   formatRelativeTime,
+  formatShortTimeAgo,
   formatDuration,
   formatFileSize,
   isValidEmail,
@@ -15,6 +16,28 @@ describe('Utils', () => {
       // Subtracting 23 hours to be safe with Math.ceil logic in utils
       const yesterday = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
       expect(formatRelativeTime(yesterday)).toBe('1 day ago')
+    })
+  })
+
+  describe('formatShortTimeAgo', () => {
+    it('formats minutes', () => {
+      const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      expect(formatShortTimeAgo(fiveMinsAgo)).toBe('5m')
+    })
+
+    it('formats hours', () => {
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+      expect(formatShortTimeAgo(twoHoursAgo)).toBe('2h')
+    })
+
+    it('formats days', () => {
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+      expect(formatShortTimeAgo(threeDaysAgo)).toBe('3d')
+    })
+
+    it('handles just now', () => {
+        const now = new Date().toISOString()
+        expect(formatShortTimeAgo(now)).toBe('0m')
     })
   })
 
