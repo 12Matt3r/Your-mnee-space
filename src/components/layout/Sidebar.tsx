@@ -1,5 +1,6 @@
 // YourSpace Creative Labs - Sidebar Navigation
 import { Link, useLocation } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { useAuth } from '../../hooks/useAuth'
 import { 
   HomeIcon, 
@@ -61,8 +62,7 @@ export const Sidebar = () => {
   const handleAuthRequiredClick = (e: React.MouseEvent, href: string) => {
     if (!user) {
       e.preventDefault()
-      // Could show a modal or toast here instead
-      alert('Please sign in to access creator features')
+      toast.error('Please sign in to access creator features', { icon: '🔒' })
     }
   }
 

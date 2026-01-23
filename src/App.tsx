@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/theme/ThemeProvider';
 import { GlobalMusicProvider } from './components/music/GlobalMusicProvider';
@@ -53,6 +54,7 @@ function App() {
             <GlobalMusicProvider>
               <MusicPlayerProvider>
               <div className="App">
+                <Toaster position="top-center" reverseOrder={false} />
                 <Routes>
                 {/* Auth routes without layout */}
                 <Route path="/login" element={<LoginPage />} />
