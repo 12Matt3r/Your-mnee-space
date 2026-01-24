@@ -7,7 +7,7 @@ export const JULES_CONFIG = {
   // Jules API endpoint (using Google's AI studio/API structure)
   apiBase: 'https://generativelanguage.googleapis.com/v1beta',
   // The API key you provided
-  apiKey: 'AQ.Ab8RN6LrIgeapRCSRnObjH3TXd_aiV-ItnEncJGmO__KDbmVig',
+  apiKey: import.meta.env.VITE_JULES_AI_API_KEY || '',
   
   // Jules is specialized for:
   // - Code generation and completion
@@ -297,7 +297,7 @@ export const ALL_AI_SERVICES = {
     name: 'Google Jules',
     type: 'paid',
     requiresKey: true,
-    keyProvided: true, // User provided the key!
+    keyProvided: false,
     description: 'Google\'s AI coding specialist',
     capabilities: ['code_generation', 'debugging', 'refactoring', 'documentation'],
     models: ['jules-code'],
