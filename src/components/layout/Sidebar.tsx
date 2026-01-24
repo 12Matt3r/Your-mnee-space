@@ -1,5 +1,6 @@
 // YourSpace Creative Labs - Sidebar Navigation
 import { Link, useLocation } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import { useAuth } from '../../hooks/useAuth'
 import { 
   HomeIcon, 
@@ -61,8 +62,7 @@ export const Sidebar = () => {
   const handleAuthRequiredClick = (e: React.MouseEvent, href: string) => {
     if (!user) {
       e.preventDefault()
-      // Could show a modal or toast here instead
-      alert('Please sign in to access creator features')
+      toast.error('Please sign in to access creator features', { icon: '🔒' })
     }
   }
 
@@ -75,6 +75,8 @@ export const Sidebar = () => {
         key={item.name}
         to={item.href}
         onClick={(e) => item.requiresAuth && handleAuthRequiredClick(e, item.href)}
+        aria-disabled={isDisabled}
+        aria-label={isDisabled ? `${item.name} (Locked)` : item.name}
         className={cn(
           'flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 group relative',
           isActive && user

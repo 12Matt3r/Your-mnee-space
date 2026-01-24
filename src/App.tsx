@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './components/theme/ThemeProvider';
 import { GlobalMusicProvider } from './components/music/GlobalMusicProvider';
@@ -50,6 +51,15 @@ function App() {
       <AuthProvider>
         <Web3Provider>
           <ThemeProvider>
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                className: '!bg-gray-800 !text-white !border !border-gray-700',
+                style: {
+                  borderRadius: '8px',
+                }
+              }}
+            />
             <GlobalMusicProvider>
               <MusicPlayerProvider>
               <div className="App">
