@@ -25,6 +25,8 @@ const PostContent = ({ text }: { text: string }) => {
                         key={index}
                         src={match[2]}
                         alt={match[1]}
+                        loading="lazy"
+                        decoding="async"
                         className="mt-3 rounded-xl w-full object-cover max-h-96"
                     />
                 );
