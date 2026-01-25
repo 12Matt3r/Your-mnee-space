@@ -65,7 +65,7 @@ export const Header = () => {
             <Link
               to="/create"
               aria-label="Create new content"
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200"
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
             >
               <PlusIcon className="h-5 w-5" />
               <span>Create</span>
@@ -77,8 +77,9 @@ export const Header = () => {
 
             {/* Notifications */}
             <button
+              type="button"
               aria-label="View notifications"
-              className="relative p-2 text-mnee-gray hover:text-mnee-gold transition-colors"
+              className="relative p-2 text-mnee-gray hover:text-mnee-gold transition-colors rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold"
             >
               <BellIcon className="h-6 w-6" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-mnee-gold rounded-full"></span>
@@ -86,7 +87,7 @@ export const Header = () => {
 
             {/* User Menu */}
             <Menu as="div" className="relative">
-              <Menu.Button className="flex items-center space-x-3 p-2 rounded-lg hover:bg-mnee-slate transition-colors">
+              <Menu.Button className="flex items-center space-x-3 p-2 rounded-lg hover:bg-mnee-slate transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-mnee-gold to-mnee-blue flex items-center justify-center">
                   {profile?.avatar_url ? (
                     <img 
@@ -182,13 +183,13 @@ export const Header = () => {
             <div className="flex items-center space-x-3">
               <Link
                 to="/login"
-                className="px-4 py-2 text-mnee-gray hover:text-white transition-colors font-medium"
+                className="px-4 py-2 text-mnee-gray hover:text-white transition-colors font-medium rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gray"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200"
+                className="px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
               >
                 Sign Up
               </Link>
