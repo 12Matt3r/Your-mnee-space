@@ -28,4 +28,19 @@ describe('Button', () => {
     const button = screen.getByRole('button')
     expect(button.className).toContain('h-8')
   })
+
+  it('shows loading spinner and disables button when isLoading is true', () => {
+    render(<Button isLoading>Submit</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+    expect(button.querySelector('.animate-spin')).toBeInTheDocument()
+  })
+
+  it('shows loading text when provided', () => {
+    render(<Button isLoading loadingText="Saving...">Submit</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toHaveTextContent('Saving...')
+    expect(screen.queryByText('Submit')).not.toBeInTheDocument()
+    expect(button).toBeDisabled()
+  })
 })
