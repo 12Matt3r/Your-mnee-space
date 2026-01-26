@@ -28,4 +28,40 @@ describe('Button', () => {
     const button = screen.getByRole('button')
     expect(button.className).toContain('h-8')
   })
+
+  it('shows loading state correctly', () => {
+    render(<Button isLoading>Submit</Button>)
+    const button = screen.getByRole('button')
+
+    // Should be disabled
+    expect(button).toBeDisabled()
+
+    // Should show spinner (check for a generic way if possible, or assumption of implementation)
+    // Since we use lucide-react Loader2, it usually renders an svg.
+    // We can check if the button contains an element with animate-spin class
+    expect(button.querySelector('.animate-spin')).toBeInTheDocument()
+
+    // Should still show text by default
+    expect(screen.getByText('Submit')).toBeInTheDocument()
+  })
+
+  it('shows loading text when provided', () => {
+    render(<Button isLoading loadingText="Saving...">Submit</Button>)
+
+    expect(screen.getByText('Saving...')).toBeInTheDocument()
+    expect(screen.queryByText('Submit')).not.toBeInTheDocument()
+  })
+
+  it('replaces content with spinner for circle buttons', () => {
+    render(
+      <Button size="circle" isLoading>
+        <span data-testid="icon">Icon</span>
+      </Button>
+    )
+
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+    expect(button.querySelector('.animate-spin')).toBeInTheDocument()
+    expect(screen.queryByTestId('icon')).not.toBeInTheDocument()
+  })
 })
