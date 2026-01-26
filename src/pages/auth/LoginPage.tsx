@@ -4,6 +4,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { ParticleBackground } from '../../components/effects/ParticleBackground'
 import { DiscordLogin } from '../../components/auth/DiscordLogin'
+import { Button } from '../../components/ui/button'
 import { EyeIcon, EyeSlashIcon, SparklesIcon } from '@heroicons/react/24/outline'
 import { isValidEmail } from '../../lib/utils'
 
@@ -145,20 +146,14 @@ export const LoginPage = () => {
             )}
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-200 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
+              isLoading={isLoading}
+              loadingText="Signing In..."
+              className="w-full neon-glow from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Signing In...
-                </div>
-              ) : (
-                'Sign In'
-              )}
-            </button>
+              Sign In
+            </Button>
 
             {/* Divider */}
             <div className="relative">
