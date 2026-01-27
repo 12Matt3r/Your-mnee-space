@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
+import { Button } from '../ui/button';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 
@@ -165,13 +166,15 @@ const ComposerBox = () => {
                   }}></div>
                 </div>
               </div>
-              <button
+              <Button
                 type="submit"
-                disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={!postText.trim() || postText.length > maxChars}
+                isLoading={isPosting}
+                loadingText="Posting..."
+                className="px-6 py-2 rounded-full font-medium transition-colors"
               >
-                {isPosting ? 'Posting...' : 'Post'}
-              </button>
+                Post
+              </Button>
             </div>
           </div>
         </div>
