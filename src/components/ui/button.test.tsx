@@ -28,4 +28,51 @@ describe('Button', () => {
     const button = screen.getByRole('button')
     expect(button.className).toContain('h-8')
   })
+
+  it('shows loading state correctly', () => {
+    render(<Button isLoading loadingText="Loading...">Click me</Button>)
+    const button = screen.getByRole('button')
+
+    // Check if disabled
+    expect(button).toBeDisabled()
+
+    // Check if loading text is shown
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+
+    // Check if original children are hidden
+    expect(screen.queryByText('Click me')).not.toBeInTheDocument()
+
+    // Check if spinner is present
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+  })
+
+  it('shows loading state without text correctly', () => {
+    render(<Button isLoading>Click me</Button>)
+    const button = screen.getByRole('button')
+
+    expect(button).toBeDisabled()
+
+    // Check if original children are still shown
+    expect(screen.getByText('Click me')).toBeInTheDocument()
+
+    // Check if spinner is present
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+  })
+
+  it('shows loading state for circle button correctly', () => {
+    render(
+      <Button size="circle" isLoading>
+        <span aria-label="Icon">Icon</span>
+      </Button>
+    )
+    const button = screen.getByRole('button')
+
+    expect(button).toBeDisabled()
+
+    // Check if children are hidden for circle button
+    expect(screen.queryByLabelText('Icon')).not.toBeInTheDocument()
+
+    // Check if spinner is present
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+  })
 })
