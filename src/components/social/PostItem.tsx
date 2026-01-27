@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, Coins } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
@@ -7,6 +7,8 @@ import PostContent from './PostContent';
 import PollDisplay from './PollDisplay';
 import { PostWithInteractions } from '../../types/social';
 
+const TIP_ICON = <Coins className="w-3 h-3 text-yellow-400 mr-1" />;
+
 const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLiked, setIsLiked] = useState(post.is_liked);
   const [isBookmarked, setIsBookmarked] = useState(post.is_bookmarked);
@@ -14,6 +16,10 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(post.unlocked_by_user || false);
   const { user } = useAuth();
+
+  const handleUnlockSuccess = useCallback(() => {
+    setIsUnlocked(true);
+  }, []);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -119,7 +125,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                             recipientAddress={recipientAddress}
                             amount={post.unlock_price?.toString() || "1.0"}
                             label={`Unlock for ${post.unlock_price || 1} MNEE`}
-                            onSuccess={() => setIsUnlocked(true)}
+                            onSuccess={handleUnlockSuccess}
                         />
                     </div>
                 </div>
@@ -176,7 +182,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
                         amount="5.0"
                         label="Tip 5"
                         className="!px-3 !py-1 !text-xs !bg-none !bg-gray-800 hover:!bg-gray-700 text-yellow-400 border border-yellow-500/30"
-                        icon={<Coins className="w-3 h-3 text-yellow-400 mr-1" />}
+                        icon={TIP_ICON}
                     />
                 </div>
             )}
