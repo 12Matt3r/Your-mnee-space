@@ -39,7 +39,8 @@ export const PostComposer: React.FC<PostComposerProps> = ({
   const characterLimit = 280;
   const remainingChars = characterLimit - content.length;
   const isOverLimit = remainingChars < 0;
-  const canPost = content.trim().length > 0 && !isOverLimit && !loading;
+  const isValid = content.trim().length > 0 && !isOverLimit;
+  const canPost = isValid && !loading;
 
   const handleFileSelect = (files: FileList | null, type: 'image' | 'video') => {
     if (!files) return;
@@ -322,20 +323,15 @@ export const PostComposer: React.FC<PostComposerProps> = ({
           <Button
             onClick={handleSubmit}
             disabled={!canPost}
+            isLoading={loading}
+            loadingText="Posting..."
             className={`px-6 py-2 rounded-full font-medium transition-all ${
-              canPost
+              isValid
                 ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Posting...
-              </div>
-            ) : (
-              replyToId ? 'Reply' : 'Post'
-            )}
+            {replyToId ? 'Reply' : 'Post'}
           </Button>
         </div>
       </div>
