@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2026-01-27 - Unstable Props Defeating Memoization
+**Learning:** `MneeTransactionButton` was effectively re-rendering on every parent render despite being a heavy component (wagmi hooks), because its parent `PostItem` passed unstable inline functions (`onSuccess`) and JSX objects (`icon`). This is a common pattern in list items.
+**Action:** When optimizing list items, ensure child components, especially those with expensive hooks or heavy rendering, are wrapped in `memo` AND that their props (handlers, icons) are stabilized with `useCallback` or constants.
