@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
+import { ImageIcon, Smile, Calendar, MapPin, BarChart2, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 
@@ -70,7 +70,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -97,7 +97,7 @@ const ComposerBox = () => {
                 type="button"
                 onClick={handleImageUpload}
                 aria-label="Add image"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
                 title="Add Image"
               >
                 <ImageIcon className="w-5 h-5 text-blue-500" />
@@ -105,7 +105,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add poll"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
                 title="Add Poll"
               >
                 <BarChart2 className="w-5 h-5 text-blue-500" />
@@ -113,7 +113,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add emoji"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
                 title="Add Emoji"
               >
                 <Smile className="w-5 h-5 text-blue-500" />
@@ -121,7 +121,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Schedule post"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
                 title="Schedule"
               >
                 <Calendar className="w-5 h-5 text-blue-500" />
@@ -129,7 +129,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add location"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none"
                 title="Add Location"
               >
                 <MapPin className="w-5 h-5 text-blue-500" />
@@ -138,39 +138,63 @@ const ComposerBox = () => {
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
-                      ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {maxChars - postText.length}
-                </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
+                {(maxChars - postText.length <= 20) && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label={`${maxChars - postText.length} characters remaining`}
+                    className={`text-sm font-medium ${
+                      postText.length > maxChars
+                        ? 'text-red-500'
+                        : postText.length > maxChars * 0.9
+                        ? 'text-red-500'
+                        : 'text-yellow-500'
+                    }`}
+                  >
+                    {maxChars - postText.length}
+                  </div>
+                )}
+                <div className="relative w-8 h-8 flex items-center justify-center">
+                  <svg className="w-8 h-8 transform -rotate-90">
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      className="text-gray-200 dark:text-gray-700"
+                    />
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="transparent"
+                      strokeDasharray={62.83}
+                      strokeDashoffset={62.83 - (Math.min(postText.length / maxChars, 1) * 62.83)}
+                      strokeLinecap="round"
+                      className={`transition-all duration-300 ease-out ${
+                        postText.length > maxChars
+                          ? 'text-red-500'
+                          : postText.length > maxChars * 0.9
+                          ? 'text-red-500'
+                          : postText.length > maxChars * 0.8
+                          ? 'text-yellow-500'
+                          : 'text-blue-500'
+                      }`}
+                    />
+                  </svg>
                 </div>
               </div>
               <button
                 type="submit"
                 disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus:outline-none flex items-center min-w-[80px] justify-center"
               >
-                {isPosting ? 'Posting...' : 'Post'}
+                {isPosting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Post'}
               </button>
             </div>
           </div>
