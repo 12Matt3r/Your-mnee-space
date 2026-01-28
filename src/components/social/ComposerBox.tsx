@@ -70,7 +70,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg transition-shadow"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -138,31 +138,51 @@ const ComposerBox = () => {
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
-                      ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {maxChars - postText.length}
-                </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
+                {(maxChars - postText.length) <= 20 && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label={`${maxChars - postText.length} characters remaining`}
+                    className={`text-sm font-medium ${
+                      (maxChars - postText.length) <= 0
+                        ? 'text-red-500'
+                        : 'text-yellow-500'
+                    }`}
+                  >
+                    {maxChars - postText.length}
+                  </div>
+                )}
+                <div className="relative w-8 h-8 flex items-center justify-center">
+                  <svg className="transform -rotate-90 w-full h-full">
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="12"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="transparent"
+                      className="text-gray-200 dark:text-gray-700"
+                    />
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="12"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      fill="transparent"
+                      strokeDasharray={2 * Math.PI * 12}
+                      strokeDashoffset={2 * Math.PI * 12 - (Math.min(postText.length / maxChars, 1) * 2 * Math.PI * 12)}
+                      strokeLinecap="round"
+                      className={`transition-all duration-300 ${
+                         postText.length > maxChars * 0.9
+                          ? 'text-red-500'
+                          : postText.length > maxChars * 0.8
+                          ? 'text-yellow-500'
+                          : 'text-blue-500'
+                      }`}
+                    />
+                  </svg>
                 </div>
               </div>
               <button
