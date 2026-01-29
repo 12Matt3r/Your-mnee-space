@@ -322,20 +322,15 @@ export const PostComposer: React.FC<PostComposerProps> = ({
           <Button
             onClick={handleSubmit}
             disabled={!canPost}
+            isLoading={loading}
+            loadingText="Posting..."
             className={`px-6 py-2 rounded-full font-medium transition-all ${
               canPost
                 ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
             }`}
           >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Posting...
-              </div>
-            ) : (
-              replyToId ? 'Reply' : 'Post'
-            )}
+            {replyToId ? 'Reply' : 'Post'}
           </Button>
         </div>
       </div>
