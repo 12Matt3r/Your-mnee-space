@@ -70,7 +70,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none focus:ring-2 focus:ring-blue-500 rounded-md"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -83,7 +83,8 @@ const ComposerBox = () => {
                     type="button"
                     onClick={() => setMockImage(null)}
                     aria-label="Remove image"
-                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove image"
+                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
                   >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -97,7 +98,7 @@ const ComposerBox = () => {
                 type="button"
                 onClick={handleImageUpload}
                 aria-label="Add image"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 title="Add Image"
               >
                 <ImageIcon className="w-5 h-5 text-blue-500" />
@@ -105,7 +106,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add poll"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 title="Add Poll"
               >
                 <BarChart2 className="w-5 h-5 text-blue-500" />
@@ -113,7 +114,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add emoji"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 title="Add Emoji"
               >
                 <Smile className="w-5 h-5 text-blue-500" />
@@ -121,7 +122,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Schedule post"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 title="Schedule"
               >
                 <Calendar className="w-5 h-5 text-blue-500" />
@@ -129,7 +130,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add location"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
                 title="Add Location"
               >
                 <MapPin className="w-5 h-5 text-blue-500" />
