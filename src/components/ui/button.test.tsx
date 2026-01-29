@@ -28,4 +28,20 @@ describe('Button', () => {
     const button = screen.getByRole('button')
     expect(button.className).toContain('h-8')
   })
+
+  it('shows loading state', () => {
+    render(<Button isLoading>Click me</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+    expect(button.querySelector('.animate-spin')).toBeInTheDocument()
+    expect(screen.getByText(/click me/i)).toBeInTheDocument()
+  })
+
+  it('shows loading text', () => {
+    render(<Button isLoading loadingText="Loading...">Click me</Button>)
+    const button = screen.getByRole('button')
+    expect(button).toBeDisabled()
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    expect(screen.queryByText('Click me')).not.toBeInTheDocument()
+  })
 })
