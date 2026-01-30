@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2024-05-24 - Unstable Mock Data
+**Learning:** Generating mock data with random values (e.g. `Math.random()`) inside a component's render loop or `useEffect` callback creates new object references on every render. This breaks `React.memo` optimizations on child components (like `PostItem`), causing unnecessary re-renders even when the data "looks" the same.
+**Action:** Move static mock data generation outside the component scope or wrap it in `useMemo` to ensure referential stability.
