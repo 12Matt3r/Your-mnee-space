@@ -28,4 +28,27 @@ describe('Button', () => {
     const button = screen.getByRole('button')
     expect(button.className).toContain('h-8')
   })
+
+  it('shows loading state correctly', () => {
+    render(<Button isLoading loadingText="Processing...">Submit</Button>)
+    const button = screen.getByRole('button')
+
+    expect(button).toBeDisabled()
+    expect(screen.getByText('Processing...')).toBeInTheDocument()
+    // When loadingText is present, children are replaced?
+    // Wait, my implementation was: {loadingText || children}
+    // So 'Submit' should NOT be visible.
+    expect(screen.queryByText('Submit')).not.toBeInTheDocument()
+    expect(button).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
+  })
+
+  it('shows loading spinner with children when no loadingText', () => {
+    render(<Button isLoading>Submit</Button>)
+    const button = screen.getByRole('button')
+
+    expect(button).toBeDisabled()
+    expect(screen.getByText('Submit')).toBeInTheDocument()
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument()
+  })
 })
