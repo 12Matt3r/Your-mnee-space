@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const PostContent = ({ text }: { text: string }) => {
   // Simple regex to find hashtags and images markdown
   // Very basic parser for demo purposes
-  const parts = text.split(/(\#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
+  const parts = text.split(/(#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
 
   return (
     <div className="text-gray-900 dark:text-white text-base leading-relaxed whitespace-pre-wrap">
@@ -20,14 +20,20 @@ const PostContent = ({ text }: { text: string }) => {
             // Render markdown image
             const match = part.match(/!\[(.*?)\]\((.*?)\)/);
             if (match) {
-                return (
-                    <img
-                        key={index}
-                        src={match[2]}
-                        alt={match[1]}
-                        className="mt-3 rounded-xl w-full object-cover max-h-96"
-                    />
-                );
+                const src = match[2];
+                // Security: Only allow http/https protocols to prevent XSS and other attacks
+                if (src.startsWith('http://') || src.startsWith('https://')) {
+                    return (
+                        <img
+                            key={index}
+                            src={src}
+                            alt={match[1]}
+                            className="mt-3 rounded-xl w-full object-cover max-h-96"
+                            loading="lazy"
+                            referrerPolicy="no-referrer"
+                        />
+                    );
+                }
             }
         }
         return <span key={index}>{part}</span>;
