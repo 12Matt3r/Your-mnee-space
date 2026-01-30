@@ -56,6 +56,17 @@ const ComposerBox = () => {
     );
   }
 
+  // Progress Ring Logic
+  const radius = 10;
+  const circumference = 2 * Math.PI * radius;
+  const percentage = Math.min(postText.length / maxChars, 1);
+  const strokeDashoffset = circumference - percentage * circumference;
+  const remaining = maxChars - postText.length;
+
+  let ringColor = 'text-blue-500';
+  if (remaining <= 0) ringColor = 'text-red-500';
+  else if (remaining <= 20) ringColor = 'text-yellow-500';
+
   return (
     <form onSubmit={handleSubmit} className="border-b border-gray-200 dark:border-gray-800 p-4">
       <div className="flex space-x-4">
@@ -70,7 +81,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-2 transition-shadow"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -83,7 +94,7 @@ const ComposerBox = () => {
                     type="button"
                     onClick={() => setMockImage(null)}
                     aria-label="Remove image"
-                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white"
                   >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -97,7 +108,7 @@ const ComposerBox = () => {
                 type="button"
                 onClick={handleImageUpload}
                 aria-label="Add image"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
                 title="Add Image"
               >
                 <ImageIcon className="w-5 h-5 text-blue-500" />
@@ -105,7 +116,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add poll"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
                 title="Add Poll"
               >
                 <BarChart2 className="w-5 h-5 text-blue-500" />
@@ -113,7 +124,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add emoji"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
                 title="Add Emoji"
               >
                 <Smile className="w-5 h-5 text-blue-500" />
@@ -121,7 +132,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Schedule post"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
                 title="Schedule"
               >
                 <Calendar className="w-5 h-5 text-blue-500" />
@@ -129,7 +140,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add location"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
                 title="Add Location"
               >
                 <MapPin className="w-5 h-5 text-blue-500" />
@@ -137,38 +148,52 @@ const ComposerBox = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
-                      ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {maxChars - postText.length}
-                </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
+              <div className="flex items-center space-x-3">
+                {remaining <= 20 && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label={`${remaining} characters remaining`}
+                    className={`text-xs font-medium ${
+                      remaining <= 0 ? 'text-red-500' : 'text-yellow-500'
+                    }`}
+                  >
+                    {remaining}
+                  </div>
+                )}
+
+                <div className="relative w-6 h-6 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle
+                      className="text-gray-200 dark:text-gray-700"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="transparent"
+                      r={radius}
+                      cx="12"
+                      cy="12"
+                    />
+                    <circle
+                      className={`${ringColor} transition-all duration-300 ease-in-out`}
+                      strokeWidth="2"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="transparent"
+                      r={radius}
+                      cx="12"
+                      cy="12"
+                    />
+                  </svg>
                 </div>
               </div>
+
               <button
                 type="submit"
                 disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 outline-none"
               >
                 {isPosting ? 'Posting...' : 'Post'}
               </button>
