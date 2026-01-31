@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2024-05-23 - Lazy Loading Export Patterns
+**Learning:** The codebase uses a mix of named and default exports for pages. When implementing `React.lazy`, strict attention must be paid to this distinction. Named exports require `.then(module => ({ default: module.Component }))` while default exports work directly.
+**Action:** Always verify the export type of a component before converting to a lazy import to avoid runtime errors.
