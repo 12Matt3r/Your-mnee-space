@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 const ComposerBox = () => {
   const [postText, setPostText] = useState('');
@@ -56,6 +57,20 @@ const ComposerBox = () => {
     );
   }
 
+  // Calculate percentage for progress ring
+  const percentage = Math.min((postText.length / maxChars) * 100, 100);
+  const isNearLimit = postText.length > maxChars * 0.8;
+  const isOverLimit = postText.length > maxChars;
+
+  // Progress Ring Color
+  const getProgressColor = () => {
+    if (isOverLimit) return 'text-red-500';
+    if (isNearLimit) return 'text-yellow-500';
+    return 'text-blue-500';
+  };
+
+  const circumference = 2 * Math.PI * 10; // r=10
+
   return (
     <form onSubmit={handleSubmit} className="border-b border-gray-200 dark:border-gray-800 p-4">
       <div className="flex space-x-4">
@@ -70,7 +85,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md p-2 -ml-2 transition-all"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -83,7 +98,7 @@ const ComposerBox = () => {
                     type="button"
                     onClick={() => setMockImage(null)}
                     aria-label="Remove image"
-                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-white transition-opacity"
                   >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -92,12 +107,12 @@ const ComposerBox = () => {
 
           {/* Composer Actions */}
           <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
               <button
                 type="button"
                 onClick={handleImageUpload}
                 aria-label="Add image"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none transition-colors"
                 title="Add Image"
               >
                 <ImageIcon className="w-5 h-5 text-blue-500" />
@@ -105,7 +120,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add poll"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none transition-colors"
                 title="Add Poll"
               >
                 <BarChart2 className="w-5 h-5 text-blue-500" />
@@ -113,7 +128,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add emoji"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none transition-colors"
                 title="Add Emoji"
               >
                 <Smile className="w-5 h-5 text-blue-500" />
@@ -121,7 +136,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Schedule post"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none transition-colors"
                 title="Schedule"
               >
                 <Calendar className="w-5 h-5 text-blue-500" />
@@ -129,7 +144,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add location"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none transition-colors"
                 title="Add Location"
               >
                 <MapPin className="w-5 h-5 text-blue-500" />
@@ -138,39 +153,57 @@ const ComposerBox = () => {
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
-                      ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {maxChars - postText.length}
-                </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
+                {/* Character Count text - only show when near limit */}
+                {isNearLimit && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    aria-label={`${maxChars - postText.length} characters remaining`}
+                    className={`text-sm font-medium ${isOverLimit ? 'text-red-500' : 'text-yellow-500'}`}
+                  >
+                    {maxChars - postText.length}
+                  </div>
+                )}
+
+                {/* SVG Progress Ring */}
+                <div className="relative w-8 h-8 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90">
+                    {/* Background circle */}
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-gray-200 dark:text-gray-700"
+                    />
+                    {/* Progress circle */}
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={circumference - (percentage / 100) * circumference}
+                      className={`transition-all duration-300 ease-out ${getProgressColor()}`}
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 </div>
               </div>
+
+              <div className="h-8 w-[1px] bg-gray-200 dark:bg-gray-700 mx-2" />
+
               <button
                 type="submit"
                 disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900 focus-visible:outline-none flex items-center justify-center min-w-[90px]"
               >
-                {isPosting ? 'Posting...' : 'Post'}
+                {isPosting ? <LoadingSpinner size="sm" className="text-white" /> : 'Post'}
               </button>
             </div>
           </div>
