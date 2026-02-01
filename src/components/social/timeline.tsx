@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useAuth } from '../../contexts/AuthContext';
@@ -16,6 +16,18 @@ const Timeline = () => {
   const [hasMore, setHasMore] = useState(true);
   const { user } = useAuth();
   const [feedType, setFeedType] = useState<'chronological' | 'trending'>('chronological');
+
+  // Memoize mock posts to prevent re-generation and random stat jumps on every render/scroll
+  const mockPostsWithInteractions = useMemo(() => {
+    return MOCK_POSTS.map(p => ({
+      ...p,
+      likes_count: Math.floor(Math.random() * 500),
+      replies_count: Math.floor(Math.random() * 50),
+      bookmarks_count: Math.floor(Math.random() * 100),
+      is_liked: false,
+      is_bookmarked: false
+    })) as unknown as PostWithInteractions[];
+  }, []);
 
   // Intersection Observer for Infinite Scroll
   const { ref, inView } = useInView({
@@ -36,16 +48,6 @@ const Timeline = () => {
       // Real pagination would require API update, but let's stick to the limit for now.
       
       const postsData = await socialApi.getPostsWithStats(limit);
-
-      // Merge Mock Posts (simulating mixing real & suggested/mock content)
-      const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-          ...p,
-          likes_count: Math.floor(Math.random() * 500),
-          replies_count: Math.floor(Math.random() * 50),
-          bookmarks_count: Math.floor(Math.random() * 100),
-          is_liked: false,
-          is_bookmarked: false
-      })) as unknown as PostWithInteractions[];
 
       // In a real scenario, we would append based on unique IDs
       const newPosts = [...mockPostsWithInteractions, ...postsData];
@@ -73,20 +75,12 @@ const Timeline = () => {
       console.error('Error loading posts:', err);
       // Fallback
       if (posts.length === 0) {
-         const mockPostsWithInteractions = MOCK_POSTS.map(p => ({
-            ...p,
-            likes_count: Math.floor(Math.random() * 500),
-            replies_count: Math.floor(Math.random() * 50),
-            bookmarks_count: Math.floor(Math.random() * 100),
-            is_liked: false,
-            is_bookmarked: false
-         })) as unknown as PostWithInteractions[];
          setPosts(mockPostsWithInteractions);
       }
     } finally {
       setLoading(false);
     }
-  }, [feedType, hasMore, posts.length]);
+  }, [feedType, hasMore, posts.length, mockPostsWithInteractions]);
 
   // Initial load
   useEffect(() => {
