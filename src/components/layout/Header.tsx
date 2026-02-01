@@ -23,7 +23,11 @@ export const Header = () => {
       {/* Left Section - MNEE Logo */}
       <div className="flex items-center space-x-4">
         {/* MNEE Logo */}
-        <div className="flex items-center space-x-3">
+        <Link
+          to="/"
+          aria-label="Home"
+          className="flex items-center space-x-3 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
+        >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-mnee-gold to-mnee-blue flex items-center justify-center shadow-mnee-gold">
             <svg viewBox="0 0 40 40" className="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="20" cy="20" r="18" stroke="white" strokeWidth="2" fill="none"/>
@@ -35,7 +39,7 @@ export const Header = () => {
             <span className="text-white font-bold text-lg">YourSpace</span>
             <span className="text-mnee-gold text-xs block -mt-1">Powered by MNEE</span>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Search Bar */}
@@ -48,7 +52,7 @@ export const Header = () => {
             placeholder="Search agents, creators, content..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-mnee-slate border border-mnee-charcoal rounded-lg text-white placeholder-mnee-gray focus:outline-none focus:border-mnee-blue focus:ring-2 focus:ring-mnee-blue/20 transition-all"
+            className="w-full pl-10 pr-4 py-3 bg-mnee-slate border border-mnee-charcoal rounded-lg text-white placeholder-mnee-gray focus:outline-none focus:border-mnee-blue focus:ring-2 focus:ring-mnee-blue/20 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal transition-all"
           />
         </div>
       </div>
@@ -65,7 +69,7 @@ export const Header = () => {
             <Link
               to="/create"
               aria-label="Create new content"
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200"
+              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
             >
               <PlusIcon className="h-5 w-5" />
               <span>Create</span>
@@ -78,7 +82,7 @@ export const Header = () => {
             {/* Notifications */}
             <button
               aria-label="View notifications"
-              className="relative p-2 text-mnee-gray hover:text-mnee-gold transition-colors"
+              className="relative p-2 text-mnee-gray hover:text-mnee-gold transition-colors rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
             >
               <BellIcon className="h-6 w-6" />
               <span className="absolute top-0 right-0 h-2 w-2 bg-mnee-gold rounded-full"></span>
@@ -86,7 +90,10 @@ export const Header = () => {
 
             {/* User Menu */}
             <Menu as="div" className="relative">
-              <Menu.Button className="flex items-center space-x-3 p-2 rounded-lg hover:bg-mnee-slate transition-colors">
+              <Menu.Button
+                aria-label="User menu"
+                className="flex items-center space-x-3 p-2 rounded-lg hover:bg-mnee-slate transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
+              >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-mnee-gold to-mnee-blue flex items-center justify-center">
                   {profile?.avatar_url ? (
                     <img 
@@ -182,13 +189,13 @@ export const Header = () => {
             <div className="flex items-center space-x-3">
               <Link
                 to="/login"
-                className="px-4 py-2 text-mnee-gray hover:text-white transition-colors font-medium"
+                className="px-4 py-2 text-mnee-gray hover:text-white transition-colors font-medium rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
               >
                 Sign In
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200"
+                className="px-4 py-2 bg-gradient-to-r from-mnee-gold to-mnee-goldDark rounded-lg text-mnee-black font-medium hover:shadow-mnee-gold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
               >
                 Sign Up
               </Link>
