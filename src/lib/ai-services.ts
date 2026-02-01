@@ -249,7 +249,7 @@ export const AI_SERVICES_CONFIG = {
       'dall-e-3': { costPerImage: 0.04, capabilities: ['image'] },
       'whisper': { costPerMinute: 0.006, capabilities: ['audio'] },
     },
-    apiKey: process.env.OPENAI_API_KEY,
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
   },
   anthropic: {
     name: 'Anthropic',
@@ -259,7 +259,7 @@ export const AI_SERVICES_CONFIG = {
       'claude-3-5-sonnet': { costPerToken: 0.000003, contextWindow: 200000, capabilities: ['text', 'code', 'analysis'] },
       'claude-3-haiku': { costPerToken: 0.00000025, contextWindow: 200000, capabilities: ['text', 'fast'] },
     },
-    apiKey: process.env.ANTHROPIC_API_KEY,
+    apiKey: import.meta.env.VITE_ANTHROPIC_API_KEY,
   },
   google: {
     name: 'Google',
@@ -267,7 +267,7 @@ export const AI_SERVICES_CONFIG = {
       'gemini-pro': { costPerToken: 0.000000125, contextWindow: 2000000, capabilities: ['text', 'code', 'analysis', 'multimodal'] },
       'gemini-ultra': { costPerToken: 0.000001, contextWindow: 2000000, capabilities: ['text', 'code', 'analysis', 'reasoning'] },
     },
-    apiKey: process.env.GOOGLE_API_KEY,
+    apiKey: import.meta.env.VITE_GOOGLE_API_KEY,
   },
   replicate: {
     name: 'Replicate',
@@ -276,7 +276,7 @@ export const AI_SERVICES_CONFIG = {
       'stable-diffusion': { costPerImage: 0.002, capabilities: ['image'] },
       'music-gen': { costPerSecond: 0.0003, capabilities: ['audio'] },
     },
-    apiKey: process.env.REPLICATE_API_KEY,
+    apiKey: import.meta.env.VITE_REPLICATE_API_KEY,
   },
   elevenlabs: {
     name: 'ElevenLabs',
@@ -284,7 +284,7 @@ export const AI_SERVICES_CONFIG = {
       'multilingual-v2': { costPerCharacter: 0.00003, capabilities: ['voice', 'audio'] },
       'english-v1': { costPerCharacter: 0.00001, capabilities: ['voice'] },
     },
-    apiKey: process.env.ELEVENLABS_API_KEY,
+    apiKey: import.meta.env.VITE_ELEVENLABS_API_KEY,
   },
   minimax: {
     name: 'MiniMax',
@@ -293,7 +293,7 @@ export const AI_SERVICES_CONFIG = {
       'abab6.5-chat': { costPerToken: 0.000002, contextWindow: 128000, capabilities: ['text', 'code', 'analysis'] },
       'abab5.5-chat': { costPerToken: 0.000001, contextWindow: 16000, capabilities: ['text', 'fast'] },
     },
-    apiKey: process.env.MINIMAX_API_KEY,
+    apiKey: import.meta.env.VITE_MINIMAX_API_KEY,
   }
 };
 
