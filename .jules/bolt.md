@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2024-05-23 - Route-based Code Splitting
+**Learning:** React routes imported directly (statically) are bundled together, causing massive initial bundle sizes. Code splitting using `React.lazy` is essential for performance.
+**Action:** Use `React.lazy` for all non-critical routes. For named exports, use `lazy(() => import('./path').then(module => ({ default: module.ExportName })))`. Keep critical entry points (Auth, Home) eager for better LCP.
