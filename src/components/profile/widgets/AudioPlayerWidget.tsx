@@ -106,7 +106,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-bold text-pink-400 flex items-center">
-          <MusicalNoteIcon className="w-4 h-4 mr-1" />
+          <MusicalNoteIcon className="w-4 h-4 mr-1" aria-hidden="true" />
           Audio Player
         </h3>
         <div className="text-xs text-gray-400">
@@ -133,13 +133,14 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
           
           <button
             onClick={() => toggleLike(track.id)}
+            aria-label={likedTracks.has(track.id) ? "Unlike track" : "Like track"}
             className={`p-2 rounded-full transition-colors ${
               likedTracks.has(track.id)
                 ? 'text-pink-500 bg-pink-500/20'
                 : 'text-gray-400 hover:text-pink-400'
             }`}
           >
-            <HeartIcon className={`w-4 h-4 ${likedTracks.has(track.id) ? 'fill-current' : ''}`} />
+            <HeartIcon className={`w-4 h-4 ${likedTracks.has(track.id) ? 'fill-current' : ''}`} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -174,29 +175,32 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
       <div className="flex items-center justify-center space-x-4 mb-4">
         <button
           onClick={prevTrack}
+          aria-label="Previous track"
           className="p-2 text-gray-400 hover:text-white transition-colors"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
           </svg>
         </button>
         
         <button
           onClick={togglePlay}
+          aria-label={isPlaying ? "Pause" : "Play"}
           className="p-3 bg-pink-600 hover:bg-pink-700 text-white rounded-full transition-colors"
         >
           {isPlaying ? (
-            <PauseIcon className="w-5 h-5" />
+            <PauseIcon className="w-5 h-5" aria-hidden="true" />
           ) : (
-            <PlayIcon className="w-5 h-5" />
+            <PlayIcon className="w-5 h-5" aria-hidden="true" />
           )}
         </button>
         
         <button
           onClick={nextTrack}
+          aria-label="Next track"
           className="p-2 text-gray-400 hover:text-white transition-colors"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
             <path d="M11.555 14.832A1 1 0 0010 14v-2.798l-5.445 3.63A1 1 0 003 14V6a1 1 0 011.555-.832L10 8.798V6a1 1 0 011.555-.832l6 4a1 1 0 010 1.664l-6 4z" />
           </svg>
         </button>
@@ -204,7 +208,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
       
       {/* Volume Control */}
       <div className="flex items-center space-x-2 mb-4">
-        <SpeakerWaveIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        <SpeakerWaveIcon className="w-4 h-4 text-gray-400 flex-shrink-0" aria-hidden="true" />
         <div className="flex-1">
           <input
             type="range"
@@ -212,6 +216,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
             max="100"
             value={volume}
             onChange={(e) => setVolume(Number(e.target.value))}
+            aria-label="Volume control"
             className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
             style={{
               background: `linear-gradient(to right, rgb(236 72 153) 0%, rgb(236 72 153) ${volume}%, rgb(55 65 81) ${volume}%, rgb(55 65 81) 100%)`
@@ -230,6 +235,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
               setCurrentTrack(index)
               setProgress(0)
             }}
+            aria-current={index === currentTrack ? 'true' : undefined}
             className={`w-full flex items-center space-x-2 p-2 rounded-lg text-left transition-colors ${
               index === currentTrack
                 ? 'bg-pink-500/20 border border-pink-500/30'
