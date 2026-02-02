@@ -194,6 +194,7 @@ export function ArtistSwipeCard({ artist, onSwipe, isTop = false }: ArtistSwipeC
           <div className="flex justify-center mb-3">
             <Link
               to={`/rooms?artist=${artist.username}`}
+              aria-label={`Visit ${artist.display_name || artist.username}'s studio`}
               className="px-4 py-2 bg-black/70 backdrop-blur-sm border border-purple-500/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-400 hover:text-purple-200 rounded-lg shadow-lg transition-all duration-200 text-sm font-medium flex items-center space-x-2 neon-glow-purple"
             >
               <Home className="h-4 w-4" />
@@ -208,6 +209,8 @@ export function ArtistSwipeCard({ artist, onSwipe, isTop = false }: ArtistSwipeC
               size="circle"
               className="w-14 h-14 bg-black/70 backdrop-blur-sm border-2 border-red-500/60 text-red-400 hover:bg-red-500/20 hover:border-red-400 hover:text-red-300 shadow-lg transition-all duration-200"
               onClick={() => handleButtonSwipe(false)}
+              aria-label="Pass"
+              title="Pass"
             >
               <X className="h-7 w-7" />
             </Button>
@@ -216,6 +219,8 @@ export function ArtistSwipeCard({ artist, onSwipe, isTop = false }: ArtistSwipeC
               size="circle"
               className="w-14 h-14 bg-black/70 backdrop-blur-sm border-2 border-green-500/60 text-green-400 hover:bg-green-500/20 hover:border-green-400 hover:text-green-300 shadow-lg transition-all duration-200 neon-glow-green"
               onClick={() => handleButtonSwipe(true)}
+              aria-label="Like"
+              title="Like"
             >
               <Heart className="h-7 w-7" />
             </Button>
