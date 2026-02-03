@@ -122,9 +122,10 @@ export const useAnalytics = () => {
   const fetchTrendingContent = async () => {
     try {
       // Get trending content based on recent engagement
+      // Bolt Optimization: Select only necessary fields to reduce payload size (was selecting '*')
       const { data: trending, error } = await supabase
         .from('content')
-        .select('*, profiles!inner(display_name, username)')
+        .select('id, title, file_url, content_type, view_count, like_count, profiles!inner(display_name, username)')
         .eq('is_public', true)
         .order('view_count', { ascending: false })
         .limit(10)
