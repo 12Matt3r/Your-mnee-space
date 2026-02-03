@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 const ComposerBox = () => {
   const [postText, setPostText] = useState('');
@@ -70,7 +71,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-2 -ml-2 transition-all"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -83,7 +84,7 @@ const ComposerBox = () => {
                     type="button"
                     onClick={() => setMockImage(null)}
                     aria-label="Remove image"
-                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-white"
                   >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
@@ -97,7 +98,7 @@ const ComposerBox = () => {
                 type="button"
                 onClick={handleImageUpload}
                 aria-label="Add image"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Add Image"
               >
                 <ImageIcon className="w-5 h-5 text-blue-500" />
@@ -105,7 +106,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add poll"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Add Poll"
               >
                 <BarChart2 className="w-5 h-5 text-blue-500" />
@@ -113,7 +114,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add emoji"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Add Emoji"
               >
                 <Smile className="w-5 h-5 text-blue-500" />
@@ -121,7 +122,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Schedule post"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Schedule"
               >
                 <Calendar className="w-5 h-5 text-blue-500" />
@@ -129,7 +130,7 @@ const ComposerBox = () => {
               <button
                 type="button"
                 aria-label="Add location"
-                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 title="Add Location"
               >
                 <MapPin className="w-5 h-5 text-blue-500" />
@@ -168,9 +169,9 @@ const ComposerBox = () => {
               <button
                 type="submit"
                 disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[80px]"
               >
-                {isPosting ? 'Posting...' : 'Post'}
+                {isPosting ? <LoadingSpinner size="sm" className="text-white" /> : 'Post'}
               </button>
             </div>
           </div>
