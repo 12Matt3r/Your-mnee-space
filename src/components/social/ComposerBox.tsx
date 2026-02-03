@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
+import { Button } from '../ui/button';
 
 const ComposerBox = () => {
   const [postText, setPostText] = useState('');
@@ -10,6 +11,19 @@ const ComposerBox = () => {
   const [mockImage, setMockImage] = useState<string | null>(null);
   const { user, profile } = useAuth();
   const maxChars = 280;
+
+  const charCount = postText.length;
+  const remainingChars = maxChars - charCount;
+  const progress = Math.min((charCount / maxChars) * 100, 100);
+  const radius = 10;
+  const circumference = 2 * Math.PI * radius;
+  const dashoffset = circumference - (progress / 100) * circumference;
+
+  const getProgressColor = () => {
+    if (remainingChars < 0) return 'text-red-500';
+    if (remainingChars <= 20) return 'text-yellow-500';
+    return 'text-blue-500';
+  };
 
   const handleImageUpload = () => {
       // Mock image upload
@@ -70,7 +84,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg p-2 -ml-2 transition-all"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -138,40 +152,52 @@ const ComposerBox = () => {
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div
-                  role="status"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
-                      ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {maxChars - postText.length}
-                </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
-                </div>
+                {/* Character Count Ring */}
+                {postText.length > 0 && (
+                  <div className="relative w-8 h-8 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90">
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r={radius}
+                        fill="none"
+                        className="stroke-gray-200 dark:stroke-gray-700"
+                        strokeWidth="2"
+                      />
+                      <circle
+                        cx="16"
+                        cy="16"
+                        r={radius}
+                        fill="none"
+                        className={`transition-all duration-300 ease-in-out ${getProgressColor()}`}
+                        strokeWidth="2"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={dashoffset}
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    {remainingChars <= 20 && (
+                      <span
+                        className={`absolute text-xs font-medium ${remainingChars < 0 ? 'text-red-500' : 'text-gray-500'}`}
+                        role="status"
+                        aria-live="polite"
+                      >
+                        {remainingChars}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
-              <button
+
+              <Button
                 type="submit"
-                disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={!postText.trim() && !mockImage}
+                isLoading={isPosting}
+                loadingText="Posting..."
+                className="bg-blue-500 hover:bg-blue-600 rounded-full bg-none"
               >
-                {isPosting ? 'Posting...' : 'Post'}
-              </button>
+                Post
+              </Button>
             </div>
           </div>
         </div>
