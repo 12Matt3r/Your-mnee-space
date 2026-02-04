@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2024-05-24 - Route-Based Code Splitting
+**Learning:** In a large SPA with many heavy pages (like 3D viewers or complex dashboards), eagerness to load all routes results in a massive initial bundle.
+**Action:** Use `React.lazy` and `Suspense` to split code by route. Wrap the `Routes` or the inner content area with a `Suspense` boundary and a nice fallback loader. Be careful with named vs default exports when lazy loading; use `.then(module => ({ default: module.NamedComponent }))` for named exports.
