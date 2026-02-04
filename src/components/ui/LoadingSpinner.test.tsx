@@ -1,21 +1,25 @@
 import { describe, it, expect } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { LoadingSpinner } from './LoadingSpinner'
 import React from 'react'
 
 describe('LoadingSpinner', () => {
   it('renders correctly', () => {
-    const { container } = render(<LoadingSpinner />)
-    expect(container.firstChild).toHaveClass('loading-spinner')
+    render(<LoadingSpinner />)
+    const spinner = screen.getByRole('status')
+    expect(spinner).toHaveClass('animate-spin')
+    expect(spinner).toHaveAttribute('aria-label', 'Loading')
   })
 
   it('applies size classes', () => {
-    const { container } = render(<LoadingSpinner size="lg" />)
-    expect(container.firstChild).toHaveClass('w-12 h-12')
+    render(<LoadingSpinner size="lg" />)
+    const spinner = screen.getByRole('status')
+    expect(spinner).toHaveClass('w-12 h-12')
   })
 
   it('applies custom className', () => {
-    const { container } = render(<LoadingSpinner className="custom-class" />)
-    expect(container.firstChild).toHaveClass('custom-class')
+    render(<LoadingSpinner className="custom-class" />)
+    const spinner = screen.getByRole('status')
+    expect(spinner).toHaveClass('custom-class')
   })
 })
