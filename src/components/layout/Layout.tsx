@@ -1,8 +1,9 @@
 // YourSpace Creative Labs - Main Layout Component
-import { ReactNode } from 'react'
+import { ReactNode, Suspense } from 'react'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { FloatingBuyMNEE } from '../mnee/BuyMNEEButton'
+import { PageLoader } from '../ui/PageLoader'
 
 interface LayoutProps {
   children: ReactNode
@@ -25,7 +26,9 @@ export const Layout = ({ children }: LayoutProps) => {
           
           <main className="flex-1 p-6">
             <div className="max-w-7xl mx-auto">
-              {children}
+              <Suspense fallback={<PageLoader />}>
+                {children}
+              </Suspense>
             </div>
           </main>
         </div>
