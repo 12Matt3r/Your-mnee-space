@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ImageIcon, Smile, Calendar, MapPin, BarChart2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 const ComposerBox = () => {
   const [postText, setPostText] = useState('');
@@ -70,7 +71,7 @@ const ComposerBox = () => {
             onChange={(e) => setPostText(e.target.value)}
             placeholder="What's happening in your creative world?"
             aria-label="What's happening in your creative world?"
-            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none"
+            className="w-full text-xl placeholder-gray-500 bg-transparent text-gray-900 dark:text-white resize-none border-none outline-none p-2 -ml-2 rounded-lg focus-visible:ring-2 focus-visible:ring-mnee-gold focus-visible:ring-offset-2 focus-visible:ring-offset-mnee-charcoal"
             rows={3}
             maxLength={maxChars}
             disabled={isPosting}
@@ -168,9 +169,9 @@ const ComposerBox = () => {
               <button
                 type="submit"
                 disabled={!postText.trim() || postText.length > maxChars || isPosting}
-                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-6 py-2 bg-blue-500 text-white rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors min-w-[80px] flex justify-center items-center"
               >
-                {isPosting ? 'Posting...' : 'Post'}
+                {isPosting ? <LoadingSpinner size="sm" className="border-t-white border-white/30" /> : 'Post'}
               </button>
             </div>
           </div>
