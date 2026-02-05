@@ -133,13 +133,14 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
           
           <button
             onClick={() => toggleLike(track.id)}
+            aria-label={likedTracks.has(track.id) ? "Unlike track" : "Like track"}
             className={`p-2 rounded-full transition-colors ${
               likedTracks.has(track.id)
                 ? 'text-pink-500 bg-pink-500/20'
                 : 'text-gray-400 hover:text-pink-400'
             }`}
           >
-            <HeartIcon className={`w-4 h-4 ${likedTracks.has(track.id) ? 'fill-current' : ''}`} />
+            <HeartIcon aria-hidden="true" className={`w-4 h-4 ${likedTracks.has(track.id) ? 'fill-current' : ''}`} />
           </button>
         </div>
       </div>
@@ -174,29 +175,32 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
       <div className="flex items-center justify-center space-x-4 mb-4">
         <button
           onClick={prevTrack}
+          aria-label="Previous track"
           className="p-2 text-gray-400 hover:text-white transition-colors"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z" />
           </svg>
         </button>
         
         <button
           onClick={togglePlay}
+          aria-label={isPlaying ? "Pause" : "Play"}
           className="p-3 bg-pink-600 hover:bg-pink-700 text-white rounded-full transition-colors"
         >
           {isPlaying ? (
-            <PauseIcon className="w-5 h-5" />
+            <PauseIcon aria-hidden="true" className="w-5 h-5" />
           ) : (
-            <PlayIcon className="w-5 h-5" />
+            <PlayIcon aria-hidden="true" className="w-5 h-5" />
           )}
         </button>
         
         <button
           onClick={nextTrack}
+          aria-label="Next track"
           className="p-2 text-gray-400 hover:text-white transition-colors"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg aria-hidden="true" className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M11.555 14.832A1 1 0 0010 14v-2.798l-5.445 3.63A1 1 0 003 14V6a1 1 0 011.555-.832L10 8.798V6a1 1 0 011.555-.832l6 4a1 1 0 010 1.664l-6 4z" />
           </svg>
         </button>
@@ -204,10 +208,11 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
       
       {/* Volume Control */}
       <div className="flex items-center space-x-2 mb-4">
-        <SpeakerWaveIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        <SpeakerWaveIcon aria-hidden="true" className="w-4 h-4 text-gray-400 flex-shrink-0" />
         <div className="flex-1">
           <input
             type="range"
+            aria-label="Volume"
             min="0"
             max="100"
             value={volume}
@@ -218,7 +223,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
             }}
           />
         </div>
-        <span className="text-xs text-gray-400 w-8">{volume}%</span>
+        <span className="text-xs text-gray-400 w-8" aria-hidden="true">{volume}%</span>
       </div>
       
       {/* Track List */}
@@ -230,6 +235,7 @@ export const AudioPlayerWidget: React.FC<AudioPlayerWidgetProps> = ({ widget }) 
               setCurrentTrack(index)
               setProgress(0)
             }}
+            aria-current={index === currentTrack ? 'true' : undefined}
             className={`w-full flex items-center space-x-2 p-2 rounded-lg text-left transition-colors ${
               index === currentTrack
                 ? 'bg-pink-500/20 border border-pink-500/30'
