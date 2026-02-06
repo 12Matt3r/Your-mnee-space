@@ -1,15 +1,18 @@
 // YourSpace Creative Labs - Button Component
 import * as React from 'react'
 import { cn } from '../../lib/utils'
+import { LoadingSpinner } from './LoadingSpinner'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'outline' | 'ghost' | 'destructive'
   size?: 'sm' | 'default' | 'lg' | 'circle'
   children: React.ReactNode
+  isLoading?: boolean
+  loadingText?: string
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'default', size = 'default', children, ...props }, ref) => {
+  ({ className, variant = 'default', size = 'default', children, isLoading, loadingText, ...props }, ref) => {
     const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500/50 disabled:opacity-50 disabled:cursor-not-allowed'
     
     const variants = {
@@ -35,9 +38,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         ref={ref}
+        disabled={isLoading || props.disabled}
         {...props}
       >
-        {children}
+        {isLoading && <LoadingSpinner size="sm" className={cn(loadingText || children ? "mr-2" : "")} />}
+        {isLoading && loadingText ? loadingText : children}
       </button>
     )
   }
