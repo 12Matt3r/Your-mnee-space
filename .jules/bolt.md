@@ -5,3 +5,7 @@
 ## 2024-05-23 - Count Optimization
 **Learning:** Fetching all related records (e.g., `select('*')`) just to count them (`.length`) is incredibly wasteful of bandwidth and memory.
 **Action:** Use `select('*', { count: 'exact', head: true })` or `select('count')` (depending on the client/SQL capability) to retrieve only the number needed. Avoid downloading data you don't intend to display.
+
+## 2024-05-24 - Route Code Splitting Strategy
+**Learning:** This application uses a hybrid routing strategy where critical routes (Home, Login) are eager-loaded for FCP, while feature routes are lazy-loaded. Crucially, routes wrapped in the shared `Layout` component rely on a single `Suspense` boundary inside `Layout` (wrapping `{children}`), while standalone lazy routes (e.g., `/buy-mnee`) crash without their own individual `Suspense` wrappers.
+**Action:** When adding new lazy routes, check if they use `Layout`. If yes, no extra `Suspense` is needed. If no, wrap the route element in `Suspense` manually.
