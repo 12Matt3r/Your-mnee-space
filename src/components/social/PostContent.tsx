@@ -6,6 +6,17 @@ const PostContent = ({ text }: { text: string }) => {
   // Very basic parser for demo purposes
   const parts = text.split(/(\#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
 
+  const isValidImageUrl = (url: string) => {
+    if (!url) return false;
+    try {
+      // Validate protocol is http or https
+      const parsed = new URL(url, 'http://dummy.com');
+      return ['http:', 'https:'].includes(parsed.protocol);
+    } catch (e) {
+      return false;
+    }
+  };
+
   return (
     <div className="text-gray-900 dark:text-white text-base leading-relaxed whitespace-pre-wrap">
       {parts.map((part, index) => {
@@ -19,7 +30,7 @@ const PostContent = ({ text }: { text: string }) => {
         } else if (part.match(/!\[.*?\]\(.*?\)/)) {
             // Render markdown image
             const match = part.match(/!\[(.*?)\]\((.*?)\)/);
-            if (match) {
+            if (match && isValidImageUrl(match[2])) {
                 return (
                     <img
                         key={index}
@@ -28,6 +39,9 @@ const PostContent = ({ text }: { text: string }) => {
                         className="mt-3 rounded-xl w-full object-cover max-h-96"
                     />
                 );
+            } else if (match) {
+                // Invalid URL
+                return <span key={index} className="text-red-500 text-xs">[Invalid Image URL]</span>;
             }
         }
         return <span key={index}>{part}</span>;
