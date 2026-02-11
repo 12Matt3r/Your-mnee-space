@@ -180,6 +180,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleMinimize}
+                aria-label="Minimize player"
                 className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
                 title="Minimize player"
               >
@@ -187,6 +188,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               </button>
               <button
                 onClick={onClose}
+                aria-label="Close player"
                 className="text-purple-300 hover:text-white p-2 rounded-lg hover:bg-purple-800/50 transition-colors"
               >
                 <X size={24} />
@@ -246,6 +248,8 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
             <div className="flex items-center justify-center gap-4 mb-6">
               <button
                 onClick={() => audioEngine.toggleShuffle()}
+                aria-label={state.isShuffle ? "Disable shuffle" : "Enable shuffle"}
+                aria-pressed={state.isShuffle}
                 className={`p-3 rounded-xl transition-all ${
                   state.isShuffle 
                     ? 'bg-purple-600 text-white' 
@@ -258,6 +262,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               <button
                 onClick={() => audioEngine.previousTrack()}
                 disabled={tracks.length === 0}
+                aria-label="Previous track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SkipBack size={20} />
@@ -266,6 +271,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               <button
                 onClick={handlePlayPause}
                 disabled={tracks.length === 0 || state.isLoading}
+                aria-label={state.isPlaying ? "Pause" : "Play"}
                 className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
               >
                 {state.isPlaying ? <Pause size={24} /> : <Play size={24} />}
@@ -274,6 +280,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               <button
                 onClick={() => audioEngine.nextTrack()}
                 disabled={tracks.length === 0}
+                aria-label="Next track"
                 className="p-3 bg-gray-800 text-purple-300 rounded-xl hover:bg-purple-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SkipForward size={20} />
@@ -281,6 +288,7 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
               
               <button
                 onClick={() => audioEngine.toggleRepeat()}
+                aria-label={`Repeat mode: ${state.repeatMode}`}
                 className={`p-3 rounded-xl transition-all ${
                   state.repeatMode !== 'none' 
                     ? 'bg-purple-600 text-white' 
@@ -293,11 +301,15 @@ export const FullMusicPlayer: React.FC<FullMusicPlayerProps> = ({ onClose }) => 
 
             {/* Volume Control */}
             <div className="flex items-center gap-3 mb-6">
-              <button className="text-purple-300 hover:text-white transition-colors">
+              <button
+                className="text-purple-300 hover:text-white transition-colors"
+                aria-label={state.volume === 0 ? "Unmute" : "Mute"}
+              >
                 {state.volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
               </button>
               <input
                 type="range"
+                aria-label="Volume"
                 min="0"
                 max="100"
                 value={state.volume * 100}
