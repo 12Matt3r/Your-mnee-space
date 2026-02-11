@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt, useAccount, useConnect } from 'wagmi';
 import { parseUnits } from 'viem';
 import { MNEE_CONTRACT_ADDRESS, MNEE_ABI } from '../../lib/wagmi';
-import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface MneeTransactionButtonProps {
@@ -15,7 +15,7 @@ interface MneeTransactionButtonProps {
   disabled?: boolean;
 }
 
-export const MneeTransactionButton: React.FC<MneeTransactionButtonProps> = ({
+export const MneeTransactionButton: React.FC<MneeTransactionButtonProps> = memo(({
   recipientAddress,
   amount,
   label,
@@ -129,4 +129,7 @@ export const MneeTransactionButton: React.FC<MneeTransactionButtonProps> = ({
       )}
     </button>
   );
-};
+});
+
+// Add display name for debugging
+MneeTransactionButton.displayName = 'MneeTransactionButton';
