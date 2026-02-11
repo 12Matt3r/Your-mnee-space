@@ -138,32 +138,59 @@ const ComposerBox = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
+                {/* Visual Character count text - only show when getting close */}
                 <div
                   role="status"
                   aria-live="polite"
                   aria-atomic="true"
                   aria-label={`${maxChars - postText.length} characters remaining`}
-                  className={`text-sm ${
-                    postText.length > maxChars * 0.9
+                  className={`text-sm font-medium transition-opacity duration-200 ${
+                    postText.length > maxChars * 0.8 ? 'opacity-100' : 'opacity-0'
+                  } ${
+                    postText.length > maxChars
                       ? 'text-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'text-yellow-500'
-                      : 'text-gray-500'
+                      : postText.length > maxChars * 0.9
+                      ? 'text-red-500'
+                      : 'text-yellow-500'
                   }`}
                 >
                   {maxChars - postText.length}
                 </div>
-                <div className="w-8 h-8 rounded-full border-2 border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                  <div className={`w-6 h-6 rounded-full ${
-                    postText.length > maxChars * 0.9
-                      ? 'bg-red-500'
-                      : postText.length > maxChars * 0.8
-                      ? 'bg-yellow-500'
-                      : 'bg-blue-500'
-                  }`} style={{
-                    transform: `scale(${Math.min(postText.length / maxChars, 1)})`
-                  }}></div>
+
+                {/* Visual Progress Ring */}
+                <div className="relative w-6 h-6 flex items-center justify-center" aria-hidden="true">
+                  <svg className="w-full h-full transform -rotate-90">
+                    <circle
+                      className="text-gray-200 dark:text-gray-700"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      fill="transparent"
+                      r="10"
+                      cx="12"
+                      cy="12"
+                    />
+                    <circle
+                      className={`${
+                        postText.length > maxChars
+                          ? 'text-red-500'
+                          : postText.length > maxChars * 0.9
+                          ? 'text-red-500'
+                          : postText.length > maxChars * 0.8
+                          ? 'text-yellow-500'
+                          : 'text-blue-500'
+                      } transition-all duration-200 ease-in-out`}
+                      strokeWidth="2"
+                      strokeDasharray={2 * Math.PI * 10}
+                      strokeDashoffset={2 * Math.PI * 10 * (1 - Math.min(postText.length / maxChars, 1))}
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="transparent"
+                      r="10"
+                      cx="12"
+                      cy="12"
+                    />
+                  </svg>
                 </div>
               </div>
               <Button
