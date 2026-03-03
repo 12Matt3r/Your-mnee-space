@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 
 const PostContent = ({ text }: { text: string }) => {
   // Simple regex to find hashtags and images markdown
   // Very basic parser for demo purposes
-  const parts = text.split(/(\#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
+  const parts = text.split(/(#[a-zA-Z0-9_]+|!\[.*?\]\(.*?\))/g);
 
   const isValidImageUrl = (url: string) => {
     if (!url) return false;
@@ -50,4 +50,4 @@ const PostContent = ({ text }: { text: string }) => {
   );
 };
 
-export default PostContent;
+export default memo(PostContent);
