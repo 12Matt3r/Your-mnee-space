@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout } from '../components/layout/Layout';
-import { Crown, Check, Zap, Star, Infinity, Users, Music, Video, Coins, ArrowRight } from 'lucide-react';
+import { Crown, Check, Zap, Star, Infinity as InfinityIcon, Users, Music, Video, Coins, ArrowRight } from 'lucide-react';
 
 const plans = [
   {
@@ -175,7 +175,7 @@ const Subscribe: React.FC = () => {
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-500/20 rounded-2xl mb-4">
-                <Infinity className="h-8 w-8 text-purple-400" />
+                <InfinityIcon className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-lg font-semibold text-white mb-2">Unlimited Access</h3>
               <p className="text-gray-400">No limits on tipping, viewing, or creating content on the platform</p>
