@@ -3,6 +3,7 @@ import { Heart, MessageCircle, Repeat2, Share, Bookmark, MoreHorizontal, Coins }
 import { useAuth } from '../../contexts/AuthContext';
 import { socialApi } from '../../lib/api';
 import { MneeTransactionButton } from '../web3/MneeTransactionButton';
+import { formatShortTimeAgo } from '../../lib/utils';
 import PostContent from './PostContent';
 import PollDisplay from './PollDisplay';
 import { PostWithInteractions } from '../../types/social';
@@ -55,20 +56,6 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
     }
   };
 
-  const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}h`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}d`;
-    }
-  };
-
   const profile = post.profiles;
   const displayName = profile?.full_name || profile?.username || 'Anonymous';
   const username = profile?.username || `user${post.user_id.slice(0, 8)}`;
@@ -93,7 +80,7 @@ const PostItem = ({ post }: { post: PostWithInteractions }) => {
             </h3>
             <span className="text-gray-500 dark:text-gray-400 truncate">@{username}</span>
             <span className="text-gray-500 dark:text-gray-400">·</span>
-            <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{timeAgo(post.created_at)}</span>
+            <span className="text-gray-500 dark:text-gray-400 flex-shrink-0">{formatShortTimeAgo(post.created_at)}</span>
             <button
               aria-label="More options"
               className="ml-auto p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"

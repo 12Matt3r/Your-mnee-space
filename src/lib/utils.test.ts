@@ -6,7 +6,8 @@ import {
   isValidEmail,
   getFileExtension,
   truncateText,
-  generateSlug
+  generateSlug,
+  formatShortTimeAgo
 } from './utils'
 
 describe('Utils', () => {
@@ -68,6 +69,28 @@ describe('Utils', () => {
     it('converts text to slug', () => {
       expect(generateSlug('Hello World')).toBe('hello-world')
       expect(generateSlug('Test 123 !@#')).toBe('test-123')
+    })
+  })
+
+  describe('formatShortTimeAgo', () => {
+    it('formats minutes correctly', () => {
+      const fiveMinsAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      expect(formatShortTimeAgo(fiveMinsAgo)).toBe('5m')
+    })
+
+    it('formats hours correctly', () => {
+      const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+      expect(formatShortTimeAgo(twoHoursAgo)).toBe('2h')
+    })
+
+    it('formats days correctly', () => {
+      const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
+      expect(formatShortTimeAgo(threeDaysAgo)).toBe('3d')
+    })
+
+    it('handles future dates gracefully', () => {
+        const future = new Date(Date.now() + 10000).toISOString()
+        expect(formatShortTimeAgo(future)).toBe('0m')
     })
   })
 })
