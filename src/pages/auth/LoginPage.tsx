@@ -15,7 +15,8 @@ export const LoginPage = () => {
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSignInLoading, setIsSignInLoading] = useState(false)
+  const [isDemoLoading, setIsDemoLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   // Redirect if already logged in
@@ -47,14 +48,14 @@ export const LoginPage = () => {
     
     if (!validateForm()) return
 
-    setIsLoading(true)
+    setIsSignInLoading(true)
     try {
       const result = await signIn(formData.email, formData.password)
       console.log('Sign in result:', result)
     } catch (err: any) {
       setErrors({ submit: err.message || 'Invalid email or password. Please try again.' })
     } finally {
-      setIsLoading(false)
+      setIsSignInLoading(false)
     }
   }
 
@@ -147,10 +148,10 @@ export const LoginPage = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isSignInLoading || isDemoLoading}
               className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-pink-600 hover:to-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all duration-200 neon-glow disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
+              {isSignInLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                   Signing In...
@@ -173,21 +174,31 @@ export const LoginPage = () => {
             {/* Quick Demo Login */}
             <button
               type="button"
+              disabled={isSignInLoading || isDemoLoading}
               onClick={async () => {
-                setIsLoading(true)
+                setIsDemoLoading(true)
                 try {
                   await demoLogin()
                   // Force navigation to home with a hard reload feel if needed, but react router is fine
                   // We add a small delay to ensure context updates
                   setTimeout(() => navigate('/'), 100);
                 } finally {
-                  setIsLoading(false)
+                  setIsDemoLoading(false)
                 }
               }}
-              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-400/20 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <SparklesIcon className="w-5 h-5" />
-              Enter Demo Mode
+              {isDemoLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Starting Demo...
+                </>
+              ) : (
+                <>
+                  <SparklesIcon className="w-5 h-5" />
+                  Enter Demo Mode
+                </>
+              )}
             </button>
 
             {/* Discord Login */}
